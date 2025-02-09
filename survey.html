@@ -52,6 +52,11 @@
                 return;
             }
 
+            if (isNaN(shortAnswer)) {
+                alert("Please answer.");
+                return;
+            }
+
             // Save responses in localStorage (or send them to a server as needed).
             const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
             responses.push({
