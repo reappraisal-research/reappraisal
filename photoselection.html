@@ -10,9 +10,11 @@
         }
 
         img {
-            max-width: 100%;
-            height: auto;
-            margin: 20px 0;
+            display: block;
+            width: 100vw;      /* Full viewport width */
+            height: 80vh;      /* 80% of the viewport height */
+            object-fit: contain; /* Ensure the entire image is visible */
+            margin: 20px auto;
         }
 
         button {
@@ -72,7 +74,6 @@
         // Function to select a photo based on the current trial’s condition.
         function selectPhoto() {
             let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-           
 
             // If no conditions exist, prompt the user to complete the video experiment first.
             if (conditionList.length === 0) {
@@ -106,6 +107,13 @@
             let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
             localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
+            // Label ambiguous photos above the image.
+            if (currentCondition.photoType === "ambiguous") {
+                document.getElementById("photoLabel").innerText = "Ambiguous";
+            } else {
+                document.getElementById("photoLabel").innerText = "";
+            }
+
             // Display the selected photo.
             const photoElement = document.getElementById("photo");
             photoElement.src = selectedPhoto;
@@ -124,8 +132,7 @@
 </head>
 
 <body>
-    <h1>Photo Selection</h1>
-    <p>Here is your photo based on the experiment condition:</p>
+    <p id="photoLabel"></p>
     <img id="photo" src="" alt="Selected Photo">
     <br>
     <button onclick="window.location.href='video_display.html'">Next</button>
