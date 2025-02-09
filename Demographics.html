@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demographics Survey</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .question {
+      margin-bottom: 20px;
+    }
+
+    .question input,
+    .question select,
+    .question textarea {
+      margin-top: 5px;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Demographics Survey</h1>
+  <form action="Pretestsurvey.html" method="get">
+
+    <!-- Age -->
+    <div class="question">
+      <label for="age">What is your age?</label><br>
+      <select id="age" name="age" required>
+        <option value="" disabled selected>Select your age range</option>
+        <option>15 or younger</option>
+        <option>16–19</option>
+        <option>20–24</option>
+        <option>25–29</option>
+        <option>30–34</option>
+        <option>35–39</option>
+        <option>40–44</option>
+        <option>45–49</option>
+        <option>50–54</option>
+        <option>55–59</option>
+        <option>60–64</option>
+        <option>65 or older</option>
+      </select>
+    </div>
+
+    <!-- Gender -->
+    <div class="question">
+      <label for="gender">What is your gender?</label><br>
+      <select id="gender" name="gender" required>
+        <option value="" disabled selected>Select your gender</option>
+        <option>Female</option>
+        <option>Male</option>
+        <option>Non-binary</option>
+        <option>Prefer not to disclose</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <!-- Ethnicity -->
+    <div class="question">
+      <label for="ethnicity">How would you describe your ethnicity?</label><br>
+      <select id="ethnicity" name="ethnicity" required>
+        <option value="" disabled selected>Select your ethnicity</option>
+        <option>White</option>
+        <option>Black or African-American</option>
+        <option>American Indian or Alaskan Native</option>
+        <option>Asian</option>
+        <option>South Asian</option>
+        <option>Native Hawaiian or other Pacific islander</option>
+        <option>From multiple races</option>
+        <option>Some other race (please specify)</option>
+        <option>Prefer not to disclose</option>
+      </select>
+    </div>
+
+    <!-- Education -->
+    <div class="question">
+      <label for="education">What is the highest level of school you have completed?</label><br>
+      <select id="education" name="education" required>
+        <option value="" disabled selected>Select your education level</option>
+        <option>Less than high school degree</option>
+        <option>High school degree or equivalent (e.g., GED)</option>
+        <option>Some college but no degree</option>
+        <option>Associate degree</option>
+        <option>Bachelor degree</option>
+        <option>Graduate degree (e.g., Masters, PhD, M.D)</option>
+      </select>
+    </div>
+
+    <!-- Employment -->
+    <div class="question">
+      <label for="employment">Which of the following categories best describes your employment status?</label><br>
+      <select id="employment" name="employment" required>
+        <option value="" disabled selected>Select your employment status</option>
+        <option>Employed part time</option>
+        <option>Employed full time</option>
+        <option>Not employed, looking for work</option>
+        <option>Not employed, not looking for work</option>
+        <option>Retired</option>
+        <option>Disabled, not able to work</option>
+        <option>Prefer not to disclose</option>
+      </select>
+    </div>
+
+    <!-- Income -->
+    <div class="question">
+      <label for="income">What was your combined household income in the last year?</label><br>
+      <select id="income" name="income" required>
+        <option value="" disabled selected>Select your income range</option>
+        <option>$0 – $9,999</option>
+        <option>$10,000 – $19,999</option>
+        <option>$20,000 – $29,999</option>
+        <option>$30,000 – $39,999</option>
+        <option>$40,000 – $49,999</option>
+        <option>$50,000 – $59,999</option>
+        <option>$60,000 – $69,999</option>
+        <option>$70,000 – $79,999</option>
+        <option>$80,000 – $89,999</option>
+        <option>$90,000 – $99,999</option>
+        <option>$100,000 or more</option>
+        <option>Prefer not to disclose</option>
+      </select>
+    </div>
+
+    <!-- Living Situation -->
+    <div class="question">
+      <label for="living">Which of the following describes your current living situation?</label><br>
+      <select id="living" name="living" required>
+        <option value="" disabled selected>Select your living situation</option>
+        <option>Own my home</option>
+        <option>Rent my home</option>
+        <option>Other</option>
+        <option>Prefer not to disclose</option>
+      </select>
+    </div>
+
+    <div class="question">
+      <label for="language">What language do you mainly speak at home? (Select all that apply)</label><br>
+      <input type="checkbox" id="english" name="language" value="English">
+      <label for="english">English</label><br>
+      <input type="checkbox" id="spanish" name="language" value="Spanish">
+      <label for="spanish">Spanish</label><br>
+      <input type="checkbox" id="chinese" name="language" value="Chinese">
+      <label for="chinese">Chinese</label><br>
+      <input type="checkbox" id="french" name="language" value="French">
+      <label for="french">French</label><br>
+      <input type="checkbox" id="other" name="language" value="Other">
+      <label for="other">Some other language</label><br>
+    </div>
+
+    <!-- Religion -->
+    <div class="question">
+      <label for="religion">Do you identify with any of the following religions? (Select all that apply)</label><br>
+      <input type="checkbox" id="religion-protestant" name="religion" value="Protestantism">
+      <label for="religion-protestant">Protestantism</label><br>
+
+      <input type="checkbox" id="religion-catholic" name="religion" value="Catholicism">
+      <label for="religion-catholic">Catholicism</label><br>
+
+      <input type="checkbox" id="religion-christianity" name="religion" value="Christianity">
+      <label for="religion-christianity">Christianity</label><br>
+
+      <input type="checkbox" id="religion-judaism" name="religion" value="Judaism">
+      <label for="religion-judaism">Judaism</label><br>
+
+      <input type="checkbox" id="religion-islam" name="religion" value="Islam">
+      <label for="religion-islam">Islam</label><br>
+
+      <input type="checkbox" id="religion-buddhism" name="religion" value="Buddhism">
+      <label for="religion-buddhism">Buddhism</label><br>
+
+      <input type="checkbox" id="religion-hinduism" name="religion" value="Hinduism">
+      <label for="religion-hinduism">Hinduism</label><br>
+
+      <input type="checkbox" id="religion-nondenom" name="religion" value="Inter/Non-denominational">
+      <label for="religion-nondenom">Inter/Non-denominational</label><br>
+
+      <input type="checkbox" id="religion-noreligion" name="religion" value="No religion">
+      <label for="religion-noreligion">No religion</label><br>
+
+      <input type="checkbox" id="religion-other" name="religion" value="Other">
+      <label for="religion-other">Other (please specify):</label>
+      <input type="text" id="religion-other-text" name="religion-other-text" placeholder="Specify other religion">
+    </div>
+
+    <!-- Political Viewpoints -->
+    <div class="question">
+      <label for="politics">How would you describe your political viewpoints?</label><br>
+      <select id="politics" name="politics" required>
+        <option value="" disabled selected>Select your political viewpoint</option>
+        <option>Very liberal</option>
+        <option>Slightly liberal</option>
+        <option>Moderate</option>
+        <option>Slightly conservative</option>
+        <option>Very conservative</option>
+        <option>Prefer not to disclose</option>
+      </select>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+</body>
+
+</html>

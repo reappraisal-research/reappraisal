@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ambiguous Stimuli Description</title>
+</head>
+
+<body>
+    <h1>Ambiguous Stimuli Description</h1>
+    <p>You will be shown a series of photos and videos. Some are ambiguous, while others are non‑ambiguous.</p>
+    <button onclick="window.location.href='photoselection.html'">Next</button>
+
+    <button onclick="resetLocalStorage()">Reset Experiment</button>
+
+    <script>
+        function resetLocalStorage() {
+            localStorage.clear(); // Clears all stored data
+            alert("Local storage reset! Reloading...");
+            window.location.reload(); // Refresh the page
+        }
+    </script>
+</body>
+
+</html>

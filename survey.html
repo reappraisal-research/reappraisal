@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Survey</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        function saveResponses() {
+            // Retrieve responses from the form.
+            const scaledResponse = document.getElementById("scaledResponse").value;
+            const shortAnswer = document.getElementById("shortAnswer").value;
+
+            // Validate the scaled response.
+            if (scaledResponse < 1 || scaledResponse > 7 || isNaN(scaledResponse)) {
+                alert("Please enter a valid number between 1 and 7.");
+                return;
+            }
+
+            // Save responses in localStorage (or send them to a server as needed).
+            const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
+            responses.push({
+                scaledResponse: scaledResponse,
+                shortAnswer: shortAnswer,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem("surveyResponses", JSON.stringify(responses));
+
+            // Read the current video's shown count, which should be set by video_display.html.
+            // (1 = first viewing without label, 2 = second viewing with label)
+            const currentVideoShown = parseInt(localStorage.getItem("currentVideoShown"), 10);
+
+            if (currentVideoShown === 1) {
+                // Video has been shown once; go back to video_display.html for the second showing.
+                window.location.href = "video_display.html";
+            } else if (currentVideoShown === 2) {
+                // Video has now been shown twice; proceed to photo selection.
+                window.location.href = "photoselection.html";
+            } else {
+                // Fallback: if not set, return to video_display.html.
+                window.location.href = "video_display.html";
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Survey</h1>
+    <form>
+        <!-- Scaled Question -->
+        <label for="scaledResponse">1. How positively do you feel? (1 = Not at all, 7 = Extremely)</label>
+        <input type="number" id="scaledResponse" name="scaledResponse" min="1" max="7" required>
+
+        <!-- Short Answer Question -->
+        <label for="shortAnswer">2. What did you watch?</label>
+        <textarea id="shortAnswer" name="shortAnswer" rows="4" required></textarea>
+
+        <!-- Submit Button -->
+        <button type="button" onclick="saveResponses()">Submit</button>
+    </form>
+</body>
+
+</html>

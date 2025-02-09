@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Video Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        video {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .video-label {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script>
+        /***************
+         * EXPERIMENT SETUP
+         ***************/
+        // Define your 20 videos with labels
+        const videos = [
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0fd273d2f6e9d959e81b1a7a0dbddc5&profile_id=164&oauth2_token_id=57447761", label: "v1" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v2" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v3" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v4" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v5" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v6" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v7" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v8" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v9" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v10" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v11" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v12" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v13" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v14" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v15" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v16" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v17" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v18" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v19" },
+            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v20" }
+        ];
+
+        // (A) VIDEO TRACKING – initialize if not set.
+        if (!localStorage.getItem("videoTracking")) {
+            const videoTracking = videos.map(video => ({ ...video, shown: 0 }));
+            localStorage.setItem("videoTracking", JSON.stringify(videoTracking));
+        }
+
+        // (B) CONDITION LIST – 20 trials.
+        if (!localStorage.getItem("conditionList")) {
+            let conditions = [];
+            for (let i = 0; i < 5; i++) {
+                conditions.push({ videoLabel: "Goal", photoType: "ambiguous" });
+                conditions.push({ videoLabel: "Goal", photoType: "nonAmbiguous" });
+                conditions.push({ videoLabel: "Construal", photoType: "ambiguous" });
+                conditions.push({ videoLabel: "Construal", photoType: "nonAmbiguous" });
+            }
+            // Shuffle the conditions array.
+            for (let i = conditions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [conditions[i], conditions[j]] = [conditions[j], conditions[i]];
+            }
+            localStorage.setItem("conditionList", JSON.stringify(conditions));
+        }
+
+        // (C) TRIAL INDEX – initialize if not set.
+        if (!localStorage.getItem("trialIndex")) {
+            localStorage.setItem("trialIndex", "0");
+        }
+
+        // Global variable for current video shown count.
+        window.currentVideoShown = 0;
+
+        // Function to select and display a video.
+        function selectVideo() {
+            // Get the current trial condition.
+            let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
+            let conditionList = JSON.parse(localStorage.getItem("conditionList"));
+            let currentCondition = conditionList[trialIndex];
+
+            // Retrieve video tracking array.
+            let videoTracking = JSON.parse(localStorage.getItem("videoTracking"));
+            let selectedVideo = null;
+
+            // Check if there is a current video stored (i.e., one that has been shown once).
+            let currentVideoId = localStorage.getItem("currentVideoId");
+            if (currentVideoId) {
+                selectedVideo = videoTracking.find(video => video.label === currentVideoId && video.shown === 1);
+            }
+
+            // If no current video is found, select a new one.
+            if (!selectedVideo) {
+                let notShownVideos = videoTracking.filter(video => video.shown === 0);
+                if (notShownVideos.length > 0) {
+                    selectedVideo = notShownVideos[Math.floor(Math.random() * notShownVideos.length)];
+                    // Store the selected video ID for re-showing.
+                    localStorage.setItem("currentVideoId", selectedVideo.label);
+                } else {
+                    let onceShownVideos = videoTracking.filter(video => video.shown === 1);
+                    selectedVideo = onceShownVideos[Math.floor(Math.random() * onceShownVideos.length)];
+                    // In this case, currentVideoId should already be set.
+                }
+            }
+
+            // Increment its shown count.
+            selectedVideo.shown++;
+            localStorage.setItem("videoTracking", JSON.stringify(videoTracking));
+
+            // Set the video source.
+            const videoElement = document.getElementById("video");
+            videoElement.src = selectedVideo.url;
+
+            // Update the label.
+            const videoLabel = document.getElementById("videoLabel");
+            if (selectedVideo.shown === 1) {
+                videoLabel.textContent = `Now Playing: ${selectedVideo.label}`;
+            } else {
+                videoLabel.textContent = `Now Playing: ${selectedVideo.label} (${currentCondition.videoLabel})`;
+                // Remove currentVideoId now that the video has been shown twice.
+                localStorage.removeItem("currentVideoId");
+            }
+
+            // Update the global and localStorage currentVideoShown.
+            window.currentVideoShown = selectedVideo.shown;
+            localStorage.setItem("currentVideoShown", selectedVideo.shown);
+
+            // --- MODIFIED CODE ---
+            // When the video ends, always redirect to survey.html (regardless of whether it's the 1st or 2nd showing).
+            videoElement.addEventListener("ended", () => {
+                window.location.href = "survey.html";
+            }, { once: true });
+            // --- END MODIFIED CODE ---
+        }
+
+        // --- MODIFIED CODE ---
+        // The Next button now always sends the user to survey.html.
+        function redirectNext() {
+            window.location.href = "survey.html";
+        }
+        // --- END MODIFIED CODE ---
+
+        // Select a video when the page loads.
+        window.onload = selectVideo;
+    </script>
+</head>
+
+<body>
+    <h1>Video Display</h1>
+    <p>Please watch the video below:</p>
+    <div class="video-label" id="videoLabel"></div>
+    <video id="video" controls>
+        <source src="" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <button onclick="redirectNext()">Next</button>
+</body>
+
+</html>
