@@ -39,19 +39,19 @@
          * EXPERIMENT SETUP
          ***************/
         // Define your 20 videos with labels
-           const videos = [
-{ url: "videos/0015.mp4", "label": "v1" },
-{ url: "videos/0299.mp4", "label": "v2" },
-{ url: "videos/0489.mp4", "label": "v3" },
-{ url: "videos/0611.mp4", "label": "v4" },
-{ url: "videos/0681.mp4", "label": "v5" },
-{ url: "videos/0719.mp4", "label": "v6" },
-{ url: "videos/0955.mp4", "label": "v7" },
-{ url: "videos/0975.mp4", "label": "v8" },
-{ url: "videos/1576.mp4", "label": "v9" },
-{ url: "videos/1623.mp4", "label": "v10" },
-{ url: "videos/1844.mp4", "label": "v11" },
-{ url: "videos/1959.mp4", "label": "v12" },
+        const videos = [
+            { url: "videos/0015.mp4", "label": "v1" },
+            { url: "videos/0299.mp4", "label": "v2" },
+            { url: "videos/0489.mp4", "label": "v3" },
+            { url: "videos/0611.mp4", "label": "v4" },
+            { url: "videos/0681.mp4", "label": "v5" },
+            { url: "videos/0719.mp4", "label": "v6" },
+            { url: "videos/0955.mp4", "label": "v7" },
+            { url: "videos/0975.mp4", "label": "v8" },
+            { url: "videos/1576.mp4", "label": "v9" },
+            { url: "videos/1623.mp4", "label": "v10" },
+            { url: "videos/1844.mp4", "label": "v11" },
+            { url: "videos/1959.mp4", "label": "v12" },
             { url: "videos/0009.mp4", label: "v13" },
             { url: "videos/0333.mp4", label: "v14" },
             { url: "videos/0706.mp4", label: "v15" },
@@ -146,25 +146,20 @@
             window.currentVideoShown = selectedVideo.shown;
             localStorage.setItem("currentVideoShown", selectedVideo.shown);
 
-            // When the video ends, redirect based on its showing:
-            // First showing → survey.html; Second showing → photoselection.html.
+            // --- MODIFIED CODE ---
+            // When the video ends, always redirect to survey.html (regardless of whether it's the 1st or 2nd showing).
             videoElement.addEventListener("ended", () => {
-                if (selectedVideo.shown === 1) {
-                    window.location.href = "survey.html";
-                } else {
-                    window.location.href = "photoselection.html";
-                }
+                window.location.href = "survey.html";
             }, { once: true });
+            // --- END MODIFIED CODE ---
         }
 
-        // Function for the Next button.
+        // --- MODIFIED CODE ---
+        // The Next button now always sends the user to survey.html.
         function redirectNext() {
-            if (window.currentVideoShown === 1) {
-                window.location.href = "survey.html";
-            } else {
-                window.location.href = "photoselection.html";
-            }
+            window.location.href = "survey.html";
         }
+        // --- END MODIFIED CODE ---
 
         // Select a video when the page loads.
         window.onload = selectVideo;
