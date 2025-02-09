@@ -40,26 +40,26 @@
          ***************/
         // Define your 20 videos with labels
         const videos = [
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0fd273d2f6e9d959e81b1a7a0dbddc5&profile_id=164&oauth2_token_id=57447761", label: "v1" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v2" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v3" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v4" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v5" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v6" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v7" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v8" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v9" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v10" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v11" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v12" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v13" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v14" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v15" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v16" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v17" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v18" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v19" },
-            { url: "https://player.vimeo.com/external/371433846.sd.mp4?s=...", label: "v20" }
+        { url: "videos/0015.mp4" },
+{ url: "videos/0299.mp4" },
+{ url: "videos/0489.mp4", "label": "v3" },
+{ url: "videos/0611.mp4", "label": "v4" },
+{ url: "videos/0681.mp4", "label": "v5" },
+{ url: "videos/0719.mp4", "label": "v6" },
+{ url: "videos/0955.mp4", "label": "v7" },
+{ url: "videos/0975.mp4", "label": "v8" },
+{ url: "videos/1576.mp4", "label": "v9" },
+{ url: "videos/1623.mp4", "label": "v10" },
+{ url: "videos/1844.mp4", "label": "v11" },
+{ url: "videos/1959.mp4", "label": "v12" },
+            { url: "videos/0009.mp4", label: "v13" },
+            { url: "videos/0333.mp4", label: "v14" },
+            { url: "videos/", label: "v15" },
+            { url: "videos/", label: "v16" },
+            { url: "videos/", label: "v17" },
+            { url: "videos/", label: "v18" },
+            { url: "videos/", label: "v19" },
+            { url: "videos/", label: "v20" }
         ];
 
         // (A) VIDEO TRACKING – initialize if not set.
@@ -146,20 +146,25 @@
             window.currentVideoShown = selectedVideo.shown;
             localStorage.setItem("currentVideoShown", selectedVideo.shown);
 
-            // --- MODIFIED CODE ---
-            // When the video ends, always redirect to survey.html (regardless of whether it's the 1st or 2nd showing).
+            // When the video ends, redirect based on its showing:
+            // First showing → survey.html; Second showing → photoselection.html.
             videoElement.addEventListener("ended", () => {
-                window.location.href = "survey.html";
+                if (selectedVideo.shown === 1) {
+                    window.location.href = "survey.html";
+                } else {
+                    window.location.href = "photoselection.html";
+                }
             }, { once: true });
-            // --- END MODIFIED CODE ---
         }
 
-        // --- MODIFIED CODE ---
-        // The Next button now always sends the user to survey.html.
+        // Function for the Next button.
         function redirectNext() {
-            window.location.href = "survey.html";
+            if (window.currentVideoShown === 1) {
+                window.location.href = "survey.html";
+            } else {
+                window.location.href = "photoselection.html";
+            }
         }
-        // --- END MODIFIED CODE ---
 
         // Select a video when the page loads.
         window.onload = selectVideo;
