@@ -2,179 +2,146 @@
 <html>
 
 <head>
-    <title>Video Display</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+  <title>Video Display</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      overflow: hidden; /* Prevents scrolling if possible */
+    }
+
+    /* Video sizing so it appears big yet fits on the screen */
+    video {
+      width: 80vw;       /* 80% of viewport width */
+      max-height: 60vh;  /* 60% of viewport height */
+      display: block;
+      margin: 20px auto;
+    }
+
+    .video-label {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+  </style>
+  <script>
+    /***************
+     * EXPERIMENT SETUP
+     ***************/
+    const videos = [
+      { url: "videos/0015.mp4", label: "v1" },
+      { url: "videos/0299.mp4", label: "v2" },
+      { url: "videos/0489.mp4", label: "v3" },
+      { url: "videos/0611.mp4", label: "v4" },
+      { url: "videos/0681.mp4", label: "v5" },
+      { url: "videos/0719.mp4", label: "v6" },
+      { url: "videos/0955.mp4", label: "v7" },
+      { url: "videos/0975.mp4", label: "v8" },
+      { url: "videos/1576.mp4", label: "v9" },
+      { url: "videos/1623.mp4", label: "v10" },
+      { url: "videos/1844.mp4", label: "v11" },
+      { url: "videos/1959.mp4", label: "v12" },
+      { url: "videos/0009.mp4", label: "v13" },
+      { url: "videos/0333.mp4", label: "v14" },
+      { url: "videos/0706.mp4", label: "v15" },
+      { url: "videos/0803.mp4", label: "v16" },
+      { url: "videos/0860.mp4", label: "v17" },
+      { url: "videos/0948.mp4", label: "v18" },
+      { url: "videos/1001.mp4", label: "v19" },
+      { url: "videos/1164.mp4", label: "v20" }
+    ];
+
+    // Initialize video tracking if not set.
+    if (!localStorage.getItem("videoTracking")) {
+      const videoTracking = videos.map(video => ({ ...video, shown: 0 }));
+      localStorage.setItem("videoTracking", JSON.stringify(videoTracking));
+    }
+
+    // Initialize condition list (20 trials) if not set.
+    if (!localStorage.getItem("conditionList")) {
+      let conditions = [];
+      for (let i = 0; i < 5; i++) {
+        conditions.push({ videoLabel: "Goal", photoType: "ambiguous" });
+        conditions.push({ videoLabel: "Goal", photoType: "nonAmbiguous" });
+        conditions.push({ videoLabel: "Construal", photoType: "ambiguous" });
+        conditions.push({ videoLabel: "Construal", photoType: "nonAmbiguous" });
+      }
+      // Shuffle conditions array using the Fisher-Yates algorithm.
+      for (let i = conditions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [conditions[i], conditions[j]] = [conditions[j], conditions[i]];
+      }
+      localStorage.setItem("conditionList", JSON.stringify(conditions));
+    }
+
+    // Initialize trial index if not set.
+    if (!localStorage.getItem("trialIndex")) {
+      localStorage.setItem("trialIndex", "0");
+    }
+
+    window.currentVideoShown = 0;
+
+    function selectVideo() {
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
+      let conditionList = JSON.parse(localStorage.getItem("conditionList"));
+      let currentCondition = conditionList[trialIndex];
+
+      let videoTracking = JSON.parse(localStorage.getItem("videoTracking"));
+      let selectedVideo = null;
+      let currentVideoId = localStorage.getItem("currentVideoId");
+
+      if (currentVideoId) {
+        selectedVideo = videoTracking.find(video => video.label === currentVideoId && video.shown === 1);
+      }
+      if (!selectedVideo) {
+        let notShownVideos = videoTracking.filter(video => video.shown === 0);
+        if (notShownVideos.length > 0) {
+          selectedVideo = notShownVideos[Math.floor(Math.random() * notShownVideos.length)];
+          localStorage.setItem("currentVideoId", selectedVideo.label);
+        } else {
+          let onceShownVideos = videoTracking.filter(video => video.shown === 1);
+          selectedVideo = onceShownVideos[Math.floor(Math.random() * onceShownVideos.length)];
+          // currentVideoId should already be set in this case.
         }
+      }
+      selectedVideo.shown++;
+      localStorage.setItem("videoTracking", JSON.stringify(videoTracking));
 
-        video {
-            max-width: 100%;
-            height: auto;
-            margin: 20px 0;
-        }
+      const videoElement = document.getElementById("video");
+      videoElement.src = selectedVideo.url;
 
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+      // Display the condition label only on the second viewing.
+      const videoLabel = document.getElementById("videoLabel");
+      if (selectedVideo.shown === 1) {
+        videoLabel.textContent = ""; // No label on first play.
+      } else {
+        videoLabel.textContent = currentCondition.videoLabel;
+        localStorage.removeItem("currentVideoId");
+      }
 
-        button:hover {
-            background-color: #45a049;
-        }
+      window.currentVideoShown = selectedVideo.shown;
+      localStorage.setItem("currentVideoShown", selectedVideo.shown);
 
-        .video-label {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-    </style>
-    <script>
-        /***************
-         * EXPERIMENT SETUP
-         ***************/
-        // Define your 20 videos with labels
-        const videos = [
-            { url: "videos/0015.mp4", "label": "v1" },
-            { url: "videos/0299.mp4", "label": "v2" },
-            { url: "videos/0489.mp4", "label": "v3" },
-            { url: "videos/0611.mp4", "label": "v4" },
-            { url: "videos/0681.mp4", "label": "v5" },
-            { url: "videos/0719.mp4", "label": "v6" },
-            { url: "videos/0955.mp4", "label": "v7" },
-            { url: "videos/0975.mp4", "label": "v8" },
-            { url: "videos/1576.mp4", "label": "v9" },
-            { url: "videos/1623.mp4", "label": "v10" },
-            { url: "videos/1844.mp4", "label": "v11" },
-            { url: "videos/1959.mp4", "label": "v12" },
-            { url: "videos/0009.mp4", "label": "v13" },
-            { url: "videos/0333.mp4", "label": "v14" },
-            { url: "videos/0706.mp4", "label": "v15" },
-            { url: "videos/0803.mp4", "label": "v16" },
-            { url: "videos/0860.mp4", "label": "v17" },
-            { url: "videos/0948.mp4", "label": "v18" },
-            { url: "videos/1001.mp4", "label": "v19" },
-            { url: "videos/1164.mp4", "label": "v20" }
-        ];
+      videoElement.controls = true;
 
-        // (A) VIDEO TRACKING – initialize if not set.
-        if (!localStorage.getItem("videoTracking")) {
-            const videoTracking = videos.map(video => ({ ...video, shown: 0 }));
-            localStorage.setItem("videoTracking", JSON.stringify(videoTracking));
-        }
+      // Listen for the video to finish playing, then redirect.
+      videoElement.addEventListener("ended", () => {
+        window.location.href = "survey.html";
+      }, { once: true });
+    }
 
-        // (B) CONDITION LIST – 20 trials.
-        if (!localStorage.getItem("conditionList")) {
-            let conditions = [];
-            for (let i = 0; i < 5; i++) {
-                conditions.push({ videoLabel: "Goal", photoType: "ambiguous" });
-                conditions.push({ videoLabel: "Goal", photoType: "nonAmbiguous" });
-                conditions.push({ videoLabel: "Construal", photoType: "ambiguous" });
-                conditions.push({ videoLabel: "Construal", photoType: "nonAmbiguous" });
-            }
-            // Shuffle the conditions array.
-            for (let i = conditions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [conditions[i], conditions[j]] = [conditions[j], conditions[i]];
-            }
-            localStorage.setItem("conditionList", JSON.stringify(conditions));
-        }
-
-        // (C) TRIAL INDEX – initialize if not set.
-        if (!localStorage.getItem("trialIndex")) {
-            localStorage.setItem("trialIndex", "0");
-        }
-
-        // Global variable for current video shown count.
-        window.currentVideoShown = 0;
-
-        // Function to select and display a video.
-        function selectVideo() {
-            // Get the current trial condition.
-            let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-            let conditionList = JSON.parse(localStorage.getItem("conditionList"));
-            let currentCondition = conditionList[trialIndex];
-
-            // Retrieve video tracking array.
-            let videoTracking = JSON.parse(localStorage.getItem("videoTracking"));
-            let selectedVideo = null;
-
-            // Check if there is a current video stored (i.e., one that has been shown once).
-            let currentVideoId = localStorage.getItem("currentVideoId");
-            if (currentVideoId) {
-                selectedVideo = videoTracking.find(video => video.label === currentVideoId && video.shown === 1);
-            }
-
-            // If no current video is found, select a new one.
-            if (!selectedVideo) {
-                let notShownVideos = videoTracking.filter(video => video.shown === 0);
-                if (notShownVideos.length > 0) {
-                    selectedVideo = notShownVideos[Math.floor(Math.random() * notShownVideos.length)];
-                    // Store the selected video ID for re-showing.
-                    localStorage.setItem("currentVideoId", selectedVideo.label);
-                } else {
-                    let onceShownVideos = videoTracking.filter(video => video.shown === 1);
-                    selectedVideo = onceShownVideos[Math.floor(Math.random() * onceShownVideos.length)];
-                    // In this case, currentVideoId should already be set.
-                }
-            }
-
-            // Increment its shown count.
-            selectedVideo.shown++;
-            localStorage.setItem("videoTracking", JSON.stringify(videoTracking));
-
-            // Set the video source.
-            const videoElement = document.getElementById("video");
-            videoElement.src = selectedVideo.url;
-
-            // Update the label.
-            const videoLabel = document.getElementById("videoLabel");
-            if (selectedVideo.shown === 1) {
-                videoLabel.textContent = `Now Playing: ${selectedVideo.label}`;
-            } else {
-                videoLabel.textContent = `Now Playing: ${selectedVideo.label} (${currentCondition.videoLabel})`;
-                // Remove currentVideoId now that the video has been shown twice.
-                localStorage.removeItem("currentVideoId");
-            }
-
-            // Update the global and localStorage currentVideoShown.
-            window.currentVideoShown = selectedVideo.shown;
-            localStorage.setItem("currentVideoShown", selectedVideo.shown);
-
-            // --- MODIFIED CODE ---
-            // When the video ends, always redirect to survey.html (regardless of whether it's the 1st or 2nd showing).
-            videoElement.addEventListener("ended", () => {
-                window.location.href = "survey.html";
-            }, { once: true });
-            // --- END MODIFIED CODE ---
-        }
-
-        // --- MODIFIED CODE ---
-        // The Next button now always sends the user to survey.html.
-        function redirectNext() {
-            window.location.href = "survey.html";
-        }
-        // --- END MODIFIED CODE ---
-
-        // Select a video when the page loads.
-        window.onload = selectVideo;
-    </script>
+    window.onload = selectVideo;
+  </script>
 </head>
 
 <body>
-    <h1>Video Display</h1>
-    <p>Please watch the video below:</p>
-    <div class="video-label" id="videoLabel"></div>
-    <video id="video" controls>
-        <source src="" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-    <button onclick="redirectNext()">Next</button>
+  <p style="text-align: center;">Please watch the video below:</p>
+  <div class="video-label" id="videoLabel"></div>
+  <video id="video" controls>
+    <source src="" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 </body>
 
 </html>
