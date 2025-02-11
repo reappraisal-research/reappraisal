@@ -2,23 +2,56 @@
 <html>
 
 <head>
-    <title>Ambiguous Stimuli Description</title>
+  <title>Ambiguous Stimuli Description</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
-    <h1>Ambiguous Stimuli Description</h1>
-    <p>You will be shown a series of photos and videos. Some are ambiguous, while others are non‑ambiguous.</p>
-    <button onclick="window.location.href='photoselection.html'">Next</button>
+  <h1>Ambiguous Stimuli Description</h1>
+  <p>
+    You will be shown a photo before each new video you watch. Some of these images are ambiguous<br>
+    meaning there are multiple correct ways to interpret them. When you see an ambiguous image please<br>
+    focus on shifting your perception back and forth between the different interpretations of the image. <br>
+    Ambiguous images will be labeled so you know to look for both interpretations. <br>
+    Once you have finished reading this and understand what an ambiguous image is and what <br>
+    to do when you see it please press the "next" button.
+  </p>
+  <button onclick="window.location.href='photoselection.html'">Next</button>
+  <button onclick="resetLocalStorage()">Reset Experiment</button>
 
-    <button onclick="resetLocalStorage()">Reset Experiment</button>
-
-    <script>
-        function resetLocalStorage() {
-            localStorage.clear(); // Clears all stored data
-            alert("Local storage reset! Reloading...");
-            window.location.reload(); // Refresh the page
-        }
-    </script>
+  <script>
+    function resetLocalStorage() {
+      localStorage.clear(); // Clears all stored data
+      alert("Local storage reset! Reloading...");
+      window.location.reload(); // Refresh the page
+    }
+  </script>
 </body>
 
 </html>
