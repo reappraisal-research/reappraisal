@@ -2,102 +2,187 @@
 <html>
 
 <head>
-    <title>Survey</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+  <title>Survey</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px 30px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+
+    /* Scale container styling */
+    .scale {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .scale label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Style radio buttons as smaller, black bubbles */
+    .scale input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+      border: 2px solid #000; /* Black border */
+      border-radius: 50%;
+      width: 30px;   /* Smaller width */
+      height: 30px;  /* Smaller height */
+      margin-bottom: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+      font-size: 14px;
+      line-height: 30px;
+      text-align: center;
+    }
+
+    .scale input[type="radio"]:checked {
+      background-color: #000; /* Black background when selected */
+      color: #fff;
+    }
+
+    /* Scale instructions beneath the bubbles */
+    .scale-instructions {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <script>
+    function saveResponses() {
+      // Retrieve the selected value from the scale (radio buttons).
+      const scaledResponseElements = document.getElementsByName("scaledResponse");
+      let scaledResponse = "";
+      for (let i = 0; i < scaledResponseElements.length; i++) {
+        if (scaledResponseElements[i].checked) {
+          scaledResponse = scaledResponseElements[i].value;
+          break;
         }
+      }
+      const shortAnswer = document.getElementById("shortAnswer").value;
 
-        h1 {
-            color: #333;
-        }
+      // Validate that a radio button was selected.
+      if (scaledResponse === "") {
+        alert("Please select a number between 1 and 7 for how positively you feel.");
+        return;
+      }
 
-        label {
-            display: block;
-            margin: 10px 0 5px;
-        }
+      // Validate that the short answer is not a number.
+      if (!isNaN(shortAnswer)) {
+        alert("Please provide a proper answer for what you watched.");
+        return;
+      }
 
-        input[type="number"],
-        textarea {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+      // Save responses in localStorage.
+      const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
+      responses.push({
+        scaledResponse: scaledResponse,
+        shortAnswer: shortAnswer,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem("surveyResponses", JSON.stringify(responses));
 
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
-    <script>
-        function saveResponses() {
-            // Retrieve responses from the form.
-            const scaledResponse = document.getElementById("scaledResponse").value;
-            const shortAnswer = document.getElementById("shortAnswer").value;
-
-            // Validate the scaled response.
-            if (scaledResponse < 1 || scaledResponse > 7 || isNaN(scaledResponse)) {
-                alert("Please enter a valid number between 1 and 7.");
-                return;
-            }
-
-            if (!isNaN(shortAnswer)) {
-                alert("Please answer.");
-                return;
-            }
-
-            // Save responses in localStorage (or send them to a server as needed).
-            const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
-            responses.push({
-                scaledResponse: scaledResponse,
-                shortAnswer: shortAnswer,
-                timestamp: new Date().toISOString()
-            });
-            localStorage.setItem("surveyResponses", JSON.stringify(responses));
-
-            // Read the current video's shown count, which should be set by video_display.html.
-            // (1 = first viewing without label, 2 = second viewing with label)
-            const currentVideoShown = parseInt(localStorage.getItem("currentVideoShown"), 10);
-
-            if (currentVideoShown === 1) {
-                // Video has been shown once; go back to video_display.html for the second showing.
-                window.location.href = "video_display.html";
-            } else if (currentVideoShown === 2) {
-                // Video has now been shown twice; proceed to photo selection.
-                window.location.href = "photoselection.html";
-            } else {
-                // Fallback: if not set, return to video_display.html.
-                window.location.href = "video_display.html";
-            }
-        }
-    </script>
+      // Read the current video's shown count (set by video_display.html):
+      // (1 = first viewing without label, 2 = second viewing with label)
+      const currentVideoShown = parseInt(localStorage.getItem("currentVideoShown"), 10);
+      if (currentVideoShown === 1) {
+        // Video has been shown once; go back to video_display.html for the second showing.
+        window.location.href = "video_display.html";
+      } else if (currentVideoShown === 2) {
+        // Video has now been shown twice; proceed to photo selection.
+        window.location.href = "photoselection.html";
+      } else {
+        // Fallback: if not set, return to video_display.html.
+        window.location.href = "video_display.html";
+      }
+    }
+  </script>
 </head>
 
 <body>
-    <h1>Survey</h1>
+  <div class="container">
+    <h1>Please respond to the below</h1>
     <form>
-        <!-- Scaled Question -->
-        <label for="scaledResponse">1. How positively do you feel? (1 = Not at all, 7 = Extremely)</label>
-        <input type="number" id="scaledResponse" name="scaledResponse" min="1" max="7" required>
+      <!-- Scaled Question using radio buttons as bubbles -->
+      <label for="scaledResponse">1. How positively do you feel?</label>
+      <div class="scale">
+        <label><input type="radio" name="scaledResponse" value="1" required>1</label>
+        <label><input type="radio" name="scaledResponse" value="2">2</label>
+        <label><input type="radio" name="scaledResponse" value="3">3</label>
+        <label><input type="radio" name="scaledResponse" value="4">4</label>
+        <label><input type="radio" name="scaledResponse" value="5">5</label>
+        <label><input type="radio" name="scaledResponse" value="6">6</label>
+        <label><input type="radio" name="scaledResponse" value="7">7</label>
+      </div>
+      <div class="scale-instructions">
+        <span>Not positive at all</span>
+        <span>Extremely positive</span>
+      </div>
 
-        <!-- Short Answer Question -->
-        <label for="shortAnswer">2. What did you watch?</label>
-        <textarea id="shortAnswer" name="shortAnswer" rows="4" required></textarea>
+      <!-- Short Answer Question -->
+      <label for="shortAnswer">2. What did you watch?</label>
+      <textarea id="shortAnswer" name="shortAnswer" rows="4" required></textarea>
 
-        <!-- Submit Button -->
-        <button type="button" onclick="saveResponses()">Submit</button>
+      <!-- Submit Button -->
+      <button type="button" onclick="saveResponses()">Next</button>
     </form>
+  </div>
 </body>
 
 </html>
