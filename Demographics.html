@@ -18,9 +18,19 @@
       color: #333;
     }
 
+    /* Global label style (if needed for other areas) */
     label {
-      font-weight: bold;
       margin-top: 10px;
+    }
+
+    /* Within each question, make the first label (the question prompt) bold */
+    .question label:first-of-type {
+      font-weight: bold;
+    }
+
+    /* All other labels (the options) will be normal weight */
+    .question label:not(:first-of-type) {
+      font-weight: normal;
     }
 
     .question {
@@ -56,114 +66,94 @@
     <!-- Age -->
     <div class="question">
       <label for="age">What is your age?</label><br>
-      <select id="age" name="age" required>
-        <option value="" disabled selected>Select your age range</option>
-        <option>15 or younger</option>
-        <option>16–19</option>
-        <option>20–24</option>
-        <option>25–29</option>
-        <option>30–34</option>
-        <option>35–39</option>
-        <option>40–44</option>
-        <option>45–49</option>
-        <option>50–54</option>
-        <option>55–59</option>
-        <option>60–64</option>
-        <option>65 or older</option>
-      </select>
+      <label><input type="radio" name="age" value="15 or younger" required> 15 or younger</label><br>
+      <label><input type="radio" name="age" value="16–19"> 16–19</label><br>
+      <label><input type="radio" name="age" value="20–24"> 20–24</label><br>
+      <label><input type="radio" name="age" value="25–29"> 25–29</label><br>
+      <label><input type="radio" name="age" value="30–34"> 30–34</label><br>
+      <label><input type="radio" name="age" value="35–39"> 35–39</label><br>
+      <label><input type="radio" name="age" value="40–44"> 40–44</label><br>
+      <label><input type="radio" name="age" value="45–49"> 45–49</label><br>
+      <label><input type="radio" name="age" value="50–54"> 50–54</label><br>
+      <label><input type="radio" name="age" value="55–59"> 55–59</label><br>
+      <label><input type="radio" name="age" value="60–64"> 60–64</label><br>
+      <label><input type="radio" name="age" value="65 or older"> 65 or older</label>
     </div>
 
     <!-- Gender -->
     <div class="question">
       <label for="gender">What is your gender?</label><br>
-      <select id="gender" name="gender" required>
-        <option value="" disabled selected>Select your gender</option>
-        <option>Female</option>
-        <option>Male</option>
-        <option>Non-binary</option>
-        <option>Prefer not to disclose</option>
-        <option>Other</option>
-      </select>
+      <label><input type="radio" name="gender" value="Female" required> Female</label><br>
+      <label><input type="radio" name="gender" value="Male"> Male</label><br>
+      <label><input type="radio" name="gender" value="Non-binary"> Non-binary</label><br>
+      <label><input type="radio" name="gender" value="Prefer not to disclose"> Prefer not to disclose</label><br>
+      <label><input type="radio" name="gender" value="Other"> Other</label>
     </div>
 
     <!-- Ethnicity -->
     <div class="question">
       <label for="ethnicity">How would you describe your ethnicity?</label><br>
-      <select id="ethnicity" name="ethnicity" required>
-        <option value="" disabled selected>Select your ethnicity</option>
-        <option>White</option>
-        <option>Black or African-American</option>
-        <option>American Indian or Alaskan Native</option>
-        <option>Asian</option>
-        <option>South Asian</option>
-        <option>Native Hawaiian or other Pacific islander</option>
-        <option>From multiple races</option>
-        <option>Some other race (please specify)</option>
-        <option>Prefer not to disclose</option>
-      </select>
+      <label><input type="radio" name="ethnicity" value="White" required> White</label><br>
+      <label><input type="radio" name="ethnicity" value="Black or African-American"> Black or African-American</label><br>
+      <label><input type="radio" name="ethnicity" value="American Indian or Alaskan Native"> American Indian or Alaskan Native</label><br>
+      <label><input type="radio" name="ethnicity" value="Asian"> Asian</label><br>
+      <label><input type="radio" name="ethnicity" value="South Asian"> South Asian</label><br>
+      <label><input type="radio" name="ethnicity" value="Native Hawaiian or other Pacific islander"> Native Hawaiian or other Pacific islander</label><br>
+      <label><input type="radio" name="ethnicity" value="From multiple races"> From multiple races</label><br>
+      <label><input type="radio" name="ethnicity" value="Some other race (please specify)"> Some other race (please specify)</label><br>
+      <label><input type="radio" name="ethnicity" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
 
     <!-- Education -->
     <div class="question">
       <label for="education">What is the highest level of school you have completed?</label><br>
-      <select id="education" name="education" required>
-        <option value="" disabled selected>Select your education level</option>
-        <option>Less than high school degree</option>
-        <option>High school degree or equivalent (e.g., GED)</option>
-        <option>Some college but no degree</option>
-        <option>Associate degree</option>
-        <option>Bachelor degree</option>
-        <option>Graduate degree (e.g., Masters, PhD, M.D)</option>
-      </select>
+      <label><input type="radio" name="education" value="Less than high school degree" required> Less than high school degree</label><br>
+      <label><input type="radio" name="education" value="High school degree or equivalent (e.g., GED)"> High school degree or equivalent (e.g., GED)</label><br>
+      <label><input type="radio" name="education" value="Some college but no degree"> Some college but no degree</label><br>
+      <label><input type="radio" name="education" value="Associate degree"> Associate degree</label><br>
+      <label><input type="radio" name="education" value="Bachelor degree"> Bachelor degree</label><br>
+      <label><input type="radio" name="education" value="Graduate degree (e.g., Masters, PhD, M.D)"> Graduate degree (e.g., Masters, PhD, M.D)</label>
     </div>
 
     <!-- Employment -->
     <div class="question">
       <label for="employment">Which of the following categories best describes your employment status?</label><br>
-      <select id="employment" name="employment" required>
-        <option value="" disabled selected>Select your employment status</option>
-        <option>Employed part time</option>
-        <option>Employed full time</option>
-        <option>Not employed, looking for work</option>
-        <option>Not employed, not looking for work</option>
-        <option>Retired</option>
-        <option>Disabled, not able to work</option>
-        <option>Prefer not to disclose</option>
-      </select>
+      <label><input type="radio" name="employment" value="Employed part time" required> Employed part time</label><br>
+      <label><input type="radio" name="employment" value="Employed full time"> Employed full time</label><br>
+      <label><input type="radio" name="employment" value="Not employed, looking for work"> Not employed, looking for work</label><br>
+      <label><input type="radio" name="employment" value="Not employed, not looking for work"> Not employed, not looking for work</label><br>
+      <label><input type="radio" name="employment" value="Retired"> Retired</label><br>
+      <label><input type="radio" name="employment" value="Disabled, not able to work"> Disabled, not able to work</label><br>
+      <label><input type="radio" name="employment" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
 
     <!-- Income -->
     <div class="question">
       <label for="income">What was your combined household income in the last year?</label><br>
-      <select id="income" name="income" required>
-        <option value="" disabled selected>Select your income range</option>
-        <option>$0 – $9,999</option>
-        <option>$10,000 – $19,999</option>
-        <option>$20,000 – $29,999</option>
-        <option>$30,000 – $39,999</option>
-        <option>$40,000 – $49,999</option>
-        <option>$50,000 – $59,999</option>
-        <option>$60,000 – $69,999</option>
-        <option>$70,000 – $79,999</option>
-        <option>$80,000 – $89,999</option>
-        <option>$90,000 – $99,999</option>
-        <option>$100,000 or more</option>
-        <option>Prefer not to disclose</option>
-      </select>
+      <label><input type="radio" name="income" value="$0 – $9,999" required> $0 – $9,999</label><br>
+      <label><input type="radio" name="income" value="$10,000 – $19,999"> $10,000 – $19,999</label><br>
+      <label><input type="radio" name="income" value="$20,000 – $29,999"> $20,000 – $29,999</label><br>
+      <label><input type="radio" name="income" value="$30,000 – $39,999"> $30,000 – $39,999</label><br>
+      <label><input type="radio" name="income" value="$40,000 – $49,999"> $40,000 – $49,999</label><br>
+      <label><input type="radio" name="income" value="$50,000 – $59,999"> $50,000 – $59,999</label><br>
+      <label><input type="radio" name="income" value="$60,000 – $69,999"> $60,000 – $69,999</label><br>
+      <label><input type="radio" name="income" value="$70,000 – $79,999"> $70,000 – $79,999</label><br>
+      <label><input type="radio" name="income" value="$80,000 – $89,999"> $80,000 – $89,999</label><br>
+      <label><input type="radio" name="income" value="$90,000 – $99,999"> $90,000 – $99,999</label><br>
+      <label><input type="radio" name="income" value="$100,000 or more"> $100,000 or more</label><br>
+      <label><input type="radio" name="income" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
 
     <!-- Living Situation -->
     <div class="question">
       <label for="living">Which of the following describes your current living situation?</label><br>
-      <select id="living" name="living" required>
-        <option value="" disabled selected>Select your living situation</option>
-        <option>Own my home</option>
-        <option>Rent my home</option>
-        <option>Other</option>
-        <option>Prefer not to disclose</option>
-      </select>
+      <label><input type="radio" name="living" value="Own my home" required> Own my home</label><br>
+      <label><input type="radio" name="living" value="Rent my home"> Rent my home</label><br>
+      <label><input type="radio" name="living" value="Other"> Other</label><br>
+      <label><input type="radio" name="living" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
 
+    <!-- Language (Checkboxes remain unchanged) -->
     <div class="question">
       <label for="language">What language do you mainly speak at home? (Select all that apply)</label><br>
       <input type="checkbox" id="english" name="language" value="English">
@@ -175,56 +165,45 @@
       <input type="checkbox" id="french" name="language" value="French">
       <label for="french">French</label><br>
       <input type="checkbox" id="other" name="language" value="Other">
-      <label for="other">Some other language</label><br>
+      <label for="other-language">Other (please specify):</label>
+      <input type="text" id="other-language" name="other-language" placeholder=""><br>
     </div>
 
-    <!-- Religion -->
+    <!-- Religion (Checkboxes remain unchanged) -->
     <div class="question">
       <label for="religion">Do you identify with any of the following religions? (Select all that apply)</label><br>
       <input type="checkbox" id="religion-protestant" name="religion" value="Protestantism">
       <label for="religion-protestant">Protestantism</label><br>
-
       <input type="checkbox" id="religion-catholic" name="religion" value="Catholicism">
       <label for="religion-catholic">Catholicism</label><br>
-
       <input type="checkbox" id="religion-christianity" name="religion" value="Christianity">
       <label for="religion-christianity">Christianity</label><br>
-
       <input type="checkbox" id="religion-judaism" name="religion" value="Judaism">
       <label for="religion-judaism">Judaism</label><br>
-
       <input type="checkbox" id="religion-islam" name="religion" value="Islam">
       <label for="religion-islam">Islam</label><br>
-
       <input type="checkbox" id="religion-buddhism" name="religion" value="Buddhism">
       <label for="religion-buddhism">Buddhism</label><br>
-
       <input type="checkbox" id="religion-hinduism" name="religion" value="Hinduism">
       <label for="religion-hinduism">Hinduism</label><br>
-
       <input type="checkbox" id="religion-nondenom" name="religion" value="Inter/Non-denominational">
       <label for="religion-nondenom">Inter/Non-denominational</label><br>
-
       <input type="checkbox" id="religion-noreligion" name="religion" value="No religion">
       <label for="religion-noreligion">No religion</label><br>
-
       <input type="checkbox" id="religion-other" name="religion" value="Other">
       <label for="religion-other">Other (please specify):</label>
-      <input type="text" id="religion-other-text" name="religion-other-text" placeholder="Specify other religion">
+      <input type="text" id="religion-other-text" name="religion-other-text" placeholder="">
     </div>
 
     <!-- Political Viewpoints -->
     <div class="question">
       <label for="politics">How would you describe your political viewpoints?</label><br>
-      <select id="politics" name="politics" required>
-        <option value="" disabled selected>Select your political viewpoint</option>
-        <option>Very liberal</option>
-        <option>Slightly liberal</option>
-        <option>Moderate</option>
-        <option>Slightly conservative</option>
-        <option>Very conservative</option>
-        <option>Prefer not to disclose</option>
-      </select>
+      <label><input type="radio" name="politics" value="Very liberal" required> Very liberal</label><br>
+      <label><input type="radio" name="politics" value="Slightly liberal"> Slightly liberal</label><br>
+      <label><input type="radio" name="politics" value="Moderate"> Moderate</label><br>
+      <label><input type="radio" name="politics" value="Slightly conservative"> Slightly conservative</label><br>
+      <label><input type="radio" name="politics" value="Very conservative"> Very conservative</label><br>
+      <label><input type="radio" name="politics" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
 
     <button type="submit">Submit</button>
