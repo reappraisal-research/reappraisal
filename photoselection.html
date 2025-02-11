@@ -2,140 +2,147 @@
 <html>
 
 <head>
-    <title>Photo Selection</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
+  <title>Photo Selection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
 
-        img {
-            display: block;
-            width: 100vw;      /* Full viewport width */
-            height: 80vh;      /* 80% of the viewport height */
-            object-fit: contain; /* Ensure the entire image is visible */
-            margin: 20px auto;
-        }
+    img {
+      display: block;
+      width: 100vw;      /* Full viewport width */
+      height: 80vh;      /* 80% of the viewport height */
+      object-fit: contain; /* Ensure the entire image is visible */
+      margin: 20px auto;
+    }
 
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
 
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
-    <script>
-        // Define your photo pools.
-        // Update these paths if you have your own photos.
-        const ambiguousPhotos = [
-            "Stimulireal/concave.convex.jpg",
-            "Stimulireal/donkey.seal.png",
-            "Stimulireal/face.vase.png",
-            "Stimulireal/frog.horse.jpg",
-            "Stimulireal/jastrow.rabbit.jpg",
-            "Stimulireal/Necker.cube.png",
-            "Stimulireal/old.young.png",
-            "Stimulireal/skeleton.ladies.jpg",
-            "Stimulireal/Spinning_Dancer.gif",
-            "Stimulireal/tunneldot.gif"
-        ];
-        const nonAmbiguousPhotos = [
-            "Stimulireal/ur1.jpg",
-            "Stimulireal/ur2.jpg",
-            "Stimulireal/ur3.png",
-            "Stimulireal/ur4.jpg",
-            "Stimulireal/ur5.jpg",
-            "Stimulireal/ur6.jpg",
-            "Stimulireal/ur7.jpg",
-            "Stimulireal/ur8.png",
-            "Stimulireal/ur9.gif",
-            "Stimulireal/ur10.gif"
-        ];
+    button:hover {
+      background-color: #45a049;
+    }
 
-        // Initialize the photo pools in localStorage if not already set.
-        if (!localStorage.getItem("ambiguousPhotos")) {
-            localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
-        }
-        if (!localStorage.getItem("nonAmbiguousPhotos")) {
-            localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
-        }
+    /* Style for the ambiguous label */
+    #photoLabel {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+  </style>
+  <script>
+    // Define your photo pools.
+    const ambiguousPhotos = [
+      "Stimulireal/concave.convex.jpg",
+      "Stimulireal/donkey.seal.png",
+      "Stimulireal/face.vase.png",
+      "Stimulireal/frog.horse.jpg",
+      "Stimulireal/jastrow.rabbit.jpg",
+      "Stimulireal/Necker.cube.png",
+      "Stimulireal/old.young.png",
+      "Stimulireal/skeleton.ladies.jpg",
+      "Stimulireal/Spinning_Dancer.gif",
+      "Stimulireal/tunneldot.gif"
+    ];
+    const nonAmbiguousPhotos = [
+      "Stimulireal/ur1.jpg",
+      "Stimulireal/ur2.jpg",
+      "Stimulireal/ur3.png",
+      "Stimulireal/ur4.jpg",
+      "Stimulireal/ur5.jpg",
+      "Stimulireal/ur6.jpg",
+      "Stimulireal/ur7.jpg",
+      "Stimulireal/ur8.png",
+      "Stimulireal/ur9.gif",
+      "Stimulireal/ur10.gif"
+    ];
 
-        // Ensure trialIndex exists (set by video_display.html).
-        if (!localStorage.getItem("trialIndex")) {
-            localStorage.setItem("trialIndex", "0");
-        }
-        let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-        // Function to select a photo based on the current trial’s condition.
-        function selectPhoto() {
-            let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
+    // Initialize the photo pools in localStorage if not already set.
+    if (!localStorage.getItem("ambiguousPhotos")) {
+      localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
+    }
+    if (!localStorage.getItem("nonAmbiguousPhotos")) {
+      localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
+    }
 
-            // If no conditions exist, prompt the user to complete the video experiment first.
-            if (conditionList.length === 0) {
-                alert("No conditions available. Please complete the video experiment first.");
-                window.location.href = "video_display.html";
-                return;
-            }
-            // If all trials are completed, redirect to a thank-you page.
-            if (trialIndex >= conditionList.length) {
-                alert("All trials completed. Thank you!");
-                window.location.href = "thank_you.html";
-                return;
-            }
+    // Ensure trialIndex exists (set by video_display.html).
+    if (!localStorage.getItem("trialIndex")) {
+      localStorage.setItem("trialIndex", "0");
+    }
+    let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
 
-            // Get the current condition (which specifies the photo type).
-            let currentCondition = conditionList[trialIndex];
-            // Choose the corresponding photo pool.
-            let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
-            let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
+    // Function to select a photo based on the current trial’s condition.
+    function selectPhoto() {
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
 
-            console.log("Trial:", trialIndex + 1, "Using Pool:", poolKey, "Pool Length:", photoPool.length);
+      // If no conditions exist, prompt the user to complete the video experiment first.
+      if (conditionList.length === 0) {
+        alert("No conditions available. Please complete the video experiment first.");
+        window.location.href = "video_display.html";
+        return;
+      }
+      // If all trials are completed, redirect to a thank-you page.
+      if (trialIndex >= conditionList.length) {
+        alert("All trials completed. Thank you!");
+        window.location.href = "thank_you.html";
+        return;
+      }
 
-            if (photoPool.length === 0) {
-                alert("No photos remain in the pool. Thank you!");
-                window.location.href = "thank_you.html";
-                return;
-            }
+      // Get the current condition (which specifies the photo type).
+      let currentCondition = conditionList[trialIndex];
+      // Choose the corresponding photo pool.
+      let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
+      let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
 
-            // Randomly select a photo and remove it from the pool.
-            let randomIndex = Math.floor(Math.random() * photoPool.length);
-            let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
-            localStorage.setItem(poolKey, JSON.stringify(photoPool));
+      console.log("Trial:", trialIndex + 1, "Using Pool:", poolKey, "Pool Length:", photoPool.length);
 
-            // Label ambiguous photos above the image.
-            if (currentCondition.photoType === "ambiguous") {
-                document.getElementById("photoLabel").innerText = "Ambiguous";
-            } else {
-                document.getElementById("photoLabel").innerText = "";
-            }
+      if (photoPool.length === 0) {
+        alert("No photos remain in the pool. Thank you!");
+        window.location.href = "thank_you.html";
+        return;
+      }
 
-            // Display the selected photo.
-            const photoElement = document.getElementById("photo");
-            photoElement.src = selectedPhoto;
-            photoElement.alt = `Selected Photo: ${selectedPhoto}`;
+      // Randomly select a photo and remove it from the pool.
+      let randomIndex = Math.floor(Math.random() * photoPool.length);
+      let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
+      localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
-            console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
+      // If the current condition is ambiguous, display a bold label above the photo.
+      if (currentCondition.photoType === "ambiguous") {
+        document.getElementById("photoLabel").innerText = "Ambiguous";
+      } else {
+        document.getElementById("photoLabel").innerText = "";
+      }
 
-            // Increment the trial index for the next trial.
-            trialIndex++;
-            localStorage.setItem("trialIndex", trialIndex.toString());
-        }
+      // Display the selected photo.
+      const photoElement = document.getElementById("photo");
+      photoElement.src = selectedPhoto;
+      photoElement.alt = `Selected Photo: ${selectedPhoto}`;
 
-        // Run the photo selection when the page loads.
-        window.onload = selectPhoto;
-    </script>
+      console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
+
+      // Increment the trial index for the next trial.
+      trialIndex++;
+      localStorage.setItem("trialIndex", trialIndex.toString());
+    }
+
+    // Run the photo selection when the page loads.
+    window.onload = selectPhoto;
+  </script>
 </head>
 
 <body>
-    <p id="photoLabel"></p>
-    <img id="photo" src="" alt="Selected Photo">
-    <br>
-    <button onclick="window.location.href='video_display.html'">Next</button>
+  <p id="photoLabel"></p>
+  <img id="photo" src="" alt="Selected Photo">
+  <br>
+  <button onclick="window.location.href='video_display.html'">Next</button>
 </body>
 
 </html>
