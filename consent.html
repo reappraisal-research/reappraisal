@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Consent</title>
+  <style>
+    /* Example style for the instructions-body-align class */
+    .instructions-body-align {
+      background-color: #eef;
+    }
+  </style>
+  <script>
+    function consent() {
+      // Add a class to the body.
+      document.body.classList.add('instructions-body-align');
+      
+      // Get the message container.
+      let message = document.getElementById("message");
+      
+      // Set styles on the message element.
+      message.style.display = 'block';
+      message.style.marginTop = '0'; // Set top margin to 0.
+      message.style.maxWidth = '800px'; // Set maximum width.
+      message.style.marginLeft = 'auto'; // Center horizontally.
+      message.style.marginRight = 'auto'; // Center horizontally.
+      message.style.padding = '20px'; // Set padding.
+      message.style.fontFamily = "'Helvetica Neue', Arial, sans-serif"; // Set font.
+      message.style.lineHeight = '1.6'; // Set line height.
+      message.style.textAlign = 'left'; // Set text alignment.
+      message.style.color = '#333'; // Set text color.
+      message.style.overflow = 'auto';
+      
+      // Insert the consent HTML into the message element.
+      message.innerHTML = `
+        <div style="max-width: 800px; margin: auto; padding: 20px; font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; text-align: left; color: #333;">
+          <h1 style="text-align: center; font-weight: bold;">CONSENT TO PARTICIPATE IN RESEARCH</h1>
+          <h3>Welcome to the Ambiguous Stimuli and Situation Reappraisal Study!</h3>
+          <p>My name is Jeremiah Collins. I am an undergrad student in the psychology department conducting this study. The purpose of this study is to explore how exposure to different types of images affects your reappraisal success.</p>
+          <p>The procedures in this research were approved by the CPHS as part of the research on the Cal Coherence and Relationships Study CPHS #2022-06-15450. This study will require about 45 minutes of your time.</p>
+          <p><strong>Procedure:</strong> In this experiment, you will:</p>
+          <ol style="padding-left: 30px; margin-top: 10px;">
+            <li style="margin-bottom: 10px;">Answer a few questions about yourself.</li>
+            <li style="margin-bottom: 10px;">See a series of images followed by short videos.</li>
+            <li style="margin-bottom: 10px;">Complete a few questions following each image/video pair.</li>
+            <li style="margin-bottom: 10px;">Complete a final questionnaire.</li>
+          </ol>
+          <p><strong>Study time:</strong> The study will take a maximum of 60 minutes and needs to be completed in a single sitting.</p>
+          <p><strong>Risks and discomforts:</strong> You may find some of the videoclips unpleasant. There will be no videoclips with any sexual content. Moreover, as with all research, there is a chance that confidentiality could be compromised; however, my research team will be taking precautions to minimize this risk.</p>
+          <p><strong>Benefits:</strong> There is no direct benefit to you, although some individuals may enjoy watching some of these video clips. The results from the study may help us understand how different types of images affect our ability to reappraise.</p>
+          <p><strong>Confidentiality:</strong> The study data will be handled as confidentially as possible, and your responses to the videoclips and questionnaires will never be connected with your name.</p>
+          <p><strong>Retaining research records:</strong> When the research is completed, my research team will save your responses for possible use in future research done by ourselves or others indefinitely.</p>
+          <p><strong>Rights:</strong> Participation in this research is completely voluntary. You can stop participating at any time if you find the videos make you too uncomfortable.</p>
+          <p>If you wish to participate in this study, please check the box below:</p>
+          <input type="checkbox" id="participantConsent" style="margin-bottom: 20px;">
+          <label for="participantConsent">I voluntarily agree to participate in this study</label>
+          <div style="text-align: center;">
+              <button id="consentButton" onclick="submitConsent()">Agree and Continue</button>
+          </div>
+        </div>
+      `;
+      
+      // Hide the consent button initially.
+      document.getElementById("consentButton").style.display = "none";
+      
+      // After 30 seconds, show the consent button.
+      setTimeout(function() {
+        document.getElementById("consentButton").style.display = "block";
+      }, 30000);
+      
+      // Define what happens when the consent is submitted.
+      window.submitConsent = function() {
+          let participantConsent = document.getElementById("participantConsent").checked;
+          if (!participantConsent) {
+              alert("Please check the box to give your consent and continue.");
+              return false;
+          }
+          message.style.display = 'none'; // Hide the message.
+          document.body.classList.remove('instructions-body-align');
+          // Redirect to Demographics.html after a short delay.
+          setTimeout(function() {
+              window.location.href = "Demographics.html";
+          }, 100);
+      };
+    }
+  </script>
+</head>
+<body onload="consent()">
+  <div id="message" style="display:none;"></div>
+  <!-- Other page content can go here -->
+</body>
+</html>
