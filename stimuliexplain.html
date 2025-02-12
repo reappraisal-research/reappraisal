@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ambiguous Stimuli Description</title>
   <style>
     body {
@@ -11,47 +12,39 @@
       padding: 20px;
       line-height: 1.6;
     }
-
     h1 {
       font-size: 32px;
       margin-bottom: 20px;
     }
-
     p {
       font-size: 20px;
       text-align: center;
       margin-bottom: 30px;
     }
-
     button {
       font-size: 16px;
       padding: 10px 20px;
       margin: 10px;
       cursor: pointer;
+      display: none; /* Hidden initially */
     }
   </style>
-</head>
-
-<body>
-  <h1>Ambiguous Stimuli Description</h1>
-  <p>
-    You will be shown a photo before each new video you watch. Some of these images are ambiguous<br>
-    meaning there are multiple correct ways to interpret them. When you see an ambiguous image please<br>
-    focus on shifting your perception back and forth between the different interpretations of the image. <br>
-    Ambiguous images will be labeled so you know to look for both interpretations. <br>
-    Once you have finished reading this and understand what an ambiguous image is and what <br>
-    to do when you see it please press the "next" button.
-  </p>
-  <button onclick="window.location.href='photoselection.html'">Next</button>
-  <button onclick="resetLocalStorage()">Reset Experiment</button>
-
   <script>
-    function resetLocalStorage() {
-      localStorage.clear(); // Clears all stored data
-      alert("Local storage reset! Reloading...");
-      window.location.reload(); // Refresh the page
+    window.onload = function() {
+      setTimeout(function(){
+        document.getElementById("nextButton").style.display = "inline-block";
+      }, 10000); // 15,000 milliseconds = 15 seconds
     }
   </script>
+</head>
+<body>
+  <h1>Image Instructions</h1>
+  <p>
+    You will be shown a photo before each new video you watch. Some of these images have 2 correct interpretations and are labeled <strong>Ambiguous</strong>.<br><br>
+    When you see an image labeled <strong>Ambiguous</strong>, focus on seeing one interpretation of the image then the other, then back to the first, and so on as much as possible before the page switches.<br><br>
+    When you see an image labeled <strong>Unambiguous</strong>, simply look at it until the page switches.<br><br>
+    Once you have finished reading this and you understand what an ambiguous image is and what to do when you see it, please press the "Next" button.
+  </p>
+  <button id="nextButton" onclick="window.location.href='trainingdescription.html'">Next</button>
 </body>
-
 </html>
