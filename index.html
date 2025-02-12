@@ -1,48 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to the Study</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 20px;
+  <title>Student ID</title>
+  <script>
+    // Validate SID: must be exactly 10 digits.
+    function isValidSID(sid) {
+      return /^\d{10}$/.test(sid);
     }
 
-    button {
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
+    function intro() {
+      let participantSID = prompt("Please enter your 10-digit Student ID:", "");
+      
+      // Keep prompting until a valid 10-digit SID is provided.
+      while (!isValidSID(participantSID)) {
+        participantSID = prompt("Invalid SID. Please enter a 10-digit Student ID:", "");
+      }
+      
+      // Optionally, save the participant SID in localStorage.
+      localStorage.setItem("participantSID", participantSID);
+      
+      // Redirect to consent.html.
+      window.location.href = "consent.html";
     }
 
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+    window.onload = intro;
+  </script>
 </head>
-
 <body>
-  <h1>Welcome</h1>
-  <p style="font-weight: bold;">
-    This study will take approximately 45–60 minutes. Please read the instructions carefully.
-  </p>
-  <p>You will be shown various videos some of which will be preceeded by a picture. <br>
-    You will be asked to fill out some short surveys about your experience of the videos. <br>
-    You will also be asked to reinterpret the videos sometimes.
-  </p>
-  <p style="font-weight: bold;">
-    By clicking "I Agree," you consent to participate in this study.
-  </p>
-  <!-- Update this button to link to the demographics survey -->
-  <button onclick="location.href='demographics.html'">I Agree</button>
-
 </body>
-
 </html>
