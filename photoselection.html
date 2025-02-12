@@ -30,11 +30,12 @@
       background-color: #45a049;
     }
 
-    /* Style for the ambiguous label */
+    /* Style for the label above the photo */
     #photoLabel {
       font-weight: bold;
       text-align: center;
       margin-bottom: 10px;
+      font-size: 1.2em;
     }
   </style>
   <script>
@@ -48,8 +49,8 @@
       "Stimulireal/Necker.cube.png",
       "Stimulireal/old.young.png",
       "Stimulireal/skeleton.ladies.jpg",
-      "Stimulireal/Spinning_Dancer.gif",
-      "Stimulireal/tunneldot.gif"
+      "Stimulireal/hug.png",
+      "Stimulireal/profile.profile.png"
     ];
     const nonAmbiguousPhotos = [
       "Stimulireal/ur1.jpg",
@@ -60,8 +61,8 @@
       "Stimulireal/ur6.jpg",
       "Stimulireal/ur7.jpg",
       "Stimulireal/ur8.png",
-      "Stimulireal/ur9.gif",
-      "Stimulireal/ur10.gif"
+      "Stimulireal/ur12.jpg",
+      "Stimulireal/ur11.jpg"
     ];
 
     // Initialize the photo pools in localStorage if not already set.
@@ -114,11 +115,11 @@
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
-      // If the current condition is ambiguous, display a bold label above the photo.
+      // Set the label above the photo based on the current condition.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Ambiguous";
       } else {
-        document.getElementById("photoLabel").innerText = "";
+        document.getElementById("photoLabel").innerText = "Unambiguous";
       }
 
       // Display the selected photo.
