@@ -17,7 +17,7 @@
       padding: 20px 30px;
       background-color: #fff;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     /* Instruction above the header */
     .pre-instructions {
@@ -71,12 +71,22 @@
       background-color: #000; /* Black background when selected */
       color: #fff;
     }
+    /* Updated scale instructions */
     .scale-instructions {
       display: flex;
       justify-content: space-between;
       font-size: 14px;
       margin: 10px auto 20px;
       width: 50%;
+    }
+    .scale-instructions span {
+      width: 40%;
+    }
+    .scale-instructions span:first-child {
+      text-align: left;
+    }
+    .scale-instructions span:last-child {
+      text-align: right;
     }
     textarea {
       width: 100%;
@@ -137,7 +147,7 @@
         }
       }
 
-      // (Optional) Save responses in localStorage (or send them to a server as needed).
+      // Save responses in localStorage.
       const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       responses.push({
         videoScaleResponse: videoScaleResponse,
@@ -148,9 +158,8 @@
       });
       localStorage.setItem("surveyResponses", JSON.stringify(responses));
 
-      alert("Responses saved. (This is a fake survey page.)");
-      // Redirect if needed:
-      // window.location.href = "nextpage.html";
+      // Redirect to ready.html.
+      window.location.href = "ready.html";
     }
   </script>
 </head>
@@ -173,8 +182,8 @@
         <label><input type="radio" name="videoScale" value="7">7</label>
       </div>
       <div class="scale-instructions">
-        <span>Not positive at all</span>
-        <span>Extremely positive</span>
+        <span>1 = Not positive at all</span>
+        <span>7 = Extremely positive</span>
       </div>
       <label for="videoShortAnswer">2. What did you watch?</label>
       <textarea id="videoShortAnswer" name="videoShortAnswer" rows="4"></textarea>
@@ -182,7 +191,9 @@
       <!-- Break between sections -->
       <hr>
       <div class="break-label">
-        Next, you will be instructed to use goal reappraisal or construal reappraisal, then answer the following questions:
+        Next you will see this section labeled either <strong>'Situation Rethinking'</strong> or <strong>'Goal Rethinking'.</strong> 
+        You will use whichever strategy it says to rethink the video you just watched.<br><br>
+        Then you will answer the following questions:
       </div>
 
       <!-- Part 2: Reappraisal Survey -->
@@ -200,8 +211,8 @@
         <label><input type="radio" name="reappraisalScale" value="7">7</label>
       </div>
       <div class="scale-instructions">
-        <span>Not positive at all</span>
-        <span>Extremely positive</span>
+        <span>1 = Not positive at all</span>
+        <span>7 = Extremely positive</span>
       </div>
       
       <button type="button" onclick="saveResponses()">Next</button>
