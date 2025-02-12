@@ -1,18 +1,63 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Training Introduction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Introduction</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 20px;
+      line-height: 1.6;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    window.onload = function() {
+      // After 20 seconds, show the Next button.
+      setTimeout(function(){
+        document.getElementById("nextButton").style.display = "inline-block";
+      }, 20000);
+    }
+  </script>
 </head>
-
 <body>
-    <h1>Training Introduction</h1>
-    <p>There are two types of training:</p>
-    <ul>
-        <li><strong>Goal Level Training</strong>: Focuses on high-level goals.</li>
-        <li><strong>Construal Level Training</strong>: Focuses on abstract thinking.</li>
-    </ul>
-    <button onclick="window.location.href='stimuliexplain.html'">Next</button>
+  <h1>Training Introduction</h1>
+  <p>
+    We will be asking you to use two different strategies to change your perception of a few videos.
+  </p>
+  <p>
+    <strong>Situation Rethinking</strong> is about changing how you interpret the events of a situation so you feel less negative.<br>
+    <em>e.g.</em> You see a video of some people falling and injuring themselves, but you tell yourself that it was likely just a stunt and no one got hurt.<br>
+    <em>e.g.</em> You see a video of someone berating another person, but you tell yourself they are only doing it because they care about the other person and want them to be safe.<br>
+    <br>
+    When you see the label <strong>Situation Rethinking</strong> after watching a video, use this strategy to decrease your negative emotions.
+  </p>
+  <p>
+    <br><strong>Goal Rethinking</strong> is about realizing how a negative event might actually serve other goals.<br>
+    <em>e.g.</em> You see a movie where someone is crying, but you tell yourself the video is helping you practice using empathy.<br>
+    <em>e.g.</em> You see a video of a car crash, but you tell yourself you now know to avoid similar situations in your life.<br>
+    <br>
+    When you see the label <strong>Goal Rethinking</strong> after watching a video, use this strategy to decrease your negative emotions.
+  </p>
+  <!-- Next button initially hidden, appears after 20 seconds -->
+  <button id="nextButton" onclick="window.location.href='betweener.html'" style="display:none;">Next</button>
 </body>
-
 </html>
