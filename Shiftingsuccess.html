@@ -20,10 +20,6 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    h1 {
-      color: #333;
-      margin-bottom: 20px;
-    }
     img {
       width: 100%;
       max-height: 60vh;
@@ -58,7 +54,7 @@
       -webkit-appearance: none;
       appearance: none;
       background-color: #fff;
-      border: 2px solid #000;
+      border: 2px solid #000; /* Black border */
       border-radius: 50%;
       width: 30px;
       height: 30px;
@@ -70,7 +66,7 @@
       text-align: center;
     }
     .scale input[type="radio"]:checked {
-      background-color: #000;
+      background-color: #000; /* Black background when selected */
       color: #fff;
     }
     .scale-instructions {
@@ -96,7 +92,7 @@
     }
   </style>
   <script>
-    // Fisher-Yates shuffle function to randomize the images array.
+    // Fisher–Yates shuffle function to randomize the images array.
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -119,7 +115,7 @@
       "Stimulireal/tunneldot.gif"
     ];
 
-    // Randomize the images order.
+    // Randomize the order of images.
     images = shuffleArray(images);
 
     // Get current trial index from localStorage or initialize it to 0.
@@ -130,12 +126,13 @@
 
     function displayTrial() {
       if (trialIndex >= images.length) {
-        // All images have been shown, redirect to thank-you page.
-        window.location.href = "thankyou.html";
+        // All images have been shown, redirect to thank_you.html.
+        window.location.href = "thank_you.html";
         return;
       }
-      document.getElementById("trialHeader").textContent = "Trial " + (trialIndex + 1) + " of " + images.length;
+      // Update the image source for the current trial.
       document.getElementById("trialImage").src = images[trialIndex];
+      
       // Clear any previously selected radio button for the scale.
       const scaleElements = document.getElementsByName("perceptionScale");
       for (let i = 0; i < scaleElements.length; i++) {
@@ -153,8 +150,6 @@
           break;
         }
       }
-      // (Optional) Add validation if needed (e.g., alert if no response was selected).
-
       // Save the response for the current trial.
       const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
       responses.push({
@@ -164,10 +159,12 @@
         timestamp: new Date().toISOString()
       });
       localStorage.setItem("perceptionResponses", JSON.stringify(responses));
+      
       // Increment trial index and save it.
       trialIndex++;
       localStorage.setItem("perceptionTrialIndex", trialIndex);
-      // Display next trial.
+      
+      // Display the next trial.
       displayTrial();
     }
 
@@ -176,7 +173,6 @@
 </head>
 <body>
   <div class="container">
-    <h1 id="trialHeader">Trial 1 of 10</h1>
     <img id="trialImage" src="" alt="Trial Image" />
     <p class="prompt">How much did your perception of this image shift?</p>
     <div class="scale">
@@ -194,5 +190,13 @@
     </div>
     <button type="button" onclick="nextTrial()">Next</button>
   </div>
+  <button onclick="resetLocalStorage()">Reset Experiment</button>
+  <script>
+    function resetLocalStorage() {
+      localStorage.clear(); // Clears all stored data
+      alert("Local storage reset! Reloading...");
+      window.location.reload(); // Refresh the page
+    }
+  </script>
 </body>
 </html>
