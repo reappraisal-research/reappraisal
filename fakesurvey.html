@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example Survey Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px 30px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    /* Instruction above the header */
+    .pre-instructions {
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    /* Centered bubble scale */
+    .scale {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 50%;
+      margin: 10px auto 0;
+      gap: 10px;
+    }
+    .scale label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: normal;
+    }
+    .scale input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+      border: 2px solid #000; /* Black border */
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+      font-size: 14px;
+      line-height: 30px;
+      text-align: center;
+    }
+    .scale input[type="radio"]:checked {
+      background-color: #000; /* Black background when selected */
+      color: #fff;
+    }
+    .scale-instructions {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin: 10px auto 20px;
+      width: 50%;
+    }
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 10px 0 20px;
+    }
+    .break-label {
+      font-size: 18px;
+      font-weight: normal; /* Not bold */
+      text-align: center;
+      margin: 30px 0 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <script>
+    function saveResponses() {
+      // Retrieve the selected value from the video experience scale.
+      const videoScaleElements = document.getElementsByName("videoScale");
+      let videoScaleResponse = "";
+      for (let i = 0; i < videoScaleElements.length; i++) {
+        if (videoScaleElements[i].checked) {
+          videoScaleResponse = videoScaleElements[i].value;
+          break;
+        }
+      }
+      const videoShortAnswer = document.getElementById("videoShortAnswer").value;
+      
+      // Retrieve responses from the reappraisal section.
+      const reappraisalText = document.getElementById("reappraisalText").value;
+      const reappraisalScaleElements = document.getElementsByName("reappraisalScale");
+      let reappraisalScaleResponse = "";
+      for (let i = 0; i < reappraisalScaleElements.length; i++) {
+        if (reappraisalScaleElements[i].checked) {
+          reappraisalScaleResponse = reappraisalScaleElements[i].value;
+          break;
+        }
+      }
+
+      // (Optional) Save responses in localStorage (or send them to a server as needed).
+      const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
+      responses.push({
+        videoScaleResponse: videoScaleResponse,
+        videoShortAnswer: videoShortAnswer,
+        reappraisalText: reappraisalText,
+        reappraisalScaleResponse: reappraisalScaleResponse,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem("surveyResponses", JSON.stringify(responses));
+
+      alert("Responses saved. (This is a fake survey page.)");
+      // Redirect if needed:
+      // window.location.href = "nextpage.html";
+    }
+  </script>
+</head>
+<body>
+  <p class="pre-instructions">
+    After you watch the video you will be asked to fill out the following form.
+  </p>
+  <div class="container">
+    <h1>Example Survey Form</h1>
+    <form>
+      <!-- Part 1: Video Experience -->
+      <label for="videoScale">1. How positively did you feel after watching the video?</label>
+      <div class="scale">
+        <label><input type="radio" name="videoScale" value="1">1</label>
+        <label><input type="radio" name="videoScale" value="2">2</label>
+        <label><input type="radio" name="videoScale" value="3">3</label>
+        <label><input type="radio" name="videoScale" value="4">4</label>
+        <label><input type="radio" name="videoScale" value="5">5</label>
+        <label><input type="radio" name="videoScale" value="6">6</label>
+        <label><input type="radio" name="videoScale" value="7">7</label>
+      </div>
+      <div class="scale-instructions">
+        <span>Not positive at all</span>
+        <span>Extremely positive</span>
+      </div>
+      <label for="videoShortAnswer">2. What did you watch?</label>
+      <textarea id="videoShortAnswer" name="videoShortAnswer" rows="4"></textarea>
+
+      <!-- Break between sections -->
+      <hr>
+      <div class="break-label">
+        Next, you will be instructed to use goal reappraisal or construal reappraisal, then answer the following questions:
+      </div>
+
+      <!-- Part 2: Reappraisal Survey -->
+      <label for="reappraisalText">3. How did you rethink the video?</label>
+      <textarea id="reappraisalText" name="reappraisalText" rows="4"></textarea>
+      
+      <label for="reappraisalScale">4. How positively do you feel after reappraisal?</label>
+      <div class="scale">
+        <label><input type="radio" name="reappraisalScale" value="1">1</label>
+        <label><input type="radio" name="reappraisalScale" value="2">2</label>
+        <label><input type="radio" name="reappraisalScale" value="3">3</label>
+        <label><input type="radio" name="reappraisalScale" value="4">4</label>
+        <label><input type="radio" name="reappraisalScale" value="5">5</label>
+        <label><input type="radio" name="reappraisalScale" value="6">6</label>
+        <label><input type="radio" name="reappraisalScale" value="7">7</label>
+      </div>
+      <div class="scale-instructions">
+        <span>Not positive at all</span>
+        <span>Extremely positive</span>
+      </div>
+      
+      <button type="button" onclick="saveResponses()">Next</button>
+    </form>
+  </div>
+</body>
+</html>
