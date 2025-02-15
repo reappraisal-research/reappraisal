@@ -10,7 +10,7 @@
       font-family: Arial, sans-serif;
       margin: 20px;
       padding: 20px;
-      line-height: 1.6;
+      line-height: 1.8;
       background-color: #f9f9f9;
     }
     h1 {
@@ -22,10 +22,46 @@
       text-align: center;
       margin-bottom: 30px;
     }
+    .definition {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: left;
+      margin-left: 10%;
+      margin-bottom: 5px;
+    }
+    .description {
+      text-align: left;
+      font-size: 20px;
+      margin-left: 10%;
+      margin-bottom: 15px;
+      max-width: 80%;
+    }
+    .example {
+      display: block;
+      font-size: 18px;
+      margin-left: 15%;
+      text-align: left;
+      max-width: 70%;
+    }
+    .image-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .image-container img {
+      width: 60%;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .image-text {
+      font-size: 18px;
+      margin-top: 10px;
+      font-style: italic;
+    }
     button {
       font-size: 16px;
       padding: 10px 20px;
-      margin: 10px;
+      margin: 20px;
       cursor: pointer;
     }
   </style>
@@ -39,25 +75,41 @@
   </script>
 </head>
 <body>
-  <h1>Training Introduction</h1>
+
   <p>
-    We will be asking you to use two different strategies to change your perception of a few videos.
+    Next we will be asking you to use one of two different strategies to change your perception of the video.
   </p>
-  <p>
-    <strong>Situation Rethinking</strong> is about changing how you interpret the events of a situation so you feel less negative.<br>
-    <em>e.g.</em> You see a video of some people falling and injuring themselves, but you tell yourself that it was likely just a stunt and no one got hurt.<br>
-    <em>e.g.</em> You see a video of someone berating another person, but you tell yourself they are only doing it because they care about the other person and want them to be safe.<br>
-    <br>
-    When you see the label <strong>Situation Rethinking</strong> after watching a video, use this strategy to decrease your negative emotions.
+
+  <!-- Situation Rethinking -->
+  <p class="definition">Situation Rethinking</p>
+  <p class="description">
+    This strategy is about changing how you interpret the events of a situation so you feel less negative.
   </p>
-  <p>
-    <br><strong>Goal Rethinking</strong> is about realizing how a negative event might actually serve other goals.<br>
-    <em>e.g.</em> You see a movie where someone is crying, but you tell yourself the video is helping you practice using empathy.<br>
-    <em>e.g.</em> You see a video of a car crash, but you tell yourself you now know to avoid similar situations in your life.<br>
-    <br>
-    When you see the label <strong>Goal Rethinking</strong> after watching a video, use this strategy to decrease your negative emotions.
+
+  <p class="example"><em>e.g.</em> You see a video of some people falling and injuring themselves, but you tell yourself that it was likely just a stunt and no one got hurt.</p>
+  <p class="example"><em>e.g.</em> You see a video of someone berating another person, but you tell yourself they are only doing it because they care about the other person and want them to be safe.</p>
+
+  <!-- Goal Rethinking -->
+  <p class="definition">Goal Rethinking</p>
+  <p class="description">
+    This strategy is about realizing how a negative event might actually serve other goals.
   </p>
+
+  <p class="example"><em>e.g.</em> You see a movie where someone is crying, but you tell yourself the video is helping you practice using empathy.</p>
+  <p class="example"><em>e.g.</em> You see a video of a car crash, but you tell yourself you now know to avoid similar situations in your life.</p>
+
+  <p class="description">
+    Thus, if you saw a screen like this:
+  </p>
+
+  <!-- Image Section -->
+  <div class="image-container">
+    <img src="assets/pictures/survey.png" alt="Example Image">
+    <p class="image-text">You would write something like...</p>
+  <p>"At first I was upset that the driver was driving so recklessly but then I thought about how it was good no one got hurt."</p>
+</div>
+
   <!-- Next button initially hidden, appears after 20 seconds -->
-  <button id="nextButton" onclick="window.location.href='betweener.html'" style="display:none;">Next</button>
+  <button id="nextButton" onclick="window.location.href='introfinal.html'" style="display:none;">Next</button>
 </body>
 </html>
