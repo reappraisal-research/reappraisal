@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
   <title>Video Display</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
-      overflow: hidden; /* Prevents scrolling if possible */
+      text-align: center;
+      background-color: #f9f9f9;
     }
 
-    /* Video sizing so it appears big yet fits on the screen */
     video {
-      width: 80vw;       /* 80% of viewport width */
-      max-height: 60vh;  /* 60% of viewport height */
+      width: 80vw;
+      max-height: 60vh;
       display: block;
       margin: 20px auto;
     }
@@ -22,126 +21,161 @@
       font-size: 1.2em;
       font-weight: bold;
       margin-bottom: 10px;
-      text-align: center;
+    }
+
+    .question-container {
+      display: none; /* Initially hidden */
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    .scale {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px auto;
+    }
+
+    .scale label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .scale input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+      border: 2px solid #000;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .scale input[type="radio"]:checked {
+      background-color: #000;
+      color: #fff;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: none; /* Initially hidden */
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #45a049;
     }
   </style>
   <script>
-    /***************
-     * EXPERIMENT SETUP
-     ***************/
-    const videos = [
-      { url: "videos/0015.mp4", label: "v1" },
-      { url: "videos/0299.mp4", label: "v2" },
-      { url: "videos/0489.mp4", label: "v3" },
-      { url: "videos/0611.mp4", label: "v4" },
-      { url: "videos/0681.mp4", label: "v5" },
-      { url: "videos/0719.mp4", label: "v6" },
-      { url: "videos/0955.mp4", label: "v7" },
-      { url: "videos/0975.mp4", label: "v8" },
-      { url: "videos/1576.mp4", label: "v9" },
-      { url: "videos/1623.mp4", label: "v10" },
-      { url: "videos/1844.mp4", label: "v11" },
-      { url: "videos/1959.mp4", label: "v12" },
-      { url: "videos/0009.mp4", label: "v13" },
-      { url: "videos/0333.mp4", label: "v14" },
-      { url: "videos/0706.mp4", label: "v15" },
-      { url: "videos/0803.mp4", label: "v16" },
-      { url: "videos/0860.mp4", label: "v17" },
-      { url: "videos/0948.mp4", label: "v18" },
-      { url: "videos/1001.mp4", label: "v19" },
-      { url: "videos/1164.mp4", label: "v20" }
-    ];
+    function playVideoUntil3Seconds(onComplete) {
+        let startTime = Date.now();
+        let cumulativeTime = 0;
+        const videoPlayer = document.getElementById("video");
 
-    // Initialize video tracking if not set.
-    if (!localStorage.getItem("videoTracking")) {
-      const videoTracking = videos.map(video => ({ ...video, shown: 0 }));
-      localStorage.setItem("videoTracking", JSON.stringify(videoTracking));
+        videoPlayer.style.display = "block";
+        videoPlayer.play();
+        if (window.webgazer) webgazer.resume();
+        console.log("resumed");
+        document.body.focus();
+
+        videoPlayer.onended = videoPlayer.onpause = () => {
+            cumulativeTime += Date.now() - startTime; // Track total play time
+            if (cumulativeTime < 3000) {
+                startTime = Date.now();
+                videoPlayer.play();
+                if (window.webgazer) webgazer.resume();
+                console.log("resumed");
+            } else {
+                if (window.webgazer) webgazer.pause();
+                console.log("paused");
+                videoPlayer.onended = videoPlayer.onpause = null;
+                onComplete();
+            }
+        };
     }
-
-    // Initialize condition list (20 trials) if not set.
-    if (!localStorage.getItem("conditionList")) {
-      let conditions = [];
-      for (let i = 0; i < 5; i++) {
-        conditions.push({ videoLabel: "Goal", photoType: "ambiguous" });
-        conditions.push({ videoLabel: "Goal", photoType: "nonAmbiguous" });
-        conditions.push({ videoLabel: "Construal", photoType: "ambiguous" });
-        conditions.push({ videoLabel: "Construal", photoType: "nonAmbiguous" });
-      }
-      // Shuffle conditions array using the Fisher-Yates algorithm.
-      for (let i = conditions.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [conditions[i], conditions[j]] = [conditions[j], conditions[i]];
-      }
-      localStorage.setItem("conditionList", JSON.stringify(conditions));
-    }
-
-    // Initialize trial index if not set.
-    if (!localStorage.getItem("trialIndex")) {
-      localStorage.setItem("trialIndex", "0");
-    }
-
-    window.currentVideoShown = 0;
 
     function selectVideo() {
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      let conditionList = JSON.parse(localStorage.getItem("conditionList"));
-      let currentCondition = conditionList[trialIndex];
+      const videos = [
+        { url: "videos/0015.mp4", label: "v1" },
+        { url: "videos/0299.mp4", label: "v2" },
+        { url: "videos/0489.mp4", label: "v3" },
+        { url: "videos/0611.mp4", label: "v4" },
+        { url: "videos/0681.mp4", label: "v5" },
+        { url: "videos/0719.mp4", label: "v6" },
+        { url: "videos/0955.mp4", label: "v7" },
+        { url: "videos/0975.mp4", label: "v8" },
+        { url: "videos/1576.mp4", label: "v9" },
+        { url: "videos/1623.mp4", label: "v10" },
+        { url: "videos/1844.mp4", label: "v11" },
+        { url: "videos/1959.mp4", label: "v12" },
+        { url: "videos/0009.mp4", label: "v13" },
+        { url: "videos/0333.mp4", label: "v14" },
+        { url: "videos/0706.mp4", label: "v15" },
+        { url: "videos/0803.mp4", label: "v16" },
+        { url: "videos/0860.mp4", label: "v17" },
+        { url: "videos/0948.mp4", label: "v18" },
+        { url: "videos/1001.mp4", label: "v19" },
+        { url: "videos/1164.mp4", label: "v20" }
+      ];
 
-      let videoTracking = JSON.parse(localStorage.getItem("videoTracking"));
-      let selectedVideo = null;
-      let currentVideoId = localStorage.getItem("currentVideoId");
-
-      if (currentVideoId) {
-        selectedVideo = videoTracking.find(video => video.label === currentVideoId && video.shown === 1);
-      }
-      if (!selectedVideo) {
-        let notShownVideos = videoTracking.filter(video => video.shown === 0);
-        if (notShownVideos.length > 0) {
-          selectedVideo = notShownVideos[Math.floor(Math.random() * notShownVideos.length)];
-          localStorage.setItem("currentVideoId", selectedVideo.label);
-        } else {
-          let onceShownVideos = videoTracking.filter(video => video.shown === 1);
-          selectedVideo = onceShownVideos[Math.floor(Math.random() * onceShownVideos.length)];
-          // currentVideoId should already be set in this case.
-        }
-      }
-      selectedVideo.shown++;
-      localStorage.setItem("videoTracking", JSON.stringify(videoTracking));
-
+      let selectedVideo = videos[Math.floor(Math.random() * videos.length)];
       const videoElement = document.getElementById("video");
       videoElement.src = selectedVideo.url;
 
-      // Display the condition label only on the second viewing.
-      const videoLabel = document.getElementById("videoLabel");
-      if (selectedVideo.shown === 1) {
-        videoLabel.textContent = ""; // No label on first play.
-      } else {
-        videoLabel.textContent = currentCondition.videoLabel;
-        localStorage.removeItem("currentVideoId");
-      }
-
-      window.currentVideoShown = selectedVideo.shown;
-      localStorage.setItem("currentVideoShown", selectedVideo.shown);
-
-      videoElement.controls = true;
-
-      // Listen for the video to finish playing, then redirect.
-      videoElement.addEventListener("ended", () => {
-        window.location.href = "survey.html";
-      }, { once: true });
+      playVideoUntil3Seconds(() => {
+        document.getElementById("questionContainer").style.display = "block";
+      });
     }
 
-    window.onload = selectVideo;
+    window.onload = function () {
+      selectVideo();
+
+      const radioButtons = document.getElementsByName("videoScale");
+      const nextButton = document.getElementById("nextButton");
+
+      radioButtons.forEach(radio => {
+        radio.addEventListener("change", () => {
+          nextButton.style.display = "block";
+        });
+      });
+    };
   </script>
 </head>
 
 <body>
-  <p style="text-align: center;">Please watch the video below:</p>
+  <p>Please watch the video below:</p>
   <div class="video-label" id="videoLabel"></div>
-  <video id="video" controls>
+  <video id="video">
     <source src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-</body>
 
+  <!-- Question Section -->
+  <div id="questionContainer" class="question-container">
+    <label for="videoScale">1. How positively did you feel after watching the video?</label>
+    <div class="scale">
+      <label><input type="radio" name="videoScale" value="1">1</label>
+      <label><input type="radio" name="videoScale" value="2">2</label>
+      <label><input type="radio" name="videoScale" value="3">3</label>
+      <label><input type="radio" name="videoScale" value="4">4</label>
+      <label><input type="radio" name="videoScale" value="5">5</label>
+      <label><input type="radio" name="videoScale" value="6">6</label>
+      <label><input type="radio" name="videoScale" value="7">7</label>
+    </div>
+  </div>
+
+  <button id="nextButton" onclick="window.location.href='survey.html'">Next</button>
+</body>
 </html>
