@@ -19,7 +19,6 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    /* Instruction above the header */
     .pre-instructions {
       text-align: center;
       font-size: 16px;
@@ -35,7 +34,6 @@
       margin: 10px 0 5px;
       font-weight: bold;
     }
-    /* Centered bubble scale */
     .scale {
       display: flex;
       justify-content: space-around;
@@ -56,7 +54,7 @@
       -webkit-appearance: none;
       appearance: none;
       background-color: #fff;
-      border: 2px solid #000; /* Black border */
+      border: 2px solid #000;
       border-radius: 50%;
       width: 30px;
       height: 30px;
@@ -68,10 +66,9 @@
       text-align: center;
     }
     .scale input[type="radio"]:checked {
-      background-color: #000; /* Black background when selected */
+      background-color: #000;
       color: #fff;
     }
-    /* Updated scale instructions */
     .scale-instructions {
       display: flex;
       justify-content: space-between;
@@ -103,7 +100,7 @@
     }
     .break-label {
       font-size: 18px;
-      font-weight: normal; /* Not bold */
+      font-weight: normal;
       text-align: center;
       margin: 30px 0 10px;
     }
@@ -125,19 +122,8 @@
   </style>
   <script>
     function saveResponses() {
-      // Retrieve the selected value from the video experience scale.
-      const videoScaleElements = document.getElementsByName("videoScale");
-      let videoScaleResponse = "";
-      for (let i = 0; i < videoScaleElements.length; i++) {
-        if (videoScaleElements[i].checked) {
-          videoScaleResponse = videoScaleElements[i].value;
-          break;
-        }
-      }
-      const videoShortAnswer = document.getElementById("videoShortAnswer").value;
-      
-      // Retrieve responses from the reappraisal section.
-      const reappraisalText = document.getElementById("reappraisalText").value;
+      // Retrieve values from the form
+      const reappraisalText = document.getElementById("reappraisalText").value || ""; // Default to empty string if blank
       const reappraisalScaleElements = document.getElementsByName("reappraisalScale");
       let reappraisalScaleResponse = "";
       for (let i = 0; i < reappraisalScaleElements.length; i++) {
@@ -147,60 +133,37 @@
         }
       }
 
-      // Save responses in localStorage.
+      // Save responses in localStorage (even if empty)
       const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       responses.push({
-        videoScaleResponse: videoScaleResponse,
-        videoShortAnswer: videoShortAnswer,
-        reappraisalText: reappraisalText,
-        reappraisalScaleResponse: reappraisalScaleResponse,
+        reappraisalText: reappraisalText || "No response",
+        reappraisalScaleResponse: reappraisalScaleResponse || "No response",
         timestamp: new Date().toISOString()
       });
       localStorage.setItem("surveyResponses", JSON.stringify(responses));
 
-      // Redirect to ready.html.
+      // Redirect to ready.html
       window.location.href = "ready.html";
     }
   </script>
 </head>
 <body>
   <p class="pre-instructions">
-    After you watch the video you will be asked to fill out the following form.
+    After you watch the video, you will be asked to fill out the following form.
   </p>
   <div class="container">
-    <h1>Example Survey Form</h1>
     <form>
-      <!-- Part 1: Video Experience -->
-      <label for="videoScale">1. How positively did you feel after watching the video?</label>
-      <div class="scale">
-        <label><input type="radio" name="videoScale" value="1">1</label>
-        <label><input type="radio" name="videoScale" value="2">2</label>
-        <label><input type="radio" name="videoScale" value="3">3</label>
-        <label><input type="radio" name="videoScale" value="4">4</label>
-        <label><input type="radio" name="videoScale" value="5">5</label>
-        <label><input type="radio" name="videoScale" value="6">6</label>
-        <label><input type="radio" name="videoScale" value="7">7</label>
-      </div>
-      <div class="scale-instructions">
-        <span>1 = Not positive at all</span>
-        <span>7 = Extremely positive</span>
-      </div>
-      <label for="videoShortAnswer">2. What did you watch?</label>
-      <textarea id="videoShortAnswer" name="videoShortAnswer" rows="4"></textarea>
 
-      <!-- Break between sections -->
       <hr>
       <div class="break-label">
-        Next you will see this section labeled either <strong>'Situation Rethinking'</strong> or <strong>'Goal Rethinking'.</strong> 
-        You will use whichever strategy it says to rethink the video you just watched.<br><br>
-        Then you will answer the following questions:
+       <strong>Situation Rethinking</strong> 
       </div>
 
-      <!-- Part 2: Reappraisal Survey -->
-      <label for="reappraisalText">3. How did you rethink the video?</label>
+      <!-- Reappraisal Survey -->
+      <label for="reappraisalText">1. How did you rethink the video?</label>
       <textarea id="reappraisalText" name="reappraisalText" rows="4"></textarea>
-      
-      <label for="reappraisalScale">4. How positively do you feel after reappraisal?</label>
+
+      <label for="reappraisalScale">2. How positively do you feel after rethinking?</label>
       <div class="scale">
         <label><input type="radio" name="reappraisalScale" value="1">1</label>
         <label><input type="radio" name="reappraisalScale" value="2">2</label>
@@ -210,11 +173,7 @@
         <label><input type="radio" name="reappraisalScale" value="6">6</label>
         <label><input type="radio" name="reappraisalScale" value="7">7</label>
       </div>
-      <div class="scale-instructions">
-        <span>1 = Not positive at all</span>
-        <span>7 = Extremely positive</span>
-      </div>
-      
+
       <button type="button" onclick="saveResponses()">Next</button>
     </form>
   </div>
