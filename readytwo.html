@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Start Experiment</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px 30px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 30px;
+    }
+    button {
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>You Will Now Start the Experiment</h1>
+    <p>Please do your best to follow the instructions.</p>
+    
+    <!-- Begin Button -->
+    <button onclick="window.location.href='photoselection.html'">I'm ready!</button>
+  </div>
+   <!-- Reset Experiment Button -->
+   <div class="reset-container">
+    <button class="reset-button" onclick="resetLocalStorage()">Reset Experiment</button>
+  </div>
+</div>
+
+<script>
+  function resetLocalStorage() {
+    localStorage.clear(); // Clears all stored data
+    alert("Local storage reset! Reloading...");
+    window.location.reload(); // Refresh the page
+  }
+</script>
+</body>
+</html>
