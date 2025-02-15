@@ -29,6 +29,11 @@
       color: #555;
       margin-bottom: 30px;
     }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
     button {
       padding: 10px 20px;
       background-color: #4CAF50;
@@ -41,24 +46,31 @@
     button:hover {
       background-color: #45a049;
     }
+    .reset-container {
+      margin-top: 20px;
+    }
+    .reset-button {
+      background-color: #d9534f;
+    }
+    .reset-button:hover {
+      background-color: #c9302c;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Ready to Begin the Study?</h1>
+    <h1>Example Check</h1>
     <p>
-      Now that you understand what you will be doing you can move forward with the real study.<br>
-      Please hit next when you are ready.
+        Do you feel like you have a good grasp on what you’ll need to do? If not you can quickly cycle through these instructions again!
     </p>
-    <button onclick="window.location.href='photoselection.html'">Next</button>
-  </div>
-  <button onclick="resetLocalStorage()">Reset Experiment</button>
-  <script>
-    function resetLocalStorage() {
-      localStorage.clear(); // Clears all stored data
-      alert("Local storage reset! Reloading...");
-      window.location.reload(); // Refresh the page
-    }
-  </script>
+    
+    <!-- Button Section -->
+    <div class="button-container">
+      <button onclick="window.location.href='readytwo.html'">Next</button>
+      <button onclick="window.location.href='betweener.html'">Let me see the instructions again</button>
+    </div>
+
+   
+
 </body>
 </html>
