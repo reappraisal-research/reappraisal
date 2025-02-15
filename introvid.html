@@ -38,6 +38,42 @@
       border: 1px solid #ccc;
       border-radius: 8px;
     }
+    .question-container {
+      display: none; /* Initially hidden */
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .scale {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 50%;
+      margin: 10px auto;
+      gap: 10px;
+    }
+    .scale label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .scale input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+      border: 2px solid #000;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .scale input[type="radio"]:checked {
+      background-color: #000;
+      color: #fff;
+    }
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -46,27 +82,63 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      display: none; /* Initially hidden */
+      margin-top: 20px;
     }
     button:hover {
       background-color: #45a049;
     }
   </style>
+  <script>
+    window.onload = function() {
+      const video = document.getElementById("videoPlayer");
+      const questionContainer = document.getElementById("questionContainer");
+      const nextButton = document.getElementById("nextButton");
+      const radioButtons = document.getElementsByName("videoScale");
+
+      video.play(); // Auto-play the video on load
+
+      video.onended = function() {
+        questionContainer.style.display = "block"; // Show the question after video ends
+      };
+
+      // Listen for changes in the radio buttons to show the Next button
+      radioButtons.forEach(radio => {
+        radio.addEventListener("change", () => {
+          nextButton.style.display = "block";
+        });
+      });
+    };
+  </script>
 </head>
 <body>
   <div class="container">
     <h1>Example Video Page</h1>
-    <!-- Instruction text above the video -->
     <p>
-      After viewing the image you will watch a short video.<br><br>
-       It will automatically play and then take you to the next page.<br><br>
-        If the video is quite short it may play a few times. <br><br>
+      Next a video will automatically play followed by a question about how you feel.<br>
+      After you fill it out the next button will appear to take you to the next page<br><br>
       Click Next once you understand.
     </p>
-    <video controls>
-      <source src="Videos/2117.mp4" type="video/mp4">
+    <video id="videoPlayer" autoplay>
+      <source src="Videos/2090.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
-    <button onclick="window.location.href='introsurvey.html'">Next</button>
+
+    <!-- Question Section -->
+    <div id="questionContainer" class="question-container">
+      <label for="videoScale">1. How positively did you feel after watching the video?</label>
+      <div class="scale">
+        <label><input type="radio" name="videoScale" value="1">1</label>
+        <label><input type="radio" name="videoScale" value="2">2</label>
+        <label><input type="radio" name="videoScale" value="3">3</label>
+        <label><input type="radio" name="videoScale" value="4">4</label>
+        <label><input type="radio" name="videoScale" value="5">5</label>
+        <label><input type="radio" name="videoScale" value="6">6</label>
+        <label><input type="radio" name="videoScale" value="7">7</label>
+      </div>
+    </div>
+
+    <button id="nextButton" onclick="window.location.href='trainingdescription.html'">Next</button>
   </div>
 </body>
 </html>
