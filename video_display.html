@@ -8,6 +8,8 @@
       margin: 20px;
       text-align: center;
       background-color: #f9f9f9;
+      position: relative;
+      min-height: 100vh;
     }
 
     video {
@@ -31,20 +33,20 @@
 
     .scale {
       display: flex;
-      justify-content: center;
-      gap: 10px;
+      justify-content: space-evenly;
+      gap: 15px;  /* Reduced gap */
       margin: 10px auto;
+      width: 80%; /* Slightly reduced width */
     }
 
-    .scale label {
+    .scale .option {
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-size: 16px;
       cursor: pointer;
     }
 
-    .scale input[type="radio"] {
+    .scale .option input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
       background-color: #fff;
@@ -52,26 +54,46 @@
       border-radius: 50%;
       width: 30px;
       height: 30px;
-      margin-bottom: 5px;
       cursor: pointer;
       transition: background-color 0.3s;
     }
 
-    .scale input[type="radio"]:checked {
+    .scale .option input[type="radio"]:checked {
       background-color: #000;
       color: #fff;
     }
 
-    button {
-      padding: 10px 20px;
+    .label-text {
+      margin-top: 5px;
+      text-align: center;
       font-size: 16px;
+    }
+
+    .label-text small {
+      display: block;
+      font-size: 0.8em;
+      margin-top: 2px;
+    }
+
+    /* Next button container positioned at the bottom */
+    .button-container {
+      display: none; /* Initially hidden */
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 20px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
       background-color: #4CAF50;
       color: #fff;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      display: none; /* Initially hidden */
-      margin-top: 20px;
+      display: block;
+      margin: 0 auto;
     }
 
     button:hover {
@@ -80,30 +102,30 @@
   </style>
   <script>
     function playVideoUntil3Seconds(onComplete) {
-        let startTime = Date.now();
-        let cumulativeTime = 0;
-        const videoPlayer = document.getElementById("video");
+      let startTime = Date.now();
+      let cumulativeTime = 0;
+      const videoPlayer = document.getElementById("video");
 
-        videoPlayer.style.display = "block";
-        videoPlayer.play();
-        if (window.webgazer) webgazer.resume();
-        console.log("resumed");
-        document.body.focus();
+      videoPlayer.style.display = "block";
+      videoPlayer.play();
+      if (window.webgazer) webgazer.resume();
+      console.log("resumed");
+      document.body.focus();
 
-        videoPlayer.onended = videoPlayer.onpause = () => {
-            cumulativeTime += Date.now() - startTime; // Track total play time
-            if (cumulativeTime < 3000) {
-                startTime = Date.now();
-                videoPlayer.play();
-                if (window.webgazer) webgazer.resume();
-                console.log("resumed");
-            } else {
-                if (window.webgazer) webgazer.pause();
-                console.log("paused");
-                videoPlayer.onended = videoPlayer.onpause = null;
-                onComplete();
-            }
-        };
+      videoPlayer.onended = videoPlayer.onpause = () => {
+        cumulativeTime += Date.now() - startTime; // Track total play time
+        if (cumulativeTime < 3000) {
+          startTime = Date.now();
+          videoPlayer.play();
+          if (window.webgazer) webgazer.resume();
+          console.log("resumed");
+        } else {
+          if (window.webgazer) webgazer.pause();
+          console.log("paused");
+          videoPlayer.onended = videoPlayer.onpause = null;
+          onComplete();
+        }
+      };
     }
 
     function selectVideo() {
@@ -143,17 +165,16 @@
       selectVideo();
 
       const radioButtons = document.getElementsByName("videoScale");
-      const nextButton = document.getElementById("nextButton");
+      const nextButtonContainer = document.getElementById("buttonContainer");
 
       radioButtons.forEach(radio => {
         radio.addEventListener("change", () => {
-          nextButton.style.display = "block";
+          nextButtonContainer.style.display = "block"; // Show the Next button when an option is selected
         });
       });
     };
   </script>
 </head>
-
 <body>
   <p>Please watch the video below:</p>
   <div class="video-label" id="videoLabel"></div>
@@ -166,16 +187,40 @@
   <div id="questionContainer" class="question-container">
     <label for="videoScale">1. How positively did you feel after watching the video?</label>
     <div class="scale">
-      <label><input type="radio" name="videoScale" value="1">1</label>
-      <label><input type="radio" name="videoScale" value="2">2</label>
-      <label><input type="radio" name="videoScale" value="3">3</label>
-      <label><input type="radio" name="videoScale" value="4">4</label>
-      <label><input type="radio" name="videoScale" value="5">5</label>
-      <label><input type="radio" name="videoScale" value="6">6</label>
-      <label><input type="radio" name="videoScale" value="7">7</label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="1">
+        <span class="label-text">1<br><small>Not positive at all</small></span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="2">
+        <span class="label-text">2</span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="3">
+        <span class="label-text">3</span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="4">
+        <span class="label-text">4</span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="5">
+        <span class="label-text">5</span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="6">
+        <span class="label-text">6</span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="7">
+        <span class="label-text">7<br><small>Extremely positive</small></span>
+      </label>
     </div>
   </div>
 
-  <button id="nextButton" onclick="window.location.href='survey.html'">Next</button>
+  <!-- Next Button Centered at Bottom -->
+  <div id="buttonContainer" class="button-container">
+    <button id="nextButton" onclick="window.location.href='survey.html'">Next</button>
+  </div>
 </body>
 </html>
