@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>Photo Selection</title>
   <style>
@@ -8,7 +7,6 @@
       font-family: Arial, sans-serif;
       margin: 20px;
     }
-
     img {
       display: block;
       width: 100vw;      /* Full viewport width */
@@ -16,7 +14,6 @@
       object-fit: contain; /* Ensure the entire image is visible */
       margin: 20px auto;
     }
-
     button {
       padding: 10px 20px;
       background-color: #4CAF50;
@@ -25,11 +22,9 @@
       border-radius: 4px;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #45a049;
     }
-
     /* Style for the label above the photo */
     #photoLabel {
       font-weight: bold;
@@ -39,6 +34,15 @@
     }
   </style>
   <script>
+    // Utility function to shuffle an array in place.
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
     // Define your photo pools.
     const ambiguousPhotos = [
       "Stimulireal/concave.convex.jpg",
@@ -65,7 +69,7 @@
       "Stimulireal/ur11.jpg"
     ];
 
-    // Initialize the photo pools in localStorage if not already set.
+    // Initialize photo pools in localStorage if not already set.
     if (!localStorage.getItem("ambiguousPhotos")) {
       localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
     }
@@ -73,32 +77,46 @@
       localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
     }
 
-    // Ensure trialIndex exists (set by video_display.html).
+    // Ensure trialIndex exists.
     if (!localStorage.getItem("trialIndex")) {
       localStorage.setItem("trialIndex", "0");
     }
-    let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
 
-    // Function to select a photo based on the current trial’s condition.
+    // Retrieve the condition list (balanced image conditions).
+    let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+    // If the condition list is empty, generate a balanced list of 20 conditions.
+    if (!conditionList || conditionList.length === 0) {
+      let conditions = [];
+      // Create 4 conditions (each repeated 5 times = 20 trials):
+      // 1. ambiguous + "Situation rethinking"
+      // 2. ambiguous + "goal rethinking"
+      // 3. nonAmbiguous + "Situation rethinking"
+      // 4. nonAmbiguous + "goal rethinking"
+      for (let i = 0; i < 5; i++) {
+        conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
+        conditions.push({ photoType: "ambiguous", rethinkingLabel: "goal rethinking" });
+        conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
+        conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "goal rethinking" });
+      }
+      conditions = shuffleArray(conditions);
+      localStorage.setItem("conditionList", JSON.stringify(conditions));
+      conditionList = conditions;
+    }
+
     function selectPhoto() {
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
 
-      // If no conditions exist, prompt the user to complete the video experiment first.
-      if (conditionList.length === 0) {
-        alert("No conditions available. Please complete the video experiment first.");
-        window.location.href = "video_display.html";
-        return;
-      }
-      // If all trials are completed, redirect to a thank-you page.
+      // If all trials are completed, redirect to thank_you.html.
       if (trialIndex >= conditionList.length) {
         alert("All trials completed. Thank you!");
         window.location.href = "thank_you.html";
         return;
       }
 
-      // Get the current condition (which specifies the photo type).
+      // Get the current condition based on trialIndex.
       let currentCondition = conditionList[trialIndex];
-      // Choose the corresponding photo pool.
+
+      // Select the appropriate photo pool.
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
       let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
 
@@ -115,7 +133,7 @@
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
-      // Set the label above the photo based on the current condition.
+      // Set the label above the photo.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
       } else {
@@ -134,16 +152,13 @@
       localStorage.setItem("trialIndex", trialIndex.toString());
     }
 
-    // Run the photo selection when the page loads.
     window.onload = selectPhoto;
   </script>
 </head>
-
 <body>
   <p id="photoLabel"></p>
   <img id="photo" src="" alt="Selected Photo">
   <br>
   <button onclick="window.location.href='video_display.html'">Next</button>
 </body>
-
 </html>
