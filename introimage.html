@@ -13,7 +13,7 @@
       text-align: center;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       background: #fff;
       padding: 20px;
@@ -25,21 +25,25 @@
       font-weight: bold;
       margin-bottom: 20px;
     }
-    .instructions {
+    .explanation {
       font-size: 18px;
       margin-bottom: 20px;
     }
     .images {
       display: flex;
       justify-content: center;
-      align-items: center;
-      gap: 20px;
+      align-items: flex-start;
+      gap: 40px;
       flex-wrap: wrap;
       margin-bottom: 20px;
     }
     .image-block {
       flex: 1;
-      max-width: 300px;
+      max-width: 45%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .image-block img {
       width: 100%;
@@ -50,16 +54,22 @@
     .label {
       font-size: 18px;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
     .image-description {
       font-size: 16px;
       color: #555;
-      margin-top: 5px;
+      margin-bottom: 10px;
+      max-width: 90%;
     }
     .or {
       font-size: 24px;
       font-weight: bold;
+      align-self: center;
+      margin-top: 50px;
+    }
+    .spacer {
+      height: 40px; /* Creates a gap above the right image so labels align */
     }
     .navigation {
       margin-top: 30px;
@@ -80,29 +90,44 @@
 </head>
 <body>
   <div class="container">
+    <!-- Centered Header -->
     <div class="header">Trial Image Example</div>
-    <div class="instructions">
-      In each trial, you will be presented with either a <strong>Complex</strong> <strong>Simple.</strong> image<br><br>
-      Images labeled <strong>Complex</strong> can be interpreted in two distinct and correct ways.<br><br>
-      If the image is labeled <strong>Complex</strong>, focus on switching between seeing the two different interpretations of the image as much as possible before the page switches.<br><br>
-      If the image is labeled <strong>Simple</strong>, just look at it until the page switches.<br><br>
-      
+
+    <!-- Centered Explanation about Image Types -->
+    <div class="explanation">
+      In each trial, you will be presented with either a <strong>Complex</strong> or a <strong>Simple</strong> image.<br><br>
+    </div>
+
     <div class="images">
+      <!-- Complex Image Section -->
       <div class="image-block">
-        <div class="label">Ambiguous</div>
+        <div class="label">Complex</div>
+        <div class="image-description">
+          If the image is labeled <strong>Complex</strong>, it can be interpreted in two different correct ways.
+          Focus on switching between seeing the two interpretations as much as possible before the page switches.<br><br>
+        </div>
         <img src="Stimulireal/skeleton.ladies.jpg" alt="Ambiguous Image">
-        <div class="image-description">In this image you would look at the skeleton and the ballerinas.</div>
+        <div class="image-description">In this image, you would look at the skeleton and the ballerinas.</div>
       </div>
+
       <div class="or">or</div>
+
+      <!-- Simple Image Section with Lowered Placement -->
       <div class="image-block">
-        <div class="label">Unambiguous</div>
+        <div class="spacer"></div> <!-- Extra spacing added to align labels -->
+        <div class="label">Simple</div>
+        <div class="image-description">
+          If the image is labeled <strong>Simple</strong>, just look at it until the page switches.<br><br>
+        </div>
         <img src="Stimulireal/ur8.png" alt="Unambiguous Image">
         <div class="image-description">Simply look at this image.</div>
       </div>
     </div>
+
     <div class="navigation">
       <button onclick="window.location.href='introvid.html'">Next</button>
     </div>
   </div>
 </body>
 </html>
+
