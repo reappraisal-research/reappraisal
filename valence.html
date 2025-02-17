@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perception Shift Survey</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #fff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    img {
+      width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    p.prompt {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .scale {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 80%;
+      margin: 10px auto;
+      gap: 20px;
+    }
+    .scale label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: normal;
+    }
+    .scale input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+      border: 2px solid #000;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .scale input[type="radio"]:checked {
+      background-color: #000;
+      color: #fff;
+    }
+    .scale-instructions {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      width: 80%;
+      margin: 0 auto 20px;
+    }
+    button {
+      padding: 12px 25px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <script>
+    // Shuffles an array in place.
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Full list of images.
+    const images = [
+      "Stimulireal/ur1.jpg",
+      "Stimulireal/ur2.jpg",
+      "Stimulireal/ur3.png",
+      "Stimulireal/ur4.jpg",
+      "Stimulireal/ur5.jpg",
+      "Stimulireal/ur6.jpg",
+      "Stimulireal/ur7.jpg",
+      "Stimulireal/ur8.png",
+      "Stimulireal/ur12.jpg",
+      "Stimulireal/ur11.jpg"
+    ];
+
+    // Retrieve the remaining images from local storage.
+    let remainingImages = JSON.parse(localStorage.getItem("remainingImages"));
+    if (!remainingImages) {
+      // If not present, shuffle the full list and store it.
+      remainingImages = shuffleArray([...images]); // Spread to copy the array.
+      localStorage.setItem("remainingImages", JSON.stringify(remainingImages));
+    }
+
+    // Display the current trial.
+    function displayTrial() {
+      if (remainingImages.length === 0) {
+        // No images remain. Redirect to thank_you.html.
+        window.location.href = "thank_you.html";
+        return;
+      }
+      // Show the first image in the remainingImages array.
+      document.getElementById("trialImage").src = remainingImages[0];
+
+      // Reset radio selections for the new trial.
+      document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
+    }
+
+    function nextTrial() {
+      const positivityScale = document.getElementsByName("positivityScale");
+      let positivityResponse = "";
+
+      // Check if an answer was selected.
+      for (let i = 0; i < positivityScale.length; i++) {
+        if (positivityScale[i].checked) {
+          positivityResponse = positivityScale[i].value;
+          break;
+        }
+      }
+
+      if (!positivityResponse) {
+        alert("Please answer the question before proceeding.");
+        return;
+      }
+
+      // Record the response using the current image (first element).
+      const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
+      responses.push({
+        image: remainingImages[0],
+        positivityResponse: positivityResponse,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem("perceptionResponses", JSON.stringify(responses));
+
+      // Remove the current image from the remainingImages array.
+      remainingImages.shift();
+      localStorage.setItem("remainingImages", JSON.stringify(remainingImages));
+
+      // Display the next trial.
+      displayTrial();
+    }
+
+    window.onload = displayTrial;
+  </script>
+</head>
+<body>
+  <div class="container">
+    <img id="trialImage" src="" alt="Trial Image" />
+
+    <!-- Positivity Question -->
+    <p class="prompt">How positive did you find this image?</p>
+    <div class="scale">
+      <label><input type="radio" name="positivityScale" value="1">1</label>
+      <label><input type="radio" name="positivityScale" value="2">2</label>
+      <label><input type="radio" name="positivityScale" value="3">3</label>
+      <label><input type="radio" name="positivityScale" value="4">4</label>
+      <label><input type="radio" name="positivityScale" value="5">5</label>
+      <label><input type="radio" name="positivityScale" value="6">6</label>
+      <label><input type="radio" name="positivityScale" value="7">7</label>
+    </div>
+    <div class="scale-instructions">
+      <span>Not positive<br>at all</span>
+      <span>Extremely<br>positive</span>
+    </div>
+
+    <button type="button" onclick="nextTrial()">Next</button>
+  </div>
+</body>
+</html>
