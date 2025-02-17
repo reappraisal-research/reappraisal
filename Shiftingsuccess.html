@@ -33,14 +33,14 @@
       font-weight: bold;
       margin: 20px 0;
     }
-    /* Centered bubble scale styling */
+    /* Spread out scale */
     .scale {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
-      width: 50%;
-      margin: 10px auto 0;
-      gap: 10px;
+      width: 80%;
+      margin: 10px auto;
+      gap: 20px;
     }
     .scale label {
       display: flex;
@@ -54,36 +54,33 @@
       -webkit-appearance: none;
       appearance: none;
       background-color: #fff;
-      border: 2px solid #000; /* Black border */
+      border: 2px solid #000;
       border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      width: 35px;
+      height: 35px;
       margin-bottom: 5px;
       cursor: pointer;
       transition: background-color 0.3s, color 0.3s;
-      font-size: 14px;
-      line-height: 30px;
       text-align: center;
     }
     .scale input[type="radio"]:checked {
-      background-color: #000; /* Black background when selected */
+      background-color: #000;
       color: #fff;
     }
     .scale-instructions {
       display: flex;
       justify-content: space-between;
       font-size: 14px;
-      width: 50%;
+      width: 80%;
       margin: 0 auto 20px;
     }
     button {
-      padding: 10px 20px;
+      padding: 12px 25px;
       background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      width: 100%;
       font-size: 16px;
       margin-top: 20px;
     }
@@ -92,7 +89,7 @@
     }
   </style>
   <script>
-    // Fisher–Yates shuffle function to randomize the images array.
+    // Shuffle the images array randomly
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -101,7 +98,6 @@
       return array;
     }
 
-    // Array of image file paths.
     let images = [
       "Stimulireal/concave.convex.jpg",
       "Stimulireal/donkey.seal.png",
@@ -115,56 +111,58 @@
       "Stimulireal/tunneldot.gif"
     ];
 
-    // Randomize the order of images.
     images = shuffleArray(images);
 
-    // Get current trial index from localStorage or initialize it to 0.
     let trialIndex = parseInt(localStorage.getItem("perceptionTrialIndex"), 10);
     if (isNaN(trialIndex)) {
       trialIndex = 0;
     }
 
+    // Display the current trial or redirect if all trials are completed
     function displayTrial() {
       if (trialIndex >= images.length) {
-        // All images have been shown, redirect to thank_you.html.
-        window.location.href = "thank_you.html";
+        // All conditions have been used; redirect to valence.html
+        window.location.href = "valence.html";
         return;
       }
-      // Update the image source for the current trial.
       document.getElementById("trialImage").src = images[trialIndex];
-      
-      // Clear any previously selected radio button for the scale.
-      const scaleElements = document.getElementsByName("perceptionScale");
-      for (let i = 0; i < scaleElements.length; i++) {
-        scaleElements[i].checked = false;
-      }
+
+      // Reset radio selections for the new trial
+      document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
     }
 
     function nextTrial() {
-      // Get the selected value from the bubble scale.
-      const scaleElements = document.getElementsByName("perceptionScale");
-      let response = "";
-      for (let i = 0; i < scaleElements.length; i++) {
-        if (scaleElements[i].checked) {
-          response = scaleElements[i].value;
-          break;
+      const perceptionScale = document.getElementsByName("perceptionScale");
+      const positivityScale = document.getElementsByName("positivityScale");
+
+      let perceptionResponse = "", positivityResponse = "";
+      for (let i = 0; i < perceptionScale.length; i++) {
+        if (perceptionScale[i].checked) {
+          perceptionResponse = perceptionScale[i].value;
+        }
+        if (positivityScale[i].checked) {
+          positivityResponse = positivityScale[i].value;
         }
       }
-      // Save the response for the current trial.
+
+      if (!perceptionResponse || !positivityResponse) {
+        alert("Please answer both questions before proceeding.");
+        return;
+      }
+
       const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
       responses.push({
         trial: trialIndex + 1,
         image: images[trialIndex],
-        response: response,
+        perceptionResponse: perceptionResponse,
+        positivityResponse: positivityResponse,
         timestamp: new Date().toISOString()
       });
       localStorage.setItem("perceptionResponses", JSON.stringify(responses));
-      
-      // Increment trial index and save it.
+
       trialIndex++;
       localStorage.setItem("perceptionTrialIndex", trialIndex);
-      
-      // Display the next trial.
+
       displayTrial();
     }
 
@@ -174,6 +172,8 @@
 <body>
   <div class="container">
     <img id="trialImage" src="" alt="Trial Image" />
+
+    <!-- Perception Shift Question -->
     <p class="prompt">How much did your perception of this image shift?</p>
     <div class="scale">
       <label><input type="radio" name="perceptionScale" value="1">1</label>
@@ -188,15 +188,24 @@
       <span>Not at all</span>
       <span>Very much</span>
     </div>
+
+    <!-- Positivity Question -->
+    <p class="prompt">How positive did you find this image?</p>
+    <div class="scale">
+      <label><input type="radio" name="positivityScale" value="1">1</label>
+      <label><input type="radio" name="positivityScale" value="2">2</label>
+      <label><input type="radio" name="positivityScale" value="3">3</label>
+      <label><input type="radio" name="positivityScale" value="4">4</label>
+      <label><input type="radio" name="positivityScale" value="5">5</label>
+      <label><input type="radio" name="positivityScale" value="6">6</label>
+      <label><input type="radio" name="positivityScale" value="7">7</label>
+    </div>
+    <div class="scale-instructions">
+      <span>Not positive<br> at all</span>
+      <span>Extremely <br>positive</span>
+    </div>
+
     <button type="button" onclick="nextTrial()">Next</button>
   </div>
-  <button onclick="resetLocalStorage()">Reset Experiment</button>
-  <script>
-    function resetLocalStorage() {
-      localStorage.clear(); // Clears all stored data
-      alert("Local storage reset! Reloading...");
-      window.location.reload(); // Refresh the page
-    }
-  </script>
 </body>
 </html>
