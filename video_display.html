@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <title>Video Display</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -19,34 +21,36 @@
       margin: 20px auto;
     }
 
-    .video-label {
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
     .question-container {
-      display: none; /* Initially hidden */
+      display: none; /* Hidden until the video ends */
       margin-top: 20px;
       font-size: 18px;
     }
 
+    /* Container for the scale: fixed width, 
+       flush left and right with space-between. */
     .scale {
       display: flex;
-      justify-content: space-evenly;
-      gap: 15px;  /* Reduced gap */
-      margin: 10px auto;
-      width: 80%; /* Slightly reduced width */
+      width: 700px;             /* Ensures flush alignment for first & last */
+      margin: 10px auto;        /* Centers the scale container */
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: nowrap;
     }
 
-    .scale .option {
+    /* Each label has equal width (flex:1) so numbers align horizontally. */
+    .option {
+      flex: 1; 
       display: flex;
       flex-direction: column;
       align-items: center;
+      text-align: center;
       cursor: pointer;
+      margin: 0 2px; /* tiny gap so labels don't collide */
     }
 
-    .scale .option input[type="radio"] {
+    /* Custom radio style: fill in black when checked */
+    .option input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
       background-color: #fff;
@@ -54,36 +58,42 @@
       border-radius: 50%;
       width: 30px;
       height: 30px;
+      margin-bottom: 5px;
       cursor: pointer;
       transition: background-color 0.3s;
     }
-
-    .scale .option input[type="radio"]:checked {
+    .option input[type="radio"]:checked {
       background-color: #000;
       color: #fff;
     }
 
+    /* Keep the numeric label & small text on the same baseline for each bubble */
     .label-text {
-      margin-top: 5px;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 50px;     /* Enough vertical space for number + text */
+      line-height: 1.2; /* Tighter line-height */
+    }
+    .label-text .number {
       font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 2px;  /* small gap before the text */
     }
-
     .label-text small {
-      display: block;
-      font-size: 0.8em;
-      margin-top: 2px;
+      font-size: 14px;
+      margin-top: 0;       /* keep text close to the number */
     }
 
-    /* Next button container positioned at the bottom */
+    /* Next button container pinned at bottom, hidden until radio is selected */
     .button-container {
-      display: none; /* Initially hidden */
+      display: none;
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
       bottom: 20px;
     }
-
     button {
       padding: 12px 24px;
       font-size: 18px;
@@ -92,14 +102,13 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      display: block;
       margin: 0 auto;
     }
-
     button:hover {
       background-color: #45a049;
     }
   </style>
+
   <script>
     function playVideoUntil3Seconds(onComplete) {
       let startTime = Date.now();
@@ -108,20 +117,14 @@
 
       videoPlayer.style.display = "block";
       videoPlayer.play();
-      if (window.webgazer) webgazer.resume();
-      console.log("resumed");
-      document.body.focus();
 
+      // Play the video until a total of 3 seconds have passed
       videoPlayer.onended = videoPlayer.onpause = () => {
-        cumulativeTime += Date.now() - startTime; // Track total play time
+        cumulativeTime += Date.now() - startTime;
         if (cumulativeTime < 3000) {
           startTime = Date.now();
           videoPlayer.play();
-          if (window.webgazer) webgazer.resume();
-          console.log("resumed");
         } else {
-          if (window.webgazer) webgazer.pause();
-          console.log("paused");
           videoPlayer.onended = videoPlayer.onpause = null;
           onComplete();
         }
@@ -161,23 +164,25 @@
       });
     }
 
-    window.onload = function () {
+    window.onload = function() {
+      // Start the video selection logic
       selectVideo();
 
+      // Show the "Next" button when a radio is chosen
       const radioButtons = document.getElementsByName("videoScale");
       const nextButtonContainer = document.getElementById("buttonContainer");
 
       radioButtons.forEach(radio => {
         radio.addEventListener("change", () => {
-          nextButtonContainer.style.display = "block"; // Show the Next button when an option is selected
+          nextButtonContainer.style.display = "block";
         });
       });
     };
   </script>
 </head>
+
 <body>
   <p>Please watch the video below:</p>
-  <div class="video-label" id="videoLabel"></div>
   <video id="video">
     <source src="" type="video/mp4">
     Your browser does not support the video tag.
@@ -187,38 +192,66 @@
   <div id="questionContainer" class="question-container">
     <label for="videoScale">1. How positively did you feel after watching the video?</label>
     <div class="scale">
+      <!-- 1: Not positive at all -->
       <label class="option">
         <input type="radio" name="videoScale" value="1">
-        <span class="label-text">1<br><small>Not positive at all</small></span>
+        <span class="label-text">
+          <span class="number">1</span>
+          <small>Not positive at all</small>
+        </span>
       </label>
+      <!-- 2 -->
       <label class="option">
         <input type="radio" name="videoScale" value="2">
-        <span class="label-text">2</span>
+        <span class="label-text">
+          <span class="number">2</span>
+          <small>&nbsp;</small>
+        </span>
       </label>
+      <!-- 3 -->
       <label class="option">
         <input type="radio" name="videoScale" value="3">
-        <span class="label-text">3</span>
+        <span class="label-text">
+          <span class="number">3</span>
+          <small>&nbsp;</small>
+        </span>
       </label>
+      <!-- 4 -->
       <label class="option">
         <input type="radio" name="videoScale" value="4">
-        <span class="label-text">4</span>
+        <span class="label-text">
+          <span class="number">4</span>
+          <small>&nbsp;</small>
+        </span>
       </label>
+      <!-- 5 -->
       <label class="option">
         <input type="radio" name="videoScale" value="5">
-        <span class="label-text">5</span>
+        <span class="label-text">
+          <span class="number">5</span>
+          <small>&nbsp;</small>
+        </span>
       </label>
+      <!-- 6 -->
       <label class="option">
         <input type="radio" name="videoScale" value="6">
-        <span class="label-text">6</span>
+        <span class="label-text">
+          <span class="number">6</span>
+          <small>&nbsp;</small>
+        </span>
       </label>
+      <!-- 7: Extremely positive -->
       <label class="option">
         <input type="radio" name="videoScale" value="7">
-        <span class="label-text">7<br><small>Extremely positive</small></span>
+        <span class="label-text">
+          <span class="number">7</span>
+          <small>Extremely positive</small>
+        </span>
       </label>
     </div>
   </div>
 
-  <!-- Next Button Centered at Bottom -->
+  <!-- Next Button -->
   <div id="buttonContainer" class="button-container">
     <button id="nextButton" onclick="window.location.href='survey.html'">Next</button>
   </div>
