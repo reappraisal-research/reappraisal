@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Example Video Page</title>
   <style>
     body {
@@ -13,12 +13,12 @@
       text-align: center;
     }
     .container {
-      max-width: 800px;
+      max-width: 1200px;
       margin: 0 auto;
       background: #fff;
       padding: 20px 30px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     h1 {
       font-size: 28px;
@@ -39,24 +39,37 @@
       border-radius: 8px;
     }
     .question-container {
-      display: none; /* Initially hidden */
+      display: none; /* Hidden until the video ends */
       margin-top: 20px;
       font-size: 18px;
     }
+    /* Single row, flush left & right, with equal spacing for each label */
     .scale {
       display: flex;
-      justify-content: space-around;
+      width: 700px;             /* Fixed width ensures flush alignment */
+      margin: 10px auto;        /* Center the scale container */
+      justify-content: space-between; 
       align-items: center;
-      width: 50%;
-      margin: 10px auto;
-      gap: 10px;
+      flex-wrap: nowrap;
     }
     .scale label {
+      flex: 1 1 0;             /* Each label has equal width */
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-size: 16px;
+      text-align: center;
       cursor: pointer;
+      margin: 0 2px;           /* Tiny horizontal margin to avoid label collisions */
+    }
+    .scale label span {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .scale label small {
+      font-size: 14px;
+      line-height: 1.2;
+      min-height: 32px;  /* Ensure consistent height, even if blank */
     }
     .scale input[type="radio"] {
       -webkit-appearance: none;
@@ -82,8 +95,8 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      display: none; /* Initially hidden */
-      margin-top: 20px;
+      display: none; /* Hidden until a radio is selected */
+      margin: 20px auto; /* Center horizontally */
     }
     button:hover {
       background-color: #45a049;
@@ -96,13 +109,15 @@
       const nextButton = document.getElementById("nextButton");
       const radioButtons = document.getElementsByName("videoScale");
 
-      video.play(); // Auto-play the video on load
+      // Auto-play the video on page load
+      video.play();
 
+      // Show the question container when the video finishes
       video.onended = function() {
-        questionContainer.style.display = "block"; // Show the question after video ends
+        questionContainer.style.display = "block";
       };
 
-      // Listen for changes in the radio buttons to show the Next button
+      // Reveal the "I understand" button once any radio option is selected
       radioButtons.forEach(radio => {
         radio.addEventListener("change", () => {
           nextButton.style.display = "block";
@@ -115,10 +130,12 @@
   <div class="container">
     <h1>Example Video Page</h1>
     <p>
-      Next a video will automatically play followed by a question about how you feel.<br>
-      After you fill it out the next button will appear to take you to the next page<br><br>
+      Next a negative video will automatically play followed by a question about how you feel.<br>
+      After you fill it out, the next button will appear to take you to the next page.<br><br>
       Click Next once you understand.
     </p>
+
+    <!-- Video Section -->
     <video id="videoPlayer" autoplay>
       <source src="Videos/2090.mp4" type="video/mp4">
       Your browser does not support the video tag.
@@ -126,19 +143,57 @@
 
     <!-- Question Section -->
     <div id="questionContainer" class="question-container">
-      <label for="videoScale">1. How positively did you feel after watching the video?</label>
+      <label for="videoScale">1. How negatively do you feel?</label>
       <div class="scale">
-        <label><input type="radio" name="videoScale" value="1">1</label>
-        <label><input type="radio" name="videoScale" value="2">2</label>
-        <label><input type="radio" name="videoScale" value="3">3</label>
-        <label><input type="radio" name="videoScale" value="4">4</label>
-        <label><input type="radio" name="videoScale" value="5">5</label>
-        <label><input type="radio" name="videoScale" value="6">6</label>
-        <label><input type="radio" name="videoScale" value="7">7</label>
+        <!-- 1: Not negative at all -->
+        <label>
+          <input type="radio" name="videoScale" value="1">
+          <span>1</span>
+          <small>Not negative<br>at all</small>
+        </label>
+        <!-- 2: no text -->
+        <label>
+          <input type="radio" name="videoScale" value="2">
+          <span>2</span>
+          <small>&nbsp;</small>
+        </label>
+        <!-- 3: no text -->
+        <label>
+          <input type="radio" name="videoScale" value="3">
+          <span>3</span>
+          <small>&nbsp;</small>
+        </label>
+        <!-- 4: no text -->
+        <label>
+          <input type="radio" name="videoScale" value="4">
+          <span>4</span>
+          <small>&nbsp;</small>
+        </label>
+        <!-- 5: no text -->
+        <label>
+          <input type="radio" name="videoScale" value="5">
+          <span>5</span>
+          <small>&nbsp;</small>
+        </label>
+        <!-- 6: no text -->
+        <label>
+          <input type="radio" name="videoScale" value="6">
+          <span>6</span>
+          <small>&nbsp;</small>
+        </label>
+        <!-- 7: Extremely negative -->
+        <label>
+          <input type="radio" name="videoScale" value="7">
+          <span>7</span>
+          <small>Extremely<br>negative</small>
+        </label>
       </div>
     </div>
 
-    <button id="nextButton" onclick="window.location.href='trainingdescription.html'">Next</button>
+    <!-- Next Button -->
+    <button id="nextButton" onclick="window.location.href='trainingdescription.html'">
+      I understand
+    </button>
   </div>
 </body>
 </html>
