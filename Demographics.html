@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Demographics Survey</title>
   <style>
     body {
@@ -12,37 +11,30 @@
       padding: 20px;
       line-height: 1.6;
     }
-
     h1 {
       text-align: center;
       color: #333;
     }
-
-    /* Global label style (if needed for other areas) */
+    /* Global label style */
     label {
       margin-top: 10px;
     }
-
     /* Within each question, make the first label (the question prompt) bold */
     .question label:first-of-type {
       font-weight: bold;
     }
-
     /* All other labels (the options) will be normal weight */
     .question label:not(:first-of-type) {
       font-weight: normal;
     }
-
     .question {
       margin-bottom: 20px;
     }
-
     .question input,
     .question select,
     .question textarea {
       margin-top: 5px;
     }
-
     button {
       background-color: #007BFF;
       color: white;
@@ -52,17 +44,14 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #0056b3;
     }
   </style>
 </head>
-
 <body>
   <h1>Please carefully fill out the questions</h1>
-  <form action="Pretestsurvey.html" method="get">
-
+  <form action="Pretestsurvey.html" method="get" id="surveyForm">
     <!-- Age -->
     <div class="question">
       <label for="age">What is your age?</label><br>
@@ -93,15 +82,31 @@
     <!-- Ethnicity -->
     <div class="question">
       <label for="ethnicity">How would you describe your ethnicity?</label><br>
-      <label><input type="radio" name="ethnicity" value="White" required> White</label><br>
-      <label><input type="radio" name="ethnicity" value="Black or African-American"> Black or African-American</label><br>
-      <label><input type="radio" name="ethnicity" value="American Indian or Alaskan Native"> American Indian or Alaskan Native</label><br>
-      <label><input type="radio" name="ethnicity" value="Asian"> Asian</label><br>
-      <label><input type="radio" name="ethnicity" value="South Asian"> South Asian</label><br>
-      <label><input type="radio" name="ethnicity" value="Native Hawaiian or other Pacific islander"> Native Hawaiian or other Pacific islander</label><br>
-      <label><input type="radio" name="ethnicity" value="From multiple races"> From multiple races</label><br>
-      <label><input type="radio" name="ethnicity" value="Some other race (please specify)"> Some other race (please specify)</label><br>
-      <label><input type="radio" name="ethnicity" value="Prefer not to disclose"> Prefer not to disclose</label>
+      <input type="radio" id="white" name="ethnicity" value="White" required>
+      <label for="white">White</label><br>
+      <input type="radio" id="black" name="ethnicity" value="Black or African-American">
+      <label for="black">Black or African-American</label><br>
+      <input type="radio" id="americanIndian" name="ethnicity" value="American Indian or Alaskan Native">
+      <label for="americanIndian">American Indian or Alaskan Native</label><br>
+      <input type="radio" id="asian" name="ethnicity" value="Asian">
+      <label for="asian">Asian</label><br>
+      <input type="radio" id="southAsian" name="ethnicity" value="South Asian">
+      <label for="southAsian">South Asian</label><br>
+      <input type="radio" id="nativeHawaiian" name="ethnicity" value="Native Hawaiian or other Pacific islander">
+      <label for="nativeHawaiian">Native Hawaiian or other Pacific islander</label><br>
+      <input type="radio" id="multipleRaces" name="ethnicity" value="From multiple races">
+      <label for="multipleRaces">From multiple races</label><br>
+      <input type="radio" id="someOtherRace" name="ethnicity" value="Some other race">
+      <label for="otherEthnicity">Some other race (please specify):</label>
+      <input 
+        type="text" 
+        id="otherEthnicity" 
+        name="otherEthnicity" 
+        placeholder="" 
+        disabled
+      /><br>
+      <input type="radio" id="preferNot" name="ethnicity" value="Prefer not to disclose">
+      <label for="preferNot">Prefer not to disclose</label>
     </div>
 
     <!-- Education -->
@@ -153,7 +158,7 @@
       <label><input type="radio" name="living" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
 
-    <!-- Language (Checkboxes remain unchanged) -->
+    <!-- Language (Checkboxes) -->
     <div class="question">
       <label for="language">What language do you mainly speak at home? (Select all that apply)</label><br>
       <input type="checkbox" id="english" name="language" value="English">
@@ -166,10 +171,10 @@
       <label for="french">French</label><br>
       <input type="checkbox" id="other" name="language" value="Other">
       <label for="other-language">Other (please specify):</label>
-      <input type="text" id="other-language" name="other-language" placeholder=""><br>
+      <input type="text" id="other-language" name="other-language" placeholder="">
     </div>
 
-    <!-- Religion (Checkboxes remain unchanged) -->
+    <!-- Religion (Checkboxes) -->
     <div class="question">
       <label for="religion">Do you identify with any of the following religions? (Select all that apply)</label><br>
       <input type="checkbox" id="religion-protestant" name="religion" value="Protestantism">
@@ -208,6 +213,69 @@
 
     <button type="submit">Submit</button>
   </form>
-</body>
 
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // --- Ethnicity: "Some other race" ---
+      const otherRaceRadio = document.getElementById("someOtherRace");
+      const otherRaceText  = document.getElementById("otherEthnicity");
+      const ethnicityRadios  = document.querySelectorAll('input[name="ethnicity"]');
+      ethnicityRadios.forEach((radio) => {
+        radio.addEventListener("change", () => {
+          if (otherRaceRadio.checked) {
+            otherRaceText.disabled = false;
+            otherRaceText.required = true;
+          } else {
+            otherRaceText.disabled = true;
+            otherRaceText.required = false;
+            otherRaceText.value = "";
+          }
+        });
+      });
+
+      // --- Language: "Other" checkbox ---
+      const otherLangCheckbox = document.getElementById("other");
+      const otherLangText = document.getElementById("other-language");
+      otherLangCheckbox.addEventListener("change", () => {
+        if (otherLangCheckbox.checked) {
+          otherLangText.required = true;
+        } else {
+          otherLangText.required = false;
+          otherLangText.value = "";
+        }
+      });
+
+      // --- Religion: "Other" checkbox ---
+      const religionOtherCheckbox = document.getElementById("religion-other");
+      const religionOtherText = document.getElementById("religion-other-text");
+      religionOtherCheckbox.addEventListener("change", () => {
+        if (religionOtherCheckbox.checked) {
+          religionOtherText.required = true;
+        } else {
+          religionOtherText.required = false;
+          religionOtherText.value = "";
+        }
+      });
+
+      // --- Form validation for checkbox groups ---
+      const form = document.getElementById("surveyForm");
+      form.addEventListener("submit", function (event) {
+        // Check that at least one language checkbox is checked
+        const languageChecked = document.querySelectorAll('input[name="language"]:checked');
+        if (languageChecked.length === 0) {
+          alert("Please select at least one language.");
+          event.preventDefault();
+          return;
+        }
+        // Check that at least one religion checkbox is checked
+        const religionChecked = document.querySelectorAll('input[name="religion"]:checked');
+        if (religionChecked.length === 0) {
+          alert("Please select at least one religion.");
+          event.preventDefault();
+          return;
+        }
+      });
+    });
+  </script>
+</body>
 </html>
