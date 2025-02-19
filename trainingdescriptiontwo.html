@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Survey Label Explanation</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 20px;
+      line-height: 1.8;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 30px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .definition {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: left;
+      margin-left: 10%;
+      margin-bottom: 5px;
+    }
+    .description {
+      text-align: left;
+      font-size: 20px;
+      margin-left: 10%;
+      margin-bottom: 15px;
+      max-width: 80%;
+      line-height: 1.6;
+    }
+    .example {
+      display: block;
+      font-size: 18px;
+      margin-left: 15%;
+      text-align: left;
+      max-width: 70%;
+    }
+    .image-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .image-container img {
+      width: 60%;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .image-text {
+      font-size: 18px;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin: 20px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <script>
+    window.onload = function() {
+      // After 10 seconds, show the 'Got it' button
+      setTimeout(function() {
+        document.getElementById("nextButton").style.display = "inline-block";
+      }, 10000);
+    };
+  </script>
+</head>
+<body>
+  <h1>Survey Label Explanation</h1>
+
+  <p class="description">
+    You will fill out a survey labeled <strong>"Situation Rethinking"</strong> or <strong>"Goal Rethinking"</strong>,
+    which will inform which strategy you should use to rethink the video you just watched.<br><br>
+    Thus, if you saw a screen like this:
+  </p>
+
+  <!-- Image Section -->
+  <div class="image-container">
+    <img src="assets/pictures/survey.png" alt="Example Image">
+    <p class="image-text">You would use situation rethinking and then write something like...</p>
+    <p>
+      "At first I was upset that the driver was driving recklessly, but then I thought about how it was good no one got hurt."
+    </p>
+  </div>
+
+  <!-- Next Button (hidden for 10 seconds) -->
+  <button
+    id="nextButton"
+    onclick="window.location.href='introfinal.html'"
+    style="
+      display: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    "
+  >
+    Got it
+  </button>
+</body>
+</html>
