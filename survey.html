@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Survey</title>
   <style>
     body {
@@ -19,23 +19,25 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    h1 {
-      color: #333;
+    h1, h2 {
       text-align: center;
       margin-bottom: 20px;
+    }
+    h2 {
+      font-weight: bold;
     }
     label {
       display: block;
       margin: 10px 0 5px;
       font-weight: bold;
     }
+    /* Spread out the radio buttons more */
     .scale {
       display: flex;
-      justify-content: space-around;
-      align-items: center;
-      margin: 10px auto;
-      width: 50%;
-      gap: 10px;
+      justify-content: space-between;  /* space out items across full width */
+      gap: 25px;                      /* extra gap between each option */
+      margin: 20px auto;
+      width: 80%;
     }
     .scale label {
       display: flex;
@@ -43,6 +45,7 @@
       align-items: center;
       font-size: 16px;
       cursor: pointer;
+      text-align: center; /* ensures text is centered under the bubble */
     }
     .scale input[type="radio"] {
       -webkit-appearance: none;
@@ -59,14 +62,6 @@
     .scale input[type="radio"]:checked {
       background-color: #000;
       color: #fff;
-    }
-    .scale-instructions {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin-bottom: 20px;
-      width: 50%;
-      margin: 10px auto;
     }
     textarea {
       width: 100%;
@@ -93,9 +88,64 @@
     }
   </style>
   <script>
-    function saveResponses() {
-      const shortAnswer = document.getElementById("shortAnswer").value || "No response";
+    // Immediately-Invoked Function Expression (IIFE) to set up balanced conditions.
+    (function() {
+      // Retrieve any existing conditionList from localStorage.
+      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+      // If no condition list exists, generate one with 20 trials:
+      if (conditionList.length === 0) {
+        // Create 4 conditions (each repeated 5 times):
+        //   1. ambiguous + "Situation rethinking"
+        //   2. ambiguous + "goal rethinking"
+        //   3. nonAmbiguous + "Situation rethinking"
+        //   4. nonAmbiguous + "goal rethinking"
+        let conditions = [];
+        for (let i = 0; i < 5; i++) {
+          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
+          conditions.push({ photoType: "ambiguous", rethinkingLabel: "goal rethinking" });
+          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
+          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "goal rethinking" });
+        }
+        // Shuffle the conditions array
+        conditions = shuffleArray(conditions);
+        localStorage.setItem("conditionList", JSON.stringify(conditions));
+        conditionList = conditions;
+      }
 
+      // Get the current trial index from localStorage (set by photoselection.html).
+      // Note: photoselection.html increments trialIndex after showing a photo.
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
+      // Use trialIndex - 1 to get the condition for the just-completed trial.
+      let currentCondition = conditionList[trialIndex - 1] || {};
+      
+      // When the DOM is ready, set the rethinking label at the top.
+      document.addEventListener("DOMContentLoaded", function() {
+        // Create a bold heading for the rethinking label.
+        let header = document.createElement("h2");
+        header.innerText = currentCondition.rethinkingLabel || "";
+        document.querySelector(".container").insertBefore(header, document.querySelector(".container").firstChild);
+      });
+
+      // Simple in-place array shuffle function.
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+    })();
+
+    // Function to save survey responses and then move to the next page.
+    function saveResponses() {
+      // 1) Require short-answer input
+      const shortAnswer = document.getElementById("shortAnswer").value.trim();
+      if (!shortAnswer) {
+        alert("Please fill out how you rethought the video.");
+        return;
+      }
+
+      // 2) Require a scale rating
       const scaledResponse = document.getElementsByName("scaledResponse");
       let scaledResponseValue = "";
       for (let i = 0; i < scaledResponse.length; i++) {
@@ -104,12 +154,12 @@
           break;
         }
       }
-
-      if (scaledResponseValue === "") {
-        alert("Please select a rating.");
+      if (!scaledResponseValue) {
+        alert("Please select how positive you feel after rethinking.");
         return;
       }
 
+      // Save the data
       const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       responses.push({
         shortAnswer: shortAnswer,
@@ -118,35 +168,67 @@
       });
       localStorage.setItem("surveyResponses", JSON.stringify(responses));
 
-      // Always go to photoselection.html
-      window.location.href = "photoselection.html";
+      // Check if this was the final condition.
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
+      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+      
+      if (trialIndex >= conditionList.length) {
+        // If the final condition has been completed, go to Shiftingsuccess.html.
+        window.location.href = "Shiftingsuccess.html";
+      } else {
+        // Otherwise, go to photoselection.html.
+        window.location.href = "photoselection.html";
+      }
     }
   </script>
 </head>
-
 <body>
   <div class="container">
     <form>
+      <!-- The condition label ("Situation rethinking" or "goal rethinking") is inserted above via JavaScript -->
 
       <!-- Short Answer Question First -->
       <label for="shortAnswer">1. How did you rethink the video?</label>
       <textarea id="shortAnswer" name="shortAnswer" rows="4"></textarea>
 
       <!-- Scaled Question Second -->
-      <label for="scaledResponse">2. How positively do you feel after rethinking?</label>
+      <label for="scaledResponse">2. How positively do you feel?</label>
       <div class="scale">
-        <label><input type="radio" name="scaledResponse" value="1">1</label>
-        <label><input type="radio" name="scaledResponse" value="2">2</label>
-        <label><input type="radio" name="scaledResponse" value="3">3</label>
-        <label><input type="radio" name="scaledResponse" value="4">4</label>
-        <label><input type="radio" name="scaledResponse" value="5">5</label>
-        <label><input type="radio" name="scaledResponse" value="6">6</label>
-        <label><input type="radio" name="scaledResponse" value="7">7</label>
-      </div>
+        <!-- Label for value 1 with text underneath -->
+        <label>
+          <input type="radio" name="scaledResponse" value="1">
+          <span>1</span>
+          <small>Not positive<br>at all</small>
+        </label>
 
-      <div class="scale-instructions">
-        <span>1 = Not positive at all</span>
-        <span>7 = Extremely positive</span>
+        <!-- Middle values (2–6) without extra text -->
+        <label>
+          <input type="radio" name="scaledResponse" value="2">
+          <span>2</span>
+        </label>
+        <label>
+          <input type="radio" name="scaledResponse" value="3">
+          <span>3</span>
+        </label>
+        <label>
+          <input type="radio" name="scaledResponse" value="4">
+          <span>4</span>
+        </label>
+        <label>
+          <input type="radio" name="scaledResponse" value="5">
+          <span>5</span>
+        </label>
+        <label>
+          <input type="radio" name="scaledResponse" value="6">
+          <span>6</span>
+        </label>
+
+        <!-- Label for value 7 with text underneath -->
+        <label>
+          <input type="radio" name="scaledResponse" value="7">
+          <span>7</span>
+          <small>Extremely<br>positive</small>
+        </label>
       </div>
 
       <!-- Submit Button -->
