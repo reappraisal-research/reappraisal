@@ -2,20 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ready to Begin Training</title>
   <style>
     body {
-      text-align: center;
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
       padding: 20px;
       background-color: #f9f9f9;
-      line-height: 1.6;
+      text-align: center; /* Centers the heading and button */
     }
     .container {
       max-width: 800px;
-      margin: 40px auto;
+      margin: 40px auto;        /* Centers the container itself */
       padding: 30px;
       background-color: #fff;
       border-radius: 8px;
@@ -24,10 +23,22 @@
     h1 {
       font-size: 32px;
       margin-bottom: 20px;
+      color: #333;
     }
-    p {
+    /* Instructions area: left-aligned text for clarity */
+    .instructions {
+      text-align: left;
       font-size: 20px;
-      margin-bottom: 30px;
+      line-height: 1.6;
+      margin: 0 auto 30px auto; /* bottom margin for spacing */
+      max-width: 90%;           /* keep text from stretching too wide */
+    }
+    ol {
+      margin: 1em 0 1em 2em;    /* indent list items */
+      padding: 0;
+    }
+    li {
+      margin-bottom: 0.5em;     /* spacing between steps */
     }
     button {
       font-size: 16px;
@@ -45,19 +56,23 @@
 </head>
 <body>
   <div class="container">
-  
+    <h1>Ready to Begin Training</h1>
 
-    <p>
-      <strong>Now you will complete the main task.</strong> <br> <Strong>In every trial you will:</Strong><br>
-      1.View an image<br>
-      2.Watch a negative video<br>
-      3.Rate how you feel<br>
-      4.Try to change how you think about the video<br> 
-      5.Answer questions about it <br> 
-      <br><br>
-      The images, videos, and questions will be different in every trial. <br>
-     Please follow the instructions carefilly
-    </p>
+    <div class="instructions">
+      <strong>Now you will complete the main task.</strong><br><br>
+      In every trial you will:
+      <ol>
+        <li>View an image</li>
+        <li>Watch a negative video</li>
+        <li>Rate how you feel</li>
+        <li>Try to change how you think about the video</li>
+        <li>Answer questions about it</li>
+      </ol>
+      The images, videos, and questions will be different in every trial.  
+      Make sure not to refresh the page.  
+      Please follow the instructions carefully.
+    </div>
+
     <button onclick="window.location.href='introimage.html'">See Example</button>
   </div>
 </body>
