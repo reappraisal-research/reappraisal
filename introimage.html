@@ -82,11 +82,25 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      display: none; /* Hide initially */
     }
     .navigation button:hover {
       background-color: #45a049;
     }
   </style>
+
+  <script>
+    window.onload = function() {
+      // Hide the button initially
+      const nextButton = document.querySelector('.navigation button');
+      nextButton.style.display = 'none';
+
+      // After 15 seconds, show the button
+      setTimeout(function() {
+        nextButton.style.display = 'inline-block';
+      }, 15000);
+    };
+  </script>
 </head>
 <body>
   <div class="container">
@@ -125,9 +139,8 @@
     </div>
 
     <div class="navigation">
-      <button onclick="window.location.href='introvid.html'">Next</button>
+      <button onclick="window.location.href='introvid.html'">Got it!</button>
     </div>
   </div>
 </body>
 </html>
-
