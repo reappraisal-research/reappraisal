@@ -9,21 +9,10 @@
     }
     img {
       display: block;
-      width: 100vw;      /* Full viewport width */
-      height: 80vh;      /* 80% of the viewport height */
-      object-fit: contain; /* Ensure the entire image is visible */
+      width: 100vw;       /* Full viewport width */
+      height: 80vh;       /* 80% of the viewport height */
+      object-fit: contain;/* Ensure the entire image is visible */
       margin: 20px auto;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
     }
     /* Style for the label above the photo */
     #photoLabel {
@@ -31,6 +20,13 @@
       text-align: center;
       margin-bottom: 10px;
       font-size: 1.2em;
+    }
+    /* Style for the ambiguous image label underneath the photo */
+    #ambiguousLabel {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1.1em;
+      font-style: italic;
     }
   </style>
   <script>
@@ -45,29 +41,43 @@
 
     // Define your photo pools.
     const ambiguousPhotos = [
-      "Stimulireal/concave.convex.jpg",
+      "Stimulireal/horseback.jpg",
       "Stimulireal/donkey.seal.png",
       "Stimulireal/face.vase.png",
       "Stimulireal/frog.horse.jpg",
       "Stimulireal/jastrow.rabbit.jpg",
-      "Stimulireal/man.mousereal.png",
-      "Stimulireal/old.young.png",
       "Stimulireal/man.mouse.png",
+      "Stimulireal/old.young.png",
+      "Stimulireal/woman.man.png",
       "Stimulireal/hug.png",
       "Stimulireal/profile.profile.png"
     ];
     const nonAmbiguousPhotos = [
-      "Stimulireal/ur1.jpg",
+      "Stimulireal/ur.donkey.seal.jpg",
       "Stimulireal/ur2.jpg",
-      "Stimulireal/ur3.png",
-      "Stimulireal/ur4.jpg",
+      "Stimulireal/ur.face.vase.png",
+      "Stimulireal/ur.man.mouse.png",
       "Stimulireal/ur5.jpg",
       "Stimulireal/ur6.jpg",
       "Stimulireal/ur7.jpg",
       "Stimulireal/ur8.png",
       "Stimulireal/ur12.jpg",
-      "Stimulireal/ur11.jpg"
+      "Stimulireal/ur.profile.profile.jpg"
     ];
+
+    // Mapping for distinct labels for each ambiguous image.
+    const ambiguousLabels = {
+      "Stimulireal/horseback.jpg": "Riding a horse or man's face",
+      "Stimulireal/donkey.seal.png": "Donkey or seal",
+      "Stimulireal/face.vase.png": "Face or  vase",
+      "Stimulireal/frog.horse.jpg": "Frog or horse",
+      "Stimulireal/jastrow.rabbit.jpg": "Duck or rabbit",
+      "Stimulireal/man.mouse.png": "Man or mouse",
+      "Stimulireal/old.young.png": "Old lady or young lady",
+      "Stimulireal/woman.man.png": "Man's face or woman sitting",
+      "Stimulireal/hug.png": "Man's face or woman's face",
+      "Stimulireal/profile.profile.png": "Side view or profile view"
+    };
 
     // Initialize photo pools in localStorage if not already set.
     if (!localStorage.getItem("ambiguousPhotos")) {
@@ -136,8 +146,12 @@
       // Set the label above the photo.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
+        // Display the distinct label for the ambiguous image underneath the photo.
+        document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
       } else {
         document.getElementById("photoLabel").innerText = "Simple";
+        // Clear any ambiguous label for non-ambiguous images.
+        document.getElementById("ambiguousLabel").innerText = "";
       }
 
       // Display the selected photo.
@@ -150,6 +164,11 @@
       // Increment the trial index for the next trial.
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
+
+      // Automatically go to the next page after 10 seconds.
+      setTimeout(function() {
+        window.location.href = "video_display.html";
+      }, 10000);
     }
 
     window.onload = selectPhoto;
@@ -158,7 +177,6 @@
 <body>
   <p id="photoLabel"></p>
   <img id="photo" src="" alt="Selected Photo">
-  <br>
-  <button onclick="window.location.href='video_display.html'">Next</button>
+  <p id="ambiguousLabel"></p>
 </body>
 </html>
