@@ -57,8 +57,8 @@
       "Stimulireal/ur2.jpg",
       "Stimulireal/ur.face.vase.png",
       "Stimulireal/ur.man.mouse.png",
-      "Stimulireal/ur5.jpg",
-      "Stimulireal/ur6.jpg",
+      "Stimulireal/ur.hug.png",
+      "Stimulireal/ur.woman.man.png",
       "Stimulireal/ur7.jpg",
       "Stimulireal/ur8.png",
       "Stimulireal/ur12.jpg",
@@ -79,18 +79,18 @@
       "Stimulireal/profile.profile.png": "Side view/front view"
     };
 
- // Mapping for distinct labels for each ambiguous image.
- const nonAmbiguousLabels = {
-    "Stimulireal/ur.donkey.seal.jpg": "Simply look",
+    // Mapping for distinct labels for each nonambiguous image.
+    const nonAmbiguousLabels = {
+      "Stimulireal/ur.donkey.seal.jpg": "Whale",
       "Stimulireal/ur2.jpg": "Simply look",
-      "Stimulireal/ur.face.vase.png": "Simply look",
-      "Stimulireal/ur.man.mouse.png": "Simply look",
-      "Stimulireal/ur5.jpg": "Simply look",
-      "Stimulireal/ur6.jpg": "Simply look",
+      "Stimulireal/ur.face.vase.png": "Jar",
+      "Stimulireal/ur.man.mouse.png": "Mouse",
+      "Stimulireal/ur.hug.png": "People cuddling",
+      "Stimulireal/ur.woman.man.png": "Face",
       "Stimulireal/ur7.jpg": "Simply look",
       "Stimulireal/ur8.png": "Simply look",
       "Stimulireal/ur12.jpg": "Simply look",
-      "Stimulireal/ur.profile.profile.jpg": "Simply look"
+      "Stimulireal/ur.profile.profile.jpg": "Front view"
     };
 
     // Initialize photo pools in localStorage if not already set.
@@ -157,15 +157,15 @@
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
-      // Set the label above the photo.
+      // Set the label above the photo and display the corresponding label underneath.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
-        // Display the distinct label for the ambiguous image underneath the photo.
+        // Display the distinct label for the ambiguous image.
         document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
       } else {
         document.getElementById("photoLabel").innerText = "Simple";
-        // Clear any ambiguous label for non-ambiguous images.
-        document.getElementById("ambiguousLabel").innerText = "";
+        // Display the distinct label for the nonambiguous image.
+        document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
 
       // Display the selected photo.
@@ -189,8 +189,9 @@
   </script>
 </head>
 <body>
-  <p id="photoLabel"></p>
+  <div id="photoLabel"></div>
   <img id="photo" src="" alt="Selected Photo">
-  <p id="ambiguousLabel"></p>
+  <div id="ambiguousLabel"></div>
 </body>
 </html>
+
