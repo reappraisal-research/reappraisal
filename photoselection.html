@@ -67,16 +67,30 @@
 
     // Mapping for distinct labels for each ambiguous image.
     const ambiguousLabels = {
-      "Stimulireal/horseback.jpg": "Riding a horse or man's face",
-      "Stimulireal/donkey.seal.png": "Donkey or seal",
-      "Stimulireal/face.vase.png": "Face or  vase",
-      "Stimulireal/frog.horse.jpg": "Frog or horse",
-      "Stimulireal/jastrow.rabbit.jpg": "Duck or rabbit",
-      "Stimulireal/man.mouse.png": "Man or mouse",
-      "Stimulireal/old.young.png": "Old lady or young lady",
-      "Stimulireal/woman.man.png": "Man's face or woman sitting",
-      "Stimulireal/hug.png": "Man's face or woman's face",
-      "Stimulireal/profile.profile.png": "Side view or profile view"
+      "Stimulireal/horseback.jpg": "Riding a horse/man's face",
+      "Stimulireal/donkey.seal.png": "Donkey/seal",
+      "Stimulireal/face.vase.png": "Face/vase",
+      "Stimulireal/frog.horse.jpg": "Frog/horse",
+      "Stimulireal/jastrow.rabbit.jpg": "Duck/rabbit",
+      "Stimulireal/man.mouse.png": "Man/mouse",
+      "Stimulireal/old.young.png": "Old lady/young lady",
+      "Stimulireal/woman.man.png": "Man's face/woman sitting",
+      "Stimulireal/hug.png": "Man's face/woman's face",
+      "Stimulireal/profile.profile.png": "Side view/front view"
+    };
+
+ // Mapping for distinct labels for each ambiguous image.
+ const nonAmbiguousLabels = {
+    "Stimulireal/ur.donkey.seal.jpg": "Simply look",
+      "Stimulireal/ur2.jpg": "Simply look",
+      "Stimulireal/ur.face.vase.png": "Simply look",
+      "Stimulireal/ur.man.mouse.png": "Simply look",
+      "Stimulireal/ur5.jpg": "Simply look",
+      "Stimulireal/ur6.jpg": "Simply look",
+      "Stimulireal/ur7.jpg": "Simply look",
+      "Stimulireal/ur8.png": "Simply look",
+      "Stimulireal/ur12.jpg": "Simply look",
+      "Stimulireal/ur.profile.profile.jpg": "Simply look"
     };
 
     // Initialize photo pools in localStorage if not already set.
