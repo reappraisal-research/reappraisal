@@ -24,16 +24,14 @@
       margin-top: 20px;
       font-size: 18px;
     }
-    /* Container for the scale: fixed width, flush left and right with space-between. */
     .scale {
       display: flex;
-      width: 700px;             /* Ensures flush alignment for first & last */
-      margin: 10px auto;        /* Centers the scale container */
+      width: 700px;
+      margin: 10px auto;
       justify-content: space-between;
       align-items: center;
       flex-wrap: nowrap;
     }
-    /* Each label has equal width (flex:1) so numbers align horizontally. */
     .option {
       flex: 1; 
       display: flex;
@@ -41,9 +39,8 @@
       align-items: center;
       text-align: center;
       cursor: pointer;
-      margin: 0 2px; /* tiny gap so labels don't collide */
+      margin: 0 2px;
     }
-    /* Custom radio style: fill in black when checked */
     .option input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
@@ -60,25 +57,23 @@
       background-color: #000;
       color: #fff;
     }
-    /* Keep the numeric label & small text on the same baseline for each bubble */
     .label-text {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      height: 50px;     /* Enough vertical space for number + text */
-      line-height: 1.2; /* Tighter line-height */
+      height: 50px;
+      line-height: 1.2;
     }
     .label-text .number {
       font-size: 16px;
       font-weight: bold;
-      margin-bottom: 2px;  /* small gap before the text */
+      margin-bottom: 2px;
     }
     .label-text small {
       font-size: 14px;
-      margin-top: 0;       /* keep text close to the number */
+      margin-top: 0;
     }
-    /* Next button container pinned at bottom, hidden until radio is selected */
     .button-container {
       display: none;
       position: absolute;
@@ -101,15 +96,13 @@
     }
   </style>
   <script>
-    // Function to play the video until a total of 3 seconds have elapsed
+    // Function to play the video until 3 seconds of cumulative play time have elapsed.
     function playVideoUntil3Seconds(onComplete) {
       let startTime = Date.now();
       let cumulativeTime = 0;
       const videoPlayer = document.getElementById("video");
-
       videoPlayer.style.display = "block";
       videoPlayer.play();
-
       videoPlayer.onended = videoPlayer.onpause = () => {
         cumulativeTime += Date.now() - startTime;
         if (cumulativeTime < 3000) {
@@ -122,7 +115,7 @@
       };
     }
 
-    // Helper function to shuffle an array in place
+    // Helper function to shuffle an array in place.
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -132,7 +125,6 @@
     }
 
     function selectVideo() {
-      // Define the full list of videos
       const videos = [
         { url: "videos/0015.mp4", label: "v1" },
         { url: "videos/0299.mp4", label: "v2" },
@@ -156,16 +148,14 @@
         { url: "videos/1164.mp4", label: "v20" }
       ];
 
-      // Check if we already have a saved video order
+      // Retrieve or initialize the video order.
       let videoOrder = JSON.parse(localStorage.getItem("videoOrder") || "[]");
-
-      // If not, shuffle the full list and save it
       if (videoOrder.length === 0) {
         videoOrder = shuffleArray(videos.slice());
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
       }
 
-      // Get the next video (remove it from the order so it won't be shown again)
+      // Get the next video.
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
@@ -176,29 +166,53 @@
           document.getElementById("questionContainer").style.display = "block";
         });
       } else {
-        // All videos have been shown; you can choose to display a message or take another action.
         document.getElementById("video").style.display = "none";
         document.getElementById("questionContainer").innerHTML = "<p>All videos have been shown.</p>";
       }
     }
 
     window.onload = function() {
-      // Start the video selection logic
       selectVideo();
 
-      // Show the "Next" button when a radio is chosen
+      // Attach event listeners to radio buttons to show the Next button.
       const radioButtons = document.getElementsByName("videoScale");
       const nextButtonContainer = document.getElementById("buttonContainer");
-      // Convert NodeList to Array to use forEach
       Array.from(radioButtons).forEach(radio => {
         radio.addEventListener("change", () => {
           nextButtonContainer.style.display = "block";
         });
       });
     };
+
+    // Instead of inline redirection, record the video response when Next is clicked.
+    function recordVideoResponse() {
+      const radioButtons = document.getElementsByName("videoScale");
+      let videoRating = "";
+      for (let i = 0; i < radioButtons.length; i++) {
+        if (radioButtons[i].checked) {
+          videoRating = radioButtons[i].value;
+          break;
+        }
+      }
+      if (!videoRating) {
+        alert("Please select a rating before proceeding.");
+        return;
+      }
+      const eventData = {
+        stage: "VideoDisplay",
+        videoRating: videoRating,
+        timestamp: new Date().toISOString()
+      };
+      sendExperimentData(eventData, function(err, result) {
+        if (err) {
+          alert("Error recording your video rating. Please try again.");
+        } else {
+          window.location.href = "survey.html";
+        }
+      });
+    }
   </script>
 </head>
-
 <body>
   <p>Please watch the video below:</p>
   <video id="video">
@@ -210,7 +224,6 @@
   <div id="questionContainer" class="question-container">
     <label for="videoScale">1. How negatively do you feel?</label>
     <div class="scale">
-      <!-- 1: Not negative at all -->
       <label class="option">
         <input type="radio" name="videoScale" value="1">
         <span class="label-text">
@@ -218,7 +231,6 @@
           <small>Not negative at all</small>
         </span>
       </label>
-      <!-- 2 -->
       <label class="option">
         <input type="radio" name="videoScale" value="2">
         <span class="label-text">
@@ -226,7 +238,6 @@
           <small>&nbsp;</small>
         </span>
       </label>
-      <!-- 3 -->
       <label class="option">
         <input type="radio" name="videoScale" value="3">
         <span class="label-text">
@@ -234,7 +245,6 @@
           <small>&nbsp;</small>
         </span>
       </label>
-      <!-- 4 -->
       <label class="option">
         <input type="radio" name="videoScale" value="4">
         <span class="label-text">
@@ -242,7 +252,6 @@
           <small>&nbsp;</small>
         </span>
       </label>
-      <!-- 5 -->
       <label class="option">
         <input type="radio" name="videoScale" value="5">
         <span class="label-text">
@@ -250,7 +259,6 @@
           <small>&nbsp;</small>
         </span>
       </label>
-      <!-- 6 -->
       <label class="option">
         <input type="radio" name="videoScale" value="6">
         <span class="label-text">
@@ -258,7 +266,6 @@
           <small>&nbsp;</small>
         </span>
       </label>
-      <!-- 7: Extremely negative -->
       <label class="option">
         <input type="radio" name="videoScale" value="7">
         <span class="label-text">
@@ -269,9 +276,9 @@
     </div>
   </div>
 
-  <!-- Next Button -->
+  <!-- Next Button Container -->
   <div id="buttonContainer" class="button-container">
-    <button id="nextButton" onclick="window.location.href='survey.html'">Next</button>
+    <button id="nextButton" onclick="recordVideoResponse()">Next</button>
   </div>
 </body>
 </html>
