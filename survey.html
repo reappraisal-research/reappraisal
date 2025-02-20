@@ -31,23 +31,22 @@
       margin: 10px 0 5px;
       font-weight: bold;
     }
-    /* Spread out the radio buttons more */
+    /* Scale container using flex to evenly distribute options */
     .scale {
       display: flex;
-      justify-content: space-between;  /* space out items across full width */
-      gap: 25px;                      /* extra gap between each option */
+      justify-content: space-evenly;
       margin: 20px auto;
-      width: 80%;
+      width: 100%;
     }
+    /* Each option label gets a fixed width and an expanded height */
     .scale label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 16px;
-      cursor: pointer;
-      text-align: center; /* ensures text is centered under the bubble */
+      position: relative;
+      flex: 0 0 70px;      /* Fixed width for each option */
+      height: 140px;       /* Expanded height to accommodate extra text */
+      text-align: center;
     }
-    .scale input[type="radio"] {
+    /* Style the radio “bubble” and position it at the top center */
+    .scale label input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
       background-color: #fff;
@@ -55,13 +54,35 @@
       border-radius: 50%;
       width: 30px;
       height: 30px;
-      margin-bottom: 5px;
       cursor: pointer;
       transition: background-color 0.3s;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
     }
-    .scale input[type="radio"]:checked {
+    .scale label input[type="radio"]:checked {
       background-color: #000;
       color: #fff;
+    }
+    /* Place the number on a fixed horizontal line */
+    .scale label span {
+      position: absolute;
+      top: 45px;           /* Fixed vertical offset for the number */
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      font-weight: bold;
+      display: block;
+    }
+    /* Position extra descriptive text (if any) further down */
+    .scale label small {
+      position: absolute;
+      top: 75px;           /* Fixed vertical offset for extra text */
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      line-height: 1.2;
     }
     textarea {
       width: 100%;
@@ -88,45 +109,30 @@
     }
   </style>
   <script>
-    // Immediately-Invoked Function Expression (IIFE) to set up balanced conditions.
+    // Immediately-Invoked Function Expression (IIFE) to set up conditions.
     (function() {
-      // Retrieve any existing conditionList from localStorage.
       let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      // If no condition list exists, generate one with 20 trials:
       if (conditionList.length === 0) {
-        // Create 4 conditions (each repeated 5 times):
-        //   1. ambiguous + "Situation rethinking"
-        //   2. ambiguous + "goal rethinking"
-        //   3. nonAmbiguous + "Situation rethinking"
-        //   4. nonAmbiguous + "goal rethinking"
         let conditions = [];
         for (let i = 0; i < 5; i++) {
           conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
-          conditions.push({ photoType: "ambiguous", rethinkingLabel: "goal rethinking" });
+          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Goal rethinking" });
           conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
-          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "goal rethinking" });
+          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Goal rethinking" });
         }
-        // Shuffle the conditions array
         conditions = shuffleArray(conditions);
         localStorage.setItem("conditionList", JSON.stringify(conditions));
         conditionList = conditions;
       }
-
-      // Get the current trial index from localStorage (set by photoselection.html).
-      // Note: photoselection.html increments trialIndex after showing a photo.
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-      // Use trialIndex - 1 to get the condition for the just-completed trial.
       let currentCondition = conditionList[trialIndex - 1] || {};
       
-      // When the DOM is ready, set the rethinking label at the top.
       document.addEventListener("DOMContentLoaded", function() {
-        // Create a bold heading for the rethinking label.
         let header = document.createElement("h2");
         header.innerText = currentCondition.rethinkingLabel || "";
         document.querySelector(".container").insertBefore(header, document.querySelector(".container").firstChild);
       });
 
-      // Simple in-place array shuffle function.
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -136,16 +142,12 @@
       }
     })();
 
-    // Function to save survey responses and then move to the next page.
     function saveResponses() {
-      // 1) Require short-answer input
       const shortAnswer = document.getElementById("shortAnswer").value.trim();
       if (!shortAnswer) {
         alert("Please fill out how you rethought the video.");
         return;
       }
-
-      // 2) Require a scale rating
       const scaledResponse = document.getElementsByName("scaledResponse");
       let scaledResponseValue = "";
       for (let i = 0; i < scaledResponse.length; i++) {
@@ -155,11 +157,9 @@
         }
       }
       if (!scaledResponseValue) {
-        alert("Please select how positive you feel after rethinking.");
+        alert("Please select how negative you feel after rethinking.");
         return;
       }
-
-      // Save the data
       const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       responses.push({
         shortAnswer: shortAnswer,
@@ -167,16 +167,11 @@
         timestamp: new Date().toISOString()
       });
       localStorage.setItem("surveyResponses", JSON.stringify(responses));
-
-      // Check if this was the final condition.
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
       let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      
       if (trialIndex >= conditionList.length) {
-        // If the final condition has been completed, go to Shiftingsuccess.html.
         window.location.href = "Shiftingsuccess.html";
       } else {
-        // Otherwise, go to photoselection.html.
         window.location.href = "photoselection.html";
       }
     }
@@ -185,23 +180,15 @@
 <body>
   <div class="container">
     <form>
-      <!-- The condition label ("Situation rethinking" or "goal rethinking") is inserted above via JavaScript -->
-
-      <!-- Short Answer Question First -->
-      <label for="shortAnswer">1. How did you rethink the video?</label>
+      <label for="shortAnswer">1. How did you re-think the video?</label>
       <textarea id="shortAnswer" name="shortAnswer" rows="4"></textarea>
-
-      <!-- Scaled Question Second -->
-      <label for="scaledResponse">2. How positively do you feel?</label>
+      <label for="scaledResponse">2. How negatively do you feel?</label>
       <div class="scale">
-        <!-- Label for value 1 with text underneath -->
         <label>
           <input type="radio" name="scaledResponse" value="1">
           <span>1</span>
-          <small>Not positive<br>at all</small>
+          <small>Not negative<br>at all</small>
         </label>
-
-        <!-- Middle values (2–6) without extra text -->
         <label>
           <input type="radio" name="scaledResponse" value="2">
           <span>2</span>
@@ -222,20 +209,14 @@
           <input type="radio" name="scaledResponse" value="6">
           <span>6</span>
         </label>
-
-        <!-- Label for value 7 with text underneath -->
         <label>
           <input type="radio" name="scaledResponse" value="7">
           <span>7</span>
-          <small>Extremely<br>positive</small>
+          <small>Extremely<br>negative</small>
         </label>
       </div>
-
-      <!-- Submit Button -->
       <button type="button" onclick="saveResponses()">Next</button>
     </form>
   </div>
 </body>
 </html>
-
-
