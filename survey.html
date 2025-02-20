@@ -31,21 +31,18 @@
       margin: 10px 0 5px;
       font-weight: bold;
     }
-    /* Scale container using flex to evenly distribute options */
     .scale {
       display: flex;
       justify-content: space-evenly;
       margin: 20px auto;
       width: 100%;
     }
-    /* Each option label gets a fixed width and an expanded height */
     .scale label {
       position: relative;
-      flex: 0 0 70px;      /* Fixed width for each option */
-      height: 140px;       /* Expanded height to accommodate extra text */
+      flex: 0 0 70px;
+      height: 140px;
       text-align: center;
     }
-    /* Style the radio “bubble” and position it at the top center */
     .scale label input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
@@ -65,20 +62,17 @@
       background-color: #000;
       color: #fff;
     }
-    /* Place the number on a fixed horizontal line */
     .scale label span {
       position: absolute;
-      top: 45px;           /* Fixed vertical offset for the number */
+      top: 45px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 16px;
       font-weight: bold;
-      display: block;
     }
-    /* Position extra descriptive text (if any) further down */
     .scale label small {
       position: absolute;
-      top: 75px;           /* Fixed vertical offset for extra text */
+      top: 75px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 14px;
@@ -108,81 +102,15 @@
       background-color: #45a049;
     }
   </style>
-  <script>
-    // Immediately-Invoked Function Expression (IIFE) to set up conditions.
-    (function() {
-      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      if (conditionList.length === 0) {
-        let conditions = [];
-        for (let i = 0; i < 5; i++) {
-          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
-          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Goal rethinking" });
-          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
-          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Goal rethinking" });
-        }
-        conditions = shuffleArray(conditions);
-        localStorage.setItem("conditionList", JSON.stringify(conditions));
-        conditionList = conditions;
-      }
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-      let currentCondition = conditionList[trialIndex - 1] || {};
-      
-      document.addEventListener("DOMContentLoaded", function() {
-        let header = document.createElement("h2");
-        header.innerText = currentCondition.rethinkingLabel || "";
-        document.querySelector(".container").insertBefore(header, document.querySelector(".container").firstChild);
-      });
-
-      function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-      }
-    })();
-
-    function saveResponses() {
-      const shortAnswer = document.getElementById("shortAnswer").value.trim();
-      if (!shortAnswer) {
-        alert("Please fill out how you rethought the video.");
-        return;
-      }
-      const scaledResponse = document.getElementsByName("scaledResponse");
-      let scaledResponseValue = "";
-      for (let i = 0; i < scaledResponse.length; i++) {
-        if (scaledResponse[i].checked) {
-          scaledResponseValue = scaledResponse[i].value;
-          break;
-        }
-      }
-      if (!scaledResponseValue) {
-        alert("Please select how negative you feel after rethinking.");
-        return;
-      }
-      const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
-      responses.push({
-        shortAnswer: shortAnswer,
-        scaledResponse: scaledResponseValue,
-        timestamp: new Date().toISOString()
-      });
-      localStorage.setItem("surveyResponses", JSON.stringify(responses));
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      if (trialIndex >= conditionList.length) {
-        window.location.href = "Shiftingsuccess.html";
-      } else {
-        window.location.href = "photoselection.html";
-      }
-    }
-  </script>
+  <!-- Include the centralized data sender -->
+  <script src="dataSender.js"></script>
 </head>
 <body>
   <div class="container">
-    <form>
+    <form id="finalSurveyForm">
       <label for="shortAnswer">1. How did you re-think the video?</label>
       <textarea id="shortAnswer" name="shortAnswer" rows="4"></textarea>
-      <label for="scaledResponse">2. How negatively do you feel?</label>
+      <label for="scaledResponse">2. How negatively do you feel after rethinking?</label>
       <div class="scale">
         <label>
           <input type="radio" name="scaledResponse" value="1">
@@ -218,5 +146,44 @@
       <button type="button" onclick="saveResponses()">Next</button>
     </form>
   </div>
+  <script>
+    function saveResponses() {
+      // Get the text response.
+      const shortAnswer = document.getElementById("shortAnswer").value.trim();
+      if (!shortAnswer) {
+        alert("Please fill out how you rethought the video.");
+        return;
+      }
+      // Get the selected radio value.
+      const scaledOptions = document.getElementsByName("scaledResponse");
+      let scaledResponseValue = "";
+      for (let i = 0; i < scaledOptions.length; i++) {
+        if (scaledOptions[i].checked) {
+          scaledResponseValue = scaledOptions[i].value;
+          break;
+        }
+      }
+      if (!scaledResponseValue) {
+        alert("Please select your rating for how negative you feel.");
+        return;
+      }
+      // Package the responses.
+      const experimentData = {
+        shortAnswer: shortAnswer,
+        scaledResponse: scaledResponseValue,
+        timestamp: new Date().toISOString()
+      };
+      // Send the data via the centralized function.
+      sendExperimentData(experimentData, function(err, result) {
+        if (err) {
+          alert("Error submitting your survey responses. Please try again.");
+        } else {
+          // After successful submission, decide next page:
+          // Here we choose to redirect to bfis1.html; adjust if needed.
+          window.location.href = "";
+        }
+      });
+    }
+  </script>
 </body>
 </html>
