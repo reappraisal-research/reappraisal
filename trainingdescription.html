@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Training Introduction</title>
   <style>
     body {
@@ -63,59 +63,61 @@
       padding: 10px 20px;
       margin: 20px;
       cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
     }
   </style>
+  <!-- Include the data sender script -->
+  <script src="dataSender.js"></script>
   <script>
+    // Show the Next button after 12 seconds.
     window.onload = function() {
-      // After 20 seconds, show the Next button.
       setTimeout(function(){
         document.getElementById("nextButton").style.display = "inline-block";
       }, 12000);
+    };
+
+    // When the button is clicked, record the event and then redirect.
+    function recordTrainingIntroduction() {
+      const eventData = {
+        stage: "TrainingIntroduction",
+        action: "Got it",
+        timestamp: new Date().toISOString()
+      };
+      sendExperimentData(eventData, function(err, result) {
+        if (err) {
+          alert("Error recording your action. Please try again.");
+        } else {
+          window.location.href = "trainingdescriptiontwo.html";
+        }
+      });
     }
   </script>
 </head>
 <body>
-
   <p>
     Next you will use one of two different strategies to rethink the video you just watched. <br>
-  
   </p>
-
   <!-- Situation Rethinking -->
   <p class="definition">Situation Rethinking</p>
   <p class="description">
     <strong>This strategy is about changing how you interpret the events of a situation so you feel less negative.</strong> 
   </p>
-
   <p class="example"><em>e.g.</em> You see a video of some people falling and injuring themselves, but you tell yourself that it was likely just a stunt and no one got hurt.</p>
   <p class="example"><em>e.g.</em> You see a video of someone berating another person, but you tell yourself they are only doing it because they care about the other person and want them to be safe.</p>
-
   <!-- Goal Rethinking -->
   <p class="definition">Goal Rethinking</p>
   <p class="description">
     <strong>This strategy is about realizing how a negative event might actually serve other goals.</strong> 
   </p>
-
   <p class="example"><em>e.g.</em> You see a movie where someone is crying, but you tell yourself the video is helping you practice using empathy.</p>
   <p class="example"><em>e.g.</em> You see a video of a car crash, but you tell yourself you now know to avoid similar situations in your life.</p><br>
-
-  <!-- Next button initially hidden, appears after 20 seconds -->
-  <button
-  id="nextButton"
-  onclick="window.location.href='trainingdescriptiontwo.html'"
-  style="
-    display: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  "
->
-  Got it
-</button>
-
+  <!-- Next button initially hidden -->
+  <button id="nextButton" onclick="recordTrainingIntroduction()" style="display: none;">Got it</button>
 </body>
 </html>
