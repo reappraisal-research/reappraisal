@@ -67,18 +67,39 @@
       padding: 10px 20px;
       margin: 20px;
       cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
     }
     button:hover {
       background-color: #45a049;
     }
   </style>
+  <!-- Include dataSender.js -->
+  <script src="dataSender.js"></script>
   <script>
     window.onload = function() {
-      // After 10 seconds, show the 'Got it' button
+      // After 10 seconds, show the 'Got it' button.
       setTimeout(function() {
         document.getElementById("nextButton").style.display = "inline-block";
       }, 10000);
     };
+
+    function recordSurveyLabelExplanation() {
+      const eventData = {
+        stage: "SurveyLabelExplanation",
+        action: "Got it",
+        timestamp: new Date().toISOString()
+      };
+      sendExperimentData(eventData, function(err, result) {
+        if (err) {
+          alert("Error recording your response. Please try again.");
+        } else {
+          window.location.href = "introfinal.html";
+        }
+      });
+    }
   </script>
 </head>
 <body>
@@ -90,7 +111,6 @@
     Thus, if you saw a screen like this:
   </p>
 
-  <!-- Image Section -->
   <div class="image-container">
     <img src="assets/pictures/survey.png" alt="Example Image">
     <p class="image-text">You would use situation rethinking and then write something like...</p>
@@ -99,22 +119,7 @@
     </p>
   </div>
 
-  <!-- Next Button (hidden for 10 seconds) -->
-  <button
-    id="nextButton"
-    onclick="window.location.href='introfinal.html'"
-    style="
-      display: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    "
-  >
-    Got it
-  </button>
+  <!-- Next Button (hidden initially) -->
+  <button id="nextButton" onclick="recordSurveyLabelExplanation()" style="display: none;">Got it</button>
 </body>
 </html>
