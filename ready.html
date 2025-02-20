@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ready to Begin Study</title>
   <style>
     body {
@@ -46,31 +46,58 @@
     button:hover {
       background-color: #45a049;
     }
-    .reset-container {
-      margin-top: 20px;
-    }
-    .reset-button {
-      background-color: #d9534f;
-    }
-    .reset-button:hover {
-      background-color: #c9302c;
-    }
   </style>
+  <!-- Include the centralized data sender script -->
+  <script src="dataSender.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Example Check</h1>
     <p>
-        Do you feel like you have a good grasp on what you’ll need to do? If not you can quickly cycle through these instructions again!
+      Do you feel like you have a good grasp on what you’ll need to do? If not you can quickly cycle through these instructions again!
     </p>
-    
-    <!-- Button Section -->
     <div class="button-container">
-      <button onclick="window.location.href='readytwo.html'">Next</button>
-      <button onclick="window.location.href='betweener.html'">Let me see the instructions again</button>
+      <button id="nextButton">Next</button>
+      <button id="repeatButton">Let me see the instructions again</button>
     </div>
-
-   
-
+  </div>
+  
+  <script>
+    // When the Next button is clicked:
+    document.getElementById("nextButton").addEventListener("click", function() {
+      // Create an object with stage details and chosen action.
+      const eventData = {
+        stage: "ReadyToBeginStudy",
+        action: "Next",
+        timestamp: new Date().toISOString()
+      };
+      // Send the data to AWS using sendExperimentData (from dataSender.js).
+      sendExperimentData(eventData, function(err, result) {
+        if (err) {
+          alert("Error recording your action. Please try again.");
+        } else {
+          // On success, redirect to readytwo.html.
+          window.location.href = "readytwo.html";
+        }
+      });
+    });
+    
+    // When the Repeat Instructions button is clicked:
+    document.getElementById("repeatButton").addEventListener("click", function() {
+      const eventData = {
+        stage: "ReadyToBeginStudy",
+        action: "RepeatInstructions",
+        timestamp: new Date().toISOString()
+      };
+      sendExperimentData(eventData, function(err, result) {
+        if (err) {
+          alert("Error recording your action. Please try again.");
+        } else {
+          // On success, redirect to betweener.html.
+          window.location.href = "betweener.html";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
