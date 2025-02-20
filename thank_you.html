@@ -1,69 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Thank You!</title>
-    <style>
-        body {
-            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+  <meta charset="UTF-8">
+  <title>Thank You!</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      padding: 40px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 500px;
+      margin: 20px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #4CAF50;
+    }
+    p {
+      font-size: 1.2em;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    button {
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <!-- Include dataSender.js -->
+  <script src="dataSender.js"></script>
+  <script>
+    window.onload = function() {
+      // Create a final event object to record that the participant reached the Thank You page.
+      const finalEvent = {
+        stage: "StudyCompletion",
+        action: "Completed",
+        timestamp: new Date().toISOString()
+      };
 
-        .container {
-            background: #fff;
-            border-radius: 10px;
-            padding: 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 500px;
-            margin: 20px;
+      // Send the final event data to AWS.
+      sendExperimentData(finalEvent, function(err, result) {
+        if (err) {
+          console.error("Error recording final event:", err);
+          // Even if there's an error, the Thank You page will display.
+        } else {
+          console.log("Final event recorded:", result);
         }
-
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            color: #4CAF50;
-        }
-
-        p {
-            font-size: 1.2em;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        button {
-            padding: 12px 24px;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+      });
+    };
+  </script>
 </head>
-
 <body>
-    <div class="container">
-        <h1>Thank You!</h1>
-        <p>
-            We appreciate your participation in our experiment.
-            Your responses have been recorded and will greatly help our research.
-        </p>
-    </div>
+  <div class="container">
+    <h1>Thank You!</h1>
+    <p>
+      We appreciate your participation in our experiment.
+      Your responses have been recorded and will greatly help our research.
+    </p>
+  </div>
 </body>
-
 </html>
