@@ -2,6 +2,8 @@
 <html>
 <head>
   <title>Student ID</title>
+  <!-- Include the data sender script -->
+  <script src="dataSender.js"></script>
   <script>
     // Validate SID: must be exactly 10 digits.
     function isValidSID(sid) {
@@ -16,11 +18,25 @@
         participantSID = prompt("Invalid SID. Please enter a 10-digit Student ID:", "");
       }
       
-      // Optionally, save the participant SID in localStorage.
+      // Save the participant SID in localStorage.
       localStorage.setItem("participantSID", participantSID);
       
-      // Redirect to consent.html.
-      window.location.href = "consent.html";
+      // Prepare the data object to send.
+      const studentData = {
+        participantSID: participantSID,
+        timestamp: new Date().toISOString()
+      };
+
+      // Send the student ID data to AWS using the dataSender function.
+      sendExperimentData(studentData, function(err, result) {
+        if (err) {
+          alert("Error submitting Student ID. Please try again.");
+          // Optionally, you could re-prompt or retry here.
+        } else {
+          // Redirect to consent.html after successful submission.
+          window.location.href = "consent.html";
+        }
+      });
     }
 
     window.onload = intro;
