@@ -42,15 +42,36 @@
       background-color: #45a049;
     }
   </style>
+  <!-- Include the centralized data sender -->
+  <script src="dataSender.js"></script>
+  <script>
+    // When the page loads, attach a click event to the button.
+    function recordStartEvent() {
+      // Create a data object with details about this event.
+      const eventData = {
+        stage: "StartExperiment",
+        action: "I'm ready!",
+        timestamp: new Date().toISOString()
+      };
+
+      // Call sendExperimentData to record the event.
+      sendExperimentData(eventData, function(err, result) {
+        if (err) {
+          alert("Error recording your start action. Please try again.");
+        } else {
+          // On success, redirect to the next page.
+          window.location.href = "photoselection.html";
+        }
+      });
+    }
+  </script>
 </head>
 <body>
   <div class="container">
     <h1>You Will Now Start the Experiment</h1>
     <p>Please do your best to follow the instructions.</p>
-    
-    <!-- Begin Button -->
-    <button onclick="window.location.href='photoselection.html'">I'm ready!</button>
+    <!-- Remove direct redirection; use onclick to call our record function -->
+    <button onclick="recordStartEvent()">I'm ready!</button>
   </div>
-   
 </body>
 </html>
