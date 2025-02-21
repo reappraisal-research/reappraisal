@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <title>Photo Selection</title>
   <style>
@@ -29,8 +29,6 @@
       font-style: italic;
     }
   </style>
-  <!-- Include the centralized data sender -->
-  <script src="dataSender.js"></script>
   <script>
     // Utility function to shuffle an array in place.
     function shuffleArray(array) {
@@ -162,9 +160,11 @@
       // Set the label above the photo and display the corresponding label underneath.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
+        // Display the distinct label for the ambiguous image.
         document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
       } else {
         document.getElementById("photoLabel").innerText = "Simple";
+        // Display the distinct label for the nonambiguous image.
         document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
 
@@ -175,29 +175,14 @@
 
       console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
 
-      // Prepare trial data to send.
-      const trialData = {
-        trial: trialIndex + 1,
-        condition: currentCondition, // Includes photoType and rethinkingLabel
-        selectedPhoto: selectedPhoto,
-        label: (currentCondition.photoType === "ambiguous") ?
-                (ambiguousLabels[selectedPhoto] || "") :
-                (nonAmbiguousLabels[selectedPhoto] || ""),
-        timestamp: new Date().toISOString()
-      };
+      // Increment the trial index for the next trial.
+      trialIndex++;
+      localStorage.setItem("trialIndex", trialIndex.toString());
 
-      // Send the trial data to AWS using the dataSender function.
-      sendExperimentData(trialData, function(err, result) {
-        if (err) {
-          alert("Error sending trial data. Please try again.");
-        } else {
-          // Increment the trial index for the next trial.
-          trialIndex++;
-          localStorage.setItem("trialIndex", trialIndex.toString());
-          // Redirect to the next step (e.g., video_display.html).
-          window.location.href = "video_display.html";
-        }
-      });
+      // Automatically go to the next page after 10 seconds.
+      setTimeout(function() {
+        window.location.href = "video_display.html";
+      }, 10000);
     }
 
     window.onload = selectPhoto;
@@ -209,3 +194,4 @@
   <div id="ambiguousLabel"></div>
 </body>
 </html>
+
