@@ -15,12 +15,15 @@
       text-align: center;
       color: #333;
     }
+    /* Global label style */
     label {
       margin-top: 10px;
     }
+    /* Within each question, make the first label (the question prompt) bold */
     .question label:first-of-type {
       font-weight: bold;
     }
+    /* All other labels (the options) will be normal weight */
     .question label:not(:first-of-type) {
       font-weight: normal;
     }
@@ -45,13 +48,10 @@
       background-color: #0056b3;
     }
   </style>
-  <!-- Include dataSender.js -->
-  <script src="dataSender.js"></script>
 </head>
 <body>
   <h1>Please carefully fill out the questions</h1>
-  <!-- Removed action and method; added id -->
-  <form id="surveyForm">
+  <form action="Pretestsurvey.html" method="get" id="surveyForm">
     <!-- Age -->
     <div class="question">
       <label for="age">What is your age?</label><br>
@@ -98,7 +98,13 @@
       <label for="multipleRaces">From multiple races</label><br>
       <input type="radio" id="someOtherRace" name="ethnicity" value="Some other race">
       <label for="otherEthnicity">Some other race (please specify):</label>
-      <input type="text" id="otherEthnicity" name="otherEthnicity" placeholder="" disabled><br>
+      <input 
+        type="text" 
+        id="otherEthnicity" 
+        name="otherEthnicity" 
+        placeholder="" 
+        disabled
+      /><br>
       <input type="radio" id="preferNot" name="ethnicity" value="Prefer not to disclose">
       <label for="preferNot">Prefer not to disclose</label>
     </div>
@@ -165,7 +171,7 @@
       <label for="french">French</label><br>
       <input type="checkbox" id="other" name="language" value="Other">
       <label for="other-language">Other (please specify):</label>
-      <input type="text" id="other-language" name="other-language" placeholder="">
+      <input type="text" id="other-language" name="other-language" placeholder="" disabled>
     </div>
 
     <!-- Religion (Checkboxes) -->
@@ -191,7 +197,7 @@
       <label for="religion-noreligion">No religion</label><br>
       <input type="checkbox" id="religion-other" name="religion" value="Other">
       <label for="religion-other">Other (please specify):</label>
-      <input type="text" id="religion-other-text" name="religion-other-text" placeholder="">
+      <input type="text" id="religion-other-text" name="religion-other-text" placeholder="" disabled>
     </div>
 
     <!-- Political Viewpoints -->
@@ -209,31 +215,68 @@
   </form>
 
   <script>
-    document.getElementById("surveyForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-      const data = {};
-      formData.forEach((value, key) => {
-        // If the key already exists, convert it to an array (for checkboxes)
-        if (data[key]) {
-          if (Array.isArray(data[key])) {
-            data[key].push(value);
+    document.addEventListener("DOMContentLoaded", function () {
+      // --- Ethnicity: "Some other race" ---
+      const otherRaceRadio = document.getElementById("someOtherRace");
+      const otherRaceText  = document.getElementById("otherEthnicity");
+      const ethnicityRadios  = document.querySelectorAll('input[name="ethnicity"]');
+      ethnicityRadios.forEach((radio) => {
+        radio.addEventListener("change", () => {
+          if (otherRaceRadio.checked) {
+            otherRaceText.disabled = false;
+            otherRaceText.required = true;
           } else {
-            data[key] = [data[key], value];
+            otherRaceText.disabled = true;
+            otherRaceText.required = false;
+            otherRaceText.value = "";
           }
+        });
+      });
+
+      // --- Language: "Other" checkbox ---
+      const otherLangCheckbox = document.getElementById("other");
+      const otherLangText = document.getElementById("other-language");
+      otherLangCheckbox.addEventListener("change", () => {
+        if (otherLangCheckbox.checked) {
+          otherLangText.required = true;
+          otherLangText.disabled = false;
         } else {
-          data[key] = value;
+          otherLangText.required = false;
+          otherLangText.disabled = true;
+          otherLangText.value = "";
         }
       });
-      const experimentData = {
-        responses: data,
-        timestamp: new Date().toISOString()
-      };
-      sendExperimentData(experimentData, function(err, result) {
-        if (err) {
-          alert("Error submitting data. Please try again.");
+
+      // --- Religion: "Other" checkbox ---
+      const religionOtherCheckbox = document.getElementById("religion-other");
+      const religionOtherText = document.getElementById("religion-other-text");
+      religionOtherCheckbox.addEventListener("change", () => {
+        if (religionOtherCheckbox.checked) {
+          religionOtherText.required = true;
+          religionOtherText.disabled = false;
         } else {
-          window.location.href = "Pretestsurvey.html";
+          religionOtherText.required = false;
+          religionOtherText.disabled = true;
+          religionOtherText.value = "";
+        }
+      });
+
+      // --- Form validation for checkbox groups ---
+      const form = document.getElementById("surveyForm");
+      form.addEventListener("submit", function (event) {
+        // Check that at least one language checkbox is checked
+        const languageChecked = document.querySelectorAll('input[name="language"]:checked');
+        if (languageChecked.length === 0) {
+          alert("Please select at least one language.");
+          event.preventDefault();
+          return;
+        }
+        // Check that at least one religion checkbox is checked
+        const religionChecked = document.querySelectorAll('input[name="religion"]:checked');
+        if (religionChecked.length === 0) {
+          alert("Please select at least one religion.");
+          event.preventDefault();
+          return;
         }
       });
     });
