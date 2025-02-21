@@ -171,6 +171,7 @@
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
         const videoElement = document.getElementById("video");
         videoElement.src = selectedVideo.url;
+        videoElement.load(); // Ensure the new source is loaded
 
         playVideoUntil3Seconds(() => {
           document.getElementById("questionContainer").style.display = "block";
