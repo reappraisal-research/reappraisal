@@ -97,6 +97,39 @@
     }
   </style>
   <script>
+    // Define the base directory (ensure the case matches your live server)
+    const basePath = "Videos/";
+
+    // Array of video filenames
+    const filenames = [
+      "0015.mp4",
+      "0299.mp4",
+      "0489.mp4",
+      "0611.mp4",
+      "0681.mp4",
+      "0719.mp4",
+      "0955.mp4",
+      "0975.mp4",
+      "1576.mp4",
+      "1623.mp4",
+      "1844.mp4",
+      "1959.mp4",
+      "0009.mp4",
+      "0333.mp4",
+      "0706.mp4",
+      "0803.mp4",
+      "0860.mp4",
+      "0948.mp4",
+      "1001.mp4",
+      "1164.mp4"
+    ];
+
+    // Generate the videos array by mapping over the filenames
+    const videos = filenames.map((filename, index) => ({
+      url: basePath + filename,
+      label: "v" + (index + 1)
+    }));
+
     // Function to play the video until a total of 3 seconds have elapsed
     function playVideoUntil3Seconds(onComplete) {
       let startTime = Date.now();
@@ -128,34 +161,12 @@
     }
 
     function selectVideo() {
-      // Define the full list of videos with correct (case-sensitive) paths
-      const videos = [
-        { url: "Videos/0015.mp4", label: "v1" },
-        { url: "Videos/0299.mp4", label: "v2" },
-        { url: "Videos/0489.mp4", label: "v3" },
-        { url: "Videos/0611.mp4", label: "v4" },
-        { url: "Videos/0681.mp4", label: "v5" },
-        { url: "Videos/0719.mp4", label: "v6" },
-        { url: "Videos/0955.mp4", label: "v7" },
-        { url: "Videos/0975.mp4", label: "v8" },
-        { url: "Videos/1576.mp4", label: "v9" },
-        { url: "Videos/1623.mp4", label: "v10" },
-        { url: "Videos/1844.mp4", label: "v11" },
-        { url: "Videos/1959.mp4", label: "v12" },
-        { url: "Videos/0009.mp4", label: "v13" },
-        { url: "Videos/0333.mp4", label: "v14" },
-        { url: "Videos/0706.mp4", label: "v15" },
-        { url: "Videos/0803.mp4", label: "v16" },
-        { url: "Videos/0860.mp4", label: "v17" },
-        { url: "Videos/0948.mp4", label: "v18" },
-        { url: "Videos/1001.mp4", label: "v19" },
-        { url: "Videos/1164.mp4", label: "v20" }
-      ];
-
       let videoOrder = JSON.parse(localStorage.getItem("videoOrder") || "[]");
 
       if (videoOrder.length === 0) {
-        videoOrder = shuffleArray(videos.slice());
+        // Use the 'videos' array and shuffle it
+        videoOrder = videos.slice(); // Copy the array
+        videoOrder = shuffleArray(videoOrder);
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
       }
 
