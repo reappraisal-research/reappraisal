@@ -175,7 +175,7 @@
       
       // Send the survey response data to AWS
       sendExperimentData(responseData, function(err, result) {
-          console.log("sendExperimentData called with:", experimentData);
+          console.log("sendExperimentData callback result:", result);
         if (err) {
           alert("Error submitting your survey. Please try again.");
         } else {
