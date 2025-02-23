@@ -108,6 +108,8 @@
       background-color: #45a049;
     }
   </style>
+  <!-- Include the data sender script -->
+  <script src="dataSender.js"></script>
   <script>
     // Immediately-Invoked Function Expression (IIFE) to set up conditions.
     (function() {
@@ -160,20 +162,31 @@
         alert("Please select how negative you feel after rethinking.");
         return;
       }
-      const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
-      responses.push({
+      const responseData = {
         shortAnswer: shortAnswer,
         scaledResponse: scaledResponseValue,
         timestamp: new Date().toISOString()
-      });
+      };
+
+      // Save response locally
+      const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
+      responses.push(responseData);
       localStorage.setItem("surveyResponses", JSON.stringify(responses));
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      if (trialIndex >= conditionList.length) {
-        window.location.href = "Shiftingsuccess.html";
-      } else {
-        window.location.href = "photoselection.html";
-      }
+      
+      // Send the survey response data to AWS
+      sendExperimentData(responseData, function(err, result) {
+        if (err) {
+          alert("Error submitting your survey. Please try again.");
+        } else {
+          let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
+          let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+          if (trialIndex >= conditionList.length) {
+            window.location.href = "Shiftingsuccess.html";
+          } else {
+            window.location.href = "photoselection.html";
+          }
+        }
+      });
     }
   </script>
 </head>
