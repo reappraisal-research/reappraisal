@@ -8,6 +8,8 @@
       background-color: #eef;
     }
   </style>
+  <!-- Include the centralized data sender -->
+  <script src="dataSender.js"></script>
   <script>
     function consent() {
       // Add a class to the body.
@@ -61,7 +63,7 @@
       // Hide the consent button initially.
       document.getElementById("consentButton").style.display = "none";
       
-      // After 30 seconds, show the consent button.
+      // After 15 seconds, show the consent button.
       setTimeout(function() {
         document.getElementById("consentButton").style.display = "block";
       }, 15000);
@@ -73,12 +75,26 @@
               alert("Please check the box to give your consent and continue.");
               return false;
           }
-          message.style.display = 'none'; // Hide the message.
-          document.body.classList.remove('instructions-body-align');
-          // Redirect to Demographics.html after a short delay.
-          setTimeout(function() {
-              window.location.href = "Demographics.html";
-          }, 100);
+          
+          // Create data object to send to AWS.
+          const experimentData = {
+            consentGiven: true,
+            timestamp: new Date().toISOString()
+          };
+          
+          // Call the function from dataSender.js to send data to AWS.
+          sendExperimentData(experimentData, function(err, result) {
+            if (err) {
+              alert("Error submitting data. Please try again.");
+            } else {
+              message.style.display = 'none'; // Hide the message.
+              document.body.classList.remove('instructions-body-align');
+              // Redirect to Demographics.html after a short delay.
+              setTimeout(function() {
+                  window.location.href = "Demographics.html";
+              }, 100);
+            }
+          });
       };
     }
   </script>
