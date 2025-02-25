@@ -96,6 +96,8 @@
       background-color: #45a049;
     }
   </style>
+  <!-- Include the centralized data sender -->
+  <script src="dataSender.js"></script>
   <script>
     // Define the base directory (ensure the case matches your live server)
     const basePath = "Videos/";
@@ -267,5 +269,29 @@
   <div id="buttonContainer" class="button-container">
     <button id="nextButton" onclick="window.location.href='survey.html'">Next</button>
   </div>
+  <script>
+    // Override the Next button's onclick to send AWS data before redirection
+    window.addEventListener("load", function() {
+      var nextButton = document.getElementById("nextButton");
+      nextButton.onclick = function(e) {
+        e.preventDefault();
+        // Gather selected value from the radio buttons
+        const selected = document.querySelector('input[name="videoScale"]:checked');
+        const responseValue = selected ? selected.value : null;
+        const experimentData = {
+          videoScale: responseValue,
+          timestamp: new Date().toISOString()
+        };
+        // Send the data using the centralized function from dataSender.js
+        sendExperimentData(experimentData, function(err, result) {
+          if (err) {
+            alert("Error submitting data. Please try again.");
+          } else {
+            window.location.href = 'survey.html';
+          }
+        });
+      };
+    });
+  </script>
 </body>
 </html>
