@@ -27,12 +27,13 @@
     /* Container for the scale: fixed width, flush left and right with space-between. */
     .scale {
       display: flex;
-      width: 700px;
-      margin: 10px auto;
+      width: 700px;             /* Ensures flush alignment for first & last */
+      margin: 10px auto;        /* Centers the scale container */
       justify-content: space-between;
       align-items: center;
       flex-wrap: nowrap;
     }
+    /* Each label has equal width (flex:1) so numbers align horizontally. */
     .option {
       flex: 1; 
       display: flex;
@@ -40,8 +41,9 @@
       align-items: center;
       text-align: center;
       cursor: pointer;
-      margin: 0 2px;
+      margin: 0 2px; /* tiny gap so labels don't collide */
     }
+    /* Custom radio style: fill in black when checked */
     .option input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
@@ -58,23 +60,25 @@
       background-color: #000;
       color: #fff;
     }
+    /* Keep the numeric label & small text on the same baseline for each bubble */
     .label-text {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      height: 50px;
-      line-height: 1.2;
+      height: 50px;     /* Enough vertical space for number + text */
+      line-height: 1.2; /* Tighter line-height */
     }
     .label-text .number {
       font-size: 16px;
       font-weight: bold;
-      margin-bottom: 2px;
+      margin-bottom: 2px;  /* small gap before the text */
     }
     .label-text small {
       font-size: 14px;
-      margin-top: 0;
+      margin-top: 0;       /* keep text close to the number */
     }
+    /* Next button container pinned at bottom, hidden until radio is selected */
     .button-container {
       display: none;
       position: absolute;
@@ -96,42 +100,7 @@
       background-color: #45a049;
     }
   </style>
-  <!-- Include the centralized data sender -->
-  <script src="dataSender.js"></script>
   <script>
-    // Define the base directory (ensure the case matches your live server)
-    const basePath = "Videos/";
-
-    // Array of video filenames
-    const filenames = [
-      "0015.mp4",
-      "0299.mp4",
-      "0489.mp4",
-      "0611.mp4",
-      "0681.mp4",
-      "0719.mp4",
-      "0955.mp4",
-      "0975.mp4",
-      "1576.mp4",
-      "1623.mp4",
-      "1844.mp4",
-      "1959.mp4",
-      "0009.mp4",
-      "0333.mp4",
-      "0706.mp4",
-      "0803.mp4",
-      "0860.mp4",
-      "0948.mp4",
-      "1001.mp4",
-      "1164.mp4"
-    ];
-
-    // Generate the videos array by mapping over the filenames
-    const videos = filenames.map((filename, index) => ({
-      url: basePath + filename,
-      label: "v" + (index + 1)
-    }));
-
     // Function to play the video until a total of 3 seconds have elapsed
     function playVideoUntil3Seconds(onComplete) {
       let startTime = Date.now();
@@ -163,36 +132,64 @@
     }
 
     function selectVideo() {
+      // Define the full list of videos
+      const videos = [
+        { url: "Videos/0015.mp4", label: "v1" },
+        { url: "Videos/0299.mp4", label: "v2" },
+        { url: "Videos/0489.mp4", label: "v3" },
+        { url: "Videos/0611.mp4", label: "v4" },
+        { url: "Videos/0681.mp4", label: "v5" },
+        { url: "Videos/0719.mp4", label: "v6" },
+        { url: "Videos/0955.mp4", label: "v7" },
+        { url: "Videos/0975.mp4", label: "v8" },
+        { url: "Videos/1576.mp4", label: "v9" },
+        { url: "Videos/1623.mp4", label: "v10" },
+        { url: "Videos/1844.mp4", label: "v11" },
+        { url: "Videos/1959.mp4", label: "v12" },
+        { url: "Videos/0009.mp4", label: "v13" },
+        { url: "Videos/0333.mp4", label: "v14" },
+        { url: "Videos/0706.mp4", label: "v15" },
+        { url: "Videos/0803.mp4", label: "v16" },
+        { url: "Videos/0860.mp4", label: "v17" },
+        { url: "Videos/0948.mp4", label: "v18" },
+        { url: "Videos/1001.mp4", label: "v19" },
+        { url: "Videos/1164.mp4", label: "v20" }
+      ];
+
+      // Check if we already have a saved video order
       let videoOrder = JSON.parse(localStorage.getItem("videoOrder") || "[]");
 
+      // If not, shuffle the full list and save it
       if (videoOrder.length === 0) {
-        // Use the 'videos' array and shuffle it
-        videoOrder = videos.slice(); // Copy the array
-        videoOrder = shuffleArray(videoOrder);
+        videoOrder = shuffleArray(videos.slice());
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
       }
 
+      // Get the next video (remove it from the order so it won't be shown again)
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
         const videoElement = document.getElementById("video");
         videoElement.src = selectedVideo.url;
-        videoElement.load(); // Ensure the new source is loaded
 
         playVideoUntil3Seconds(() => {
           document.getElementById("questionContainer").style.display = "block";
         });
       } else {
+        // All videos have been shown; you can choose to display a message or take another action.
         document.getElementById("video").style.display = "none";
         document.getElementById("questionContainer").innerHTML = "<p>All videos have been shown.</p>";
       }
     }
 
     window.onload = function() {
+      // Start the video selection logic
       selectVideo();
 
+      // Show the "Next" button when a radio is chosen
       const radioButtons = document.getElementsByName("videoScale");
       const nextButtonContainer = document.getElementById("buttonContainer");
+      // Convert NodeList to Array to use forEach
       Array.from(radioButtons).forEach(radio => {
         radio.addEventListener("change", () => {
           nextButtonContainer.style.display = "block";
@@ -204,15 +201,16 @@
 
 <body>
   <p>Please watch the video below:</p>
-  <video id="video" autoplay muted playsinline>
+  <video id="video">
     <source src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 
   <!-- Question Section -->
   <div id="questionContainer" class="question-container">
-    <label for="videoScale">1. How negatively do you feel?</label>
+    <label for="videoScale">1. How negative do you feel?</label>
     <div class="scale">
+      <!-- 1: Not negative at all -->
       <label class="option">
         <input type="radio" name="videoScale" value="1">
         <span class="label-text">
@@ -220,6 +218,7 @@
           <small>Not negative at all</small>
         </span>
       </label>
+      <!-- 2 -->
       <label class="option">
         <input type="radio" name="videoScale" value="2">
         <span class="label-text">
@@ -227,6 +226,7 @@
           <small>&nbsp;</small>
         </span>
       </label>
+      <!-- 3 -->
       <label class="option">
         <input type="radio" name="videoScale" value="3">
         <span class="label-text">
@@ -234,6 +234,7 @@
           <small>&nbsp;</small>
         </span>
       </label>
+      <!-- 4 -->
       <label class="option">
         <input type="radio" name="videoScale" value="4">
         <span class="label-text">
@@ -241,6 +242,7 @@
           <small>&nbsp;</small>
         </span>
       </label>
+      <!-- 5 -->
       <label class="option">
         <input type="radio" name="videoScale" value="5">
         <span class="label-text">
@@ -248,6 +250,7 @@
           <small>&nbsp;</small>
         </span>
       </label>
+      <!-- 6 -->
       <label class="option">
         <input type="radio" name="videoScale" value="6">
         <span class="label-text">
@@ -255,6 +258,7 @@
           <small>&nbsp;</small>
         </span>
       </label>
+      <!-- 7: Extremely negative -->
       <label class="option">
         <input type="radio" name="videoScale" value="7">
         <span class="label-text">
@@ -269,29 +273,5 @@
   <div id="buttonContainer" class="button-container">
     <button id="nextButton" onclick="window.location.href='survey.html'">Next</button>
   </div>
-  <script>
-    // Override the Next button's onclick to send AWS data before redirection
-    window.addEventListener("load", function() {
-      var nextButton = document.getElementById("nextButton");
-      nextButton.onclick = function(e) {
-        e.preventDefault();
-        // Gather selected value from the radio buttons
-        const selected = document.querySelector('input[name="videoScale"]:checked');
-        const responseValue = selected ? selected.value : null;
-        const experimentData = {
-          videoScale: responseValue,
-          timestamp: new Date().toISOString()
-        };
-        // Send the data using the centralized function from dataSender.js
-        sendExperimentData(experimentData, function(err, result) {
-          if (err) {
-            alert("Error submitting data. Please try again.");
-          } else {
-            window.location.href = 'survey.html';
-          }
-        });
-      };
-    });
-  </script>
 </body>
 </html>
