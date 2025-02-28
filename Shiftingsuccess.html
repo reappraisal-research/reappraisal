@@ -20,9 +20,10 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    /* Fixed-size container for images */
     .image-container {
       width: 100%;
-      height: 60vh;
+      height: 60vh; /* Fixed height for uniform display */
       border: 1px solid #ccc;
       border-radius: 8px;
       margin-bottom: 20px;
@@ -34,13 +35,14 @@
     .image-container img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: contain; /* Ensures the entire image is visible (no cropping) */
     }
     p.prompt {
       font-size: 18px;
       font-weight: bold;
       margin: 20px 0;
     }
+    /* Spread out scale */
     .scale {
       display: flex;
       justify-content: space-between;
@@ -95,10 +97,6 @@
       background-color: #45a049;
     }
   </style>
-  <!-- No need to include dataSender.js here if you plan to send aggregated data later;
-       however, if you want to send each trial separately, you could call sendExperimentData() inside nextTrial().
-       In this example, we wait until all trials are completed. -->
-  <script src="dataSender.js"></script>
   <script>
     // Utility function to shuffle an array
     function shuffleArray(array) {
@@ -109,7 +107,7 @@
       return array;
     }
 
-    // Default list of images.
+    // Define the default list of images.
     const defaultImages = [
       "Stimulireal/horseback.jpg",
       "Stimulireal/donkey.seal.png",
@@ -124,56 +122,45 @@
       "Stimulireal/ur.donkey.seal.jpg",
       "Stimulireal/ur.face.vase.png",
       "Stimulireal/ur.man.mouse.png",
-      "Stimulireal/urprofile.profile.jpg",
-      "Stimulireal/ur5.jpg",
-      "Stimulireal/ur6.jpg",
-      "Stimulireal/ur7.jpg",
-      "Stimulireal/ur9.png",
-      "Stimulireal/ur12.jpg",
-      "Stimulireal/ur11.jpg"
+      "Stimulireal/ur.profile.profile.jpg",
+      "Stimulireal/ur.hug.png",
+      "Stimulireal/ur.woman.man.png",
+      "Stimulireal/ur.old.young.jpg",
+      "Stimulireal/ur.frog.horse.png",
+      "Stimulireal/ur.horseback.jpg",
+      "Stimulireal/ur.jastrow.rabbit.jpg"
     ];
 
-    // Load or initialize the shuffled images array.
+    // Load or initialize the shuffled images array from localStorage.
     let images;
     if (localStorage.getItem("perceptionImages")) {
       images = JSON.parse(localStorage.getItem("perceptionImages"));
     } else {
-      images = shuffleArray(defaultImages.slice());
+      images = shuffleArray(defaultImages.slice()); // Shuffle a copy of the default list
       localStorage.setItem("perceptionImages", JSON.stringify(images));
     }
 
-    // Get or initialize the trial index.
+    // Get the current trial index from localStorage or initialize it.
     let trialIndex = parseInt(localStorage.getItem("perceptionTrialIndex"), 10);
     if (isNaN(trialIndex)) {
       trialIndex = 0;
     }
 
-    // Display the current trial image.
+    // Display the current trial image or redirect if all images have been shown.
     function displayTrial() {
       if (trialIndex >= images.length) {
-        // All images used – retrieve aggregated responses from localStorage.
-        const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
-        const experimentData = {
-          responses: responses,
-          timestamp: new Date().toISOString()
-        };
-        // Send aggregated responses to AWS, then redirect.
-        sendExperimentData(experimentData, function(err, result) {
-          if (err) {
-            alert("Error submitting trial data. Please try again.");
-          } else {
-            window.location.href = "thank_you.html";
-          }
-        });
+        // All images have been used; redirect to thank_you.html
+        window.location.href = "thank_you.html";
         return;
       }
       document.getElementById("trialImage").src = images[trialIndex];
 
-      // Reset radio selections for the new trial.
+      // Reset radio selections for the new trial
       document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
     }
 
     function nextTrial() {
+      // Get responses from the perception and positivity scales.
       const perceptionScale = document.getElementsByName("perceptionScale");
       const positivityScale = document.getElementsByName("positivityScale");
 
@@ -187,12 +174,13 @@
         }
       }
 
+      // Ensure both questions have been answered.
       if (!perceptionResponse || !positivityResponse) {
         alert("Please answer both questions before proceeding.");
         return;
       }
 
-      // Save current trial response.
+      // Save the responses (if needed).
       const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
       responses.push({
         trial: trialIndex + 1,
@@ -203,8 +191,10 @@
       });
       localStorage.setItem("perceptionResponses", JSON.stringify(responses));
 
+      // Increment the trial index and update localStorage.
       trialIndex++;
       localStorage.setItem("perceptionTrialIndex", trialIndex);
+
       displayTrial();
     }
 
@@ -213,11 +203,21 @@
 </head>
 <body>
   <div class="container">
+    <!-- Fixed-size container for the trial image -->
     <div class="image-container">
       <img id="trialImage" src="" alt="Trial Image" />
     </div>
+    <!-- Perception Shift Question -->
     <p class="prompt">How frequently did your perception of this image shift?</p>
-    <div class="scale" style="width: 90%; margin: 10px auto; gap: 20px;">
+    <div class="scale" style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: nowrap;
+      width: 90%;
+      margin: 10px auto;
+      gap: 20px;">
+      
       <label>
         <input type="radio" name="perceptionScale" value="1">
         <small>Not at all</small>
@@ -248,6 +248,7 @@
       </label>
     </div>
 
+    <!-- Positivity Question -->
     <p class="prompt">How did you find this image?</p>
     <div class="scale">
       <label><input type="radio" name="positivityScale" value="1">1</label>
