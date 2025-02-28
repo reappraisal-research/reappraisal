@@ -8,8 +8,6 @@
       background-color: #eef;
     }
   </style>
-  <!-- Include the centralized data sender -->
-  <script src="dataSender.js"></script>
   <script>
     function consent() {
       // Add a class to the body.
@@ -35,7 +33,7 @@
       message.innerHTML = `
         <div style="max-width: 800px; margin: auto; padding: 20px; font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; text-align: left; color: #333;">
           <h1 style="text-align: center; font-weight: bold;">CONSENT TO PARTICIPATE IN RESEARCH</h1>
-          <h3>Welcome to the Ambiguous Stimuli and Situation Reappraisal Study!</h3>
+          <h3>Welcome to the Emotion and Situation Rethinking Study!</h3>
           <p>My name is Jeremiah Collins. I am an undergrad student in the psychology department conducting this study. The purpose of this study is to explore how exposure to different types of images affects your reappraisal success.</p>
           <p>The procedures in this research were approved by the CPHS as part of the research on the Cal Coherence and Relationships Study CPHS #2022-06-15450. This study will require about 45 minutes of your time.</p>
           <p><strong>Procedure:</strong> In this experiment, you will:</p>
@@ -63,7 +61,7 @@
       // Hide the consent button initially.
       document.getElementById("consentButton").style.display = "none";
       
-      // After 15 seconds, show the consent button.
+      // After 30 seconds, show the consent button.
       setTimeout(function() {
         document.getElementById("consentButton").style.display = "block";
       }, 15000);
@@ -75,26 +73,12 @@
               alert("Please check the box to give your consent and continue.");
               return false;
           }
-          
-          // Create data object to send to AWS.
-          const experimentData = {
-            consentGiven: true,
-            timestamp: new Date().toISOString()
-          };
-          
-          // Call the function from dataSender.js to send data to AWS.
-          sendExperimentData(experimentData, function(err, result) {
-            if (err) {
-              alert("Error submitting data. Please try again.");
-            } else {
-              message.style.display = 'none'; // Hide the message.
-              document.body.classList.remove('instructions-body-align');
-              // Redirect to Demographics.html after a short delay.
-              setTimeout(function() {
-                  window.location.href = "Demographics.html";
-              }, 100);
-            }
-          });
+          message.style.display = 'none'; // Hide the message.
+          document.body.classList.remove('instructions-body-align');
+          // Redirect to Demographics.html after a short delay.
+          setTimeout(function() {
+              window.location.href = "Demographics.html";
+          }, 100);
       };
     }
   </script>
