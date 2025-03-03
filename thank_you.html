@@ -54,6 +54,8 @@
     window.onload = function() {
       // Create a final event object to record that the participant reached the Thank You page.
       const finalEvent = {
+        participantSID: localStorage.getItem("participantSID"),
+        surveyName: "StudyCompletion",
         stage: "StudyCompletion",
         action: "Completed",
         timestamp: new Date().toISOString()
