@@ -8,6 +8,10 @@
       background-color: #eef;
     }
   </style>
+
+  <!-- 1. Include the data sender script -->
+  <script src="dataSender.js"></script>
+
   <script>
     function consent() {
       // Add a class to the body.
@@ -73,12 +77,33 @@
               alert("Please check the box to give your consent and continue.");
               return false;
           }
-          message.style.display = 'none'; // Hide the message.
-          document.body.classList.remove('instructions-body-align');
-          // Redirect to Demographics.html after a short delay.
-          setTimeout(function() {
-              window.location.href = "Demographics.html";
-          }, 100);
+          
+          // 2. Retrieve participantSID from localStorage
+          const participantSID = localStorage.getItem("participantSID");
+          
+          // Build the data object to send (label it BFS1, or anything you like)
+          const experimentData = {
+            participantSID: participantSID,
+            consentGiven: true,
+            surveyName: "BFS1_Consent", // <== Tag this step if you wish
+            timestamp: new Date().toISOString()
+          };
+
+          // 3. Send the data using sendExperimentData (from dataSender.js)
+          sendExperimentData(experimentData, function(err, result) {
+            if (err) {
+              alert("Error submitting consent. Please try again.");
+            } else {
+              // Hide the message (unchanged code)
+              message.style.display = 'none';
+              document.body.classList.remove('instructions-body-align');
+              
+              // 4. Redirect after successful submission
+              setTimeout(function() {
+                  window.location.href = "Demographics.html";
+              }, 100);
+            }
+          });
       };
     }
   </script>
