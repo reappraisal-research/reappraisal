@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Photo Selection</title>
   <style>
@@ -175,6 +175,27 @@
 
       console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
 
+      // --- NEW AWS DATA INTEGRATION ---
+      // Retrieve participantSID from localStorage.
+      const participantSID = localStorage.getItem("participantSID");
+      // Build the data object including which photo is shown to which user.
+      const photoData = {
+        participantSID: participantSID,
+        surveyName: "PhotoSelection",
+        selectedPhoto: selectedPhoto,
+        condition: currentCondition,
+        timestamp: new Date().toISOString()
+      };
+      // Send the data using sendExperimentData (from dataSender.js).
+      sendExperimentData(photoData, function(err, result) {
+        if(err) {
+          console.error("Error sending photo selection data:", err);
+        } else {
+          console.log("Photo selection data sent successfully.");
+        }
+      });
+      // --- END AWS DATA INTEGRATION ---
+
       // Increment the trial index for the next trial.
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
@@ -194,4 +215,3 @@
   <div id="ambiguousLabel"></div>
 </body>
 </html>
-
