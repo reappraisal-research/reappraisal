@@ -221,6 +221,8 @@
         responses[key] = value;
       });
       const experimentData = {
+        participantSID: localStorage.getItem("participantSID"),
+        surveyName: "BFS1",
         responses: responses,
         timestamp: new Date().toISOString()
       };
