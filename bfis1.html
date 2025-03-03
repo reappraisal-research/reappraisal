@@ -224,8 +224,14 @@
       for (let i = 1; i <= 10; i++) {
         responses.push({ trial: i, answer: formData.get("q" + i) });
       }
-      
+
+      // Retrieve participantSID from localStorage
+      const participantSID = localStorage.getItem("participantSID");
+
+      // Build the data object, labeling it BFS1 (or any label you prefer)
       const experimentData = {
+        participantSID: participantSID,
+        surveyName: "BFS1",
         responses: responses,
         timestamp: new Date().toISOString()
       };
