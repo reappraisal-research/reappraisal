@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Photo Selection</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -9,19 +11,17 @@
     }
     img {
       display: block;
-      width: 100vw;       /* Full viewport width */
-      height: 80vh;       /* 80% of the viewport height */
-      object-fit: contain;/* Ensure the entire image is visible */
+      width: 100vw;        /* Full viewport width */
+      height: 80vh;        /* 80% of the viewport height */
+      object-fit: contain; /* Ensure the entire image is visible */
       margin: 20px auto;
     }
-    /* Style for the label above the photo */
     #photoLabel {
       font-weight: bold;
       text-align: center;
       margin-bottom: 10px;
       font-size: 1.2em;
     }
-    /* Style for the ambiguous image label underneath the photo */
     #ambiguousLabel {
       text-align: center;
       margin-top: 10px;
@@ -39,7 +39,7 @@
       return array;
     }
 
-    // Define your photo pools.
+    // Define your photo pools
     const ambiguousPhotos = [
       "Stimulireal/horseback.jpg",
       "Stimulireal/donkey.seal.png",
@@ -65,7 +65,7 @@
       "Stimulireal/ur.profile.profile.jpg"
     ];
 
-    // Mapping for distinct labels for each ambiguous image.
+    // Labels for ambiguous images
     const ambiguousLabels = {
       "Stimulireal/horseback.jpg": "Riding a horse/ a man's face",
       "Stimulireal/donkey.seal.png": "Donkey/ seal",
@@ -79,7 +79,7 @@
       "Stimulireal/profile.profile.png": "Side view/ front view"
     };
 
-    // Mapping for distinct labels for each nonambiguous image.
+    // Labels for non-ambiguous images
     const nonAmbiguousLabels = {
       "Stimulireal/ur.donkey.seal.jpg": "Fish",
       "Stimulireal/ur.jastrow.rabbit.jpg": "Horse",
@@ -93,7 +93,7 @@
       "Stimulireal/ur.profile.profile.jpg": "Man front view"
     };
 
-    // Initialize photo pools in localStorage if not already set.
+    // Initialize photo pools in localStorage if not already set
     if (!localStorage.getItem("ambiguousPhotos")) {
       localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
     }
@@ -101,21 +101,16 @@
       localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
     }
 
-    // Ensure trialIndex exists.
+    // Ensure trialIndex exists
     if (!localStorage.getItem("trialIndex")) {
       localStorage.setItem("trialIndex", "0");
     }
 
-    // Retrieve the condition list (balanced image conditions).
+    // Retrieve the condition list (balanced image conditions)
     let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-    // If the condition list is empty, generate a balanced list of 20 conditions.
+    // If the condition list is empty, generate a balanced list of 20 conditions
     if (!conditionList || conditionList.length === 0) {
       let conditions = [];
-      // Create 4 conditions (each repeated 5 times = 20 trials):
-      // 1. ambiguous + "Situation rethinking"
-      // 2. ambiguous + "goal rethinking"
-      // 3. nonAmbiguous + "Situation rethinking"
-      // 4. nonAmbiguous + "goal rethinking"
       for (let i = 0; i < 5; i++) {
         conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
         conditions.push({ photoType: "ambiguous", rethinkingLabel: "goal rethinking" });
@@ -130,21 +125,19 @@
     function selectPhoto() {
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
 
-      // If all trials are completed, redirect to thank_you.html.
+      // If all trials completed, redirect
       if (trialIndex >= conditionList.length) {
         alert("All trials completed. Thank you!");
         window.location.href = "thank_you.html";
         return;
       }
 
-      // Get the current condition based on trialIndex.
+      // Current condition
       let currentCondition = conditionList[trialIndex];
 
-      // Select the appropriate photo pool.
+      // Select the pool
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
       let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
-
-      console.log("Trial:", trialIndex + 1, "Using Pool:", poolKey, "Pool Length:", photoPool.length);
 
       if (photoPool.length === 0) {
         alert("No photos remain in the pool. Thank you!");
@@ -152,34 +145,32 @@
         return;
       }
 
-      // Randomly select a photo and remove it from the pool.
+      // Randomly pick a photo from the pool
       let randomIndex = Math.floor(Math.random() * photoPool.length);
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
-      // Set the label above the photo and display the corresponding label underneath.
+      // Update label
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
-        // Display the distinct label for the ambiguous image.
         document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
       } else {
         document.getElementById("photoLabel").innerText = "Simple";
-        // Display the distinct label for the nonambiguous image.
         document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
 
-      // Display the selected photo.
+      // Display the photo
       const photoElement = document.getElementById("photo");
       photoElement.src = selectedPhoto;
-      photoElement.alt = Selected Photo: ${selectedPhoto};
+      photoElement.alt = `Selected Photo: ${selectedPhoto}`;
 
       console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
 
-      // Increment the trial index for the next trial.
+      // Increment trialIndex
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
-      // Automatically go to the next page after 10 seconds.
+      // Redirect after 10 seconds
       setTimeout(function() {
         window.location.href = "video_display.html";
       }, 10000);
