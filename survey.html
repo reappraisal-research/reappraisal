@@ -167,13 +167,29 @@
         timestamp: new Date().toISOString()
       });
       localStorage.setItem("surveyResponses", JSON.stringify(responses));
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      if (trialIndex >= conditionList.length) {
-        window.location.href = "Shiftingsuccess.html";
-      } else {
-        window.location.href = "photoselection.html";
-      }
+      
+      // --- NEW AWS DATA INTEGRATION ---
+      const participantSID = localStorage.getItem("participantSID");
+      const surveyData = {
+        participantSID: participantSID,
+        surveyName: "Survey",
+        responses: responses,
+        timestamp: new Date().toISOString()
+      };
+      sendExperimentData(surveyData, function(err, result) {
+        if(err) {
+          alert("Error submitting data. Please try again.");
+        } else {
+          let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
+          let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+          if (trialIndex >= conditionList.length) {
+            window.location.href = "Shiftingsuccess.html";
+          } else {
+            window.location.href = "photoselection.html";
+          }
+        }
+      });
+      // --- END AWS DATA INTEGRATION ---
     }
   </script>
 </head>
