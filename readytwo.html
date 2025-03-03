@@ -49,6 +49,8 @@
     function recordStartEvent() {
       // Create a data object with details about this event.
       const eventData = {
+        participantSID: localStorage.getItem("participantSID"),
+        surveyName: "StartExperiment",
         stage: "StartExperiment",
         action: "I'm ready!",
         timestamp: new Date().toISOString()
