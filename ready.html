@@ -67,6 +67,8 @@
     document.getElementById("nextButton").addEventListener("click", function() {
       // Create an object with stage details and chosen action.
       const eventData = {
+        participantSID: localStorage.getItem("participantSID"),
+        surveyName: "ReadyToBeginStudy",
         stage: "ReadyToBeginStudy",
         action: "Next",
         timestamp: new Date().toISOString()
@@ -85,6 +87,8 @@
     // When the Repeat Instructions button is clicked:
     document.getElementById("repeatButton").addEventListener("click", function() {
       const eventData = {
+        participantSID: localStorage.getItem("participantSID"),
+        surveyName: "ReadyToBeginStudy",
         stage: "ReadyToBeginStudy",
         action: "RepeatInstructions",
         timestamp: new Date().toISOString()
