@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <title>Photo Selection</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,21 +16,98 @@
       object-fit: contain;/* Ensure the entire image is visible */
       margin: 20px auto;
     }
-    /* Style for the label above the photo */
     #photoLabel {
       font-weight: bold;
       text-align: center;
       margin-bottom: 10px;
       font-size: 1.2em;
     }
-    /* Style for the ambiguous image label underneath the photo */
     #ambiguousLabel {
       text-align: center;
       margin-top: 10px;
       font-size: 1.1em;
       font-style: italic;
     }
+    /* The question container with the radio scale (hidden until photo is selected if needed) */
+    #questionContainer {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .scale {
+      display: flex;
+      width: 700px;
+      margin: 10px auto;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    .option {
+      flex: 1; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+    .option input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+      border: 2px solid #000;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .option input[type="radio"]:checked {
+      background-color: #000;
+      color: #fff;
+    }
+    .label-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 50px;
+      line-height: 1.2;
+    }
+    .label-text .number {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    .label-text small {
+      font-size: 14px;
+      margin-top: 0;
+    }
+    /* Next button container – hidden until a radio is selected */
+    #buttonContainer {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 auto;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
   </style>
+
+  <!-- Include your dataSender.js script if you want to record data here too -->
+  <script src="dataSender.js"></script>
+  
   <script>
     // Utility function to shuffle an array in place.
     function shuffleArray(array) {
@@ -39,179 +118,125 @@
       return array;
     }
 
-    // Define your photo pools.
-    const ambiguousPhotos = [
-      "Stimulireal/horseback.jpg",
-      "Stimulireal/donkey.seal.png",
-      "Stimulireal/face.vase.png",
-      "Stimulireal/frog.horse.jpg",
-      "Stimulireal/jastrow.rabbit.jpg",
-      "Stimulireal/man.mouse.png",
-      "Stimulireal/old.young.png",
-      "Stimulireal/woman.man.png",
-      "Stimulireal/hug.png",
-      "Stimulireal/profile.profile.png"
-    ];
-    const nonAmbiguousPhotos = [
-      "Stimulireal/ur.donkey.seal.jpg",
-      "Stimulireal/ur.jastrow.rabbit.jpg",
-      "Stimulireal/ur.face.vase.png",
-      "Stimulireal/ur.man.mouse.png",
-      "Stimulireal/ur.hug.png",
-      "Stimulireal/ur.woman.man.png",
-      "Stimulireal/ur.old.young.jpg",
-      "Stimulireal/ur.frog.horse.png",
-      "Stimulireal/ur.horseback.jpg",
-      "Stimulireal/ur.profile.profile.jpg"
-    ];
+    // Define your photo pools
+    const ambiguousPhotos = [ /* your ambiguous paths here */ ];
+    const nonAmbiguousPhotos = [ /* your non-ambiguous paths here */ ];
 
-    // Mapping for distinct labels for each ambiguous image.
-    const ambiguousLabels = {
-      "Stimulireal/horseback.jpg": "Riding a horse/ a man's face",
-      "Stimulireal/donkey.seal.png": "Donkey/ seal",
-      "Stimulireal/face.vase.png": "Face/ vase",
-      "Stimulireal/frog.horse.jpg": "Frog/ horse",
-      "Stimulireal/jastrow.rabbit.jpg": "Duck/ rabbit",
-      "Stimulireal/man.mouse.png": "Man/ mouse",
-      "Stimulireal/old.young.png": "Old lady/ young lady",
-      "Stimulireal/woman.man.png": "Man's face/ woman sitting",
-      "Stimulireal/hug.png": "Man's face/ woman's face",
-      "Stimulireal/profile.profile.png": "Side view/ front view"
+    // Mapping for ambiguous / nonambiguous labels
+    const ambiguousLabels = { /* your dictionary here */ };
+    const nonAmbiguousLabels = { /* your dictionary here */ };
+
+    // On page load, show the correct photo, then show the question container.
+    window.onload = function() {
+      selectPhoto(); // pick the next photo and show it
     };
-
-    // Mapping for distinct labels for each nonambiguous image.
-    const nonAmbiguousLabels = {
-      "Stimulireal/ur.donkey.seal.jpg": "Fish",
-      "Stimulireal/ur.jastrow.rabbit.jpg": "Horse",
-      "Stimulireal/ur.face.vase.png": "Jar",
-      "Stimulireal/ur.man.mouse.png": "Mouse",
-      "Stimulireal/ur.hug.png": "People talking",
-      "Stimulireal/ur.woman.man.png": "Face",
-      "Stimulireal/ur.old.young.jpg": "Woman",
-      "Stimulireal/ur.frog.horse.png": "Bird",
-      "Stimulireal/ur.horseback.jpg": "Person walking dog",
-      "Stimulireal/ur.profile.profile.jpg": "Man front view"
-    };
-
-    // Initialize photo pools in localStorage if not already set.
-    if (!localStorage.getItem("ambiguousPhotos")) {
-      localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
-    }
-    if (!localStorage.getItem("nonAmbiguousPhotos")) {
-      localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
-    }
-
-    // Ensure trialIndex exists.
-    if (!localStorage.getItem("trialIndex")) {
-      localStorage.setItem("trialIndex", "0");
-    }
-
-    // Retrieve the condition list (balanced image conditions).
-    let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-    // If the condition list is empty, generate a balanced list of 20 conditions.
-    if (!conditionList || conditionList.length === 0) {
-      let conditions = [];
-      // Create 4 conditions (each repeated 5 times = 20 trials):
-      // 1. ambiguous + "Situation rethinking"
-      // 2. ambiguous + "goal rethinking"
-      // 3. nonAmbiguous + "Situation rethinking"
-      // 4. nonAmbiguous + "goal rethinking"
-      for (let i = 0; i < 5; i++) {
-        conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
-        conditions.push({ photoType: "ambiguous", rethinkingLabel: "goal rethinking" });
-        conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
-        conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "goal rethinking" });
-      }
-      conditions = shuffleArray(conditions);
-      localStorage.setItem("conditionList", JSON.stringify(conditions));
-      conditionList = conditions;
-    }
 
     function selectPhoto() {
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-
-      // If all trials are completed, redirect to thank_you.html.
-      if (trialIndex >= conditionList.length) {
-        alert("All trials completed. Thank you!");
-        window.location.href = "thank_you.html";
-        return;
-      }
-
-      // Get the current condition based on trialIndex.
-      let currentCondition = conditionList[trialIndex];
-
-      // Select the appropriate photo pool.
-      let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
-      let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
-
-      console.log("Trial:", trialIndex + 1, "Using Pool:", poolKey, "Pool Length:", photoPool.length);
-
-      if (photoPool.length === 0) {
-        alert("No photos remain in the pool. Thank you!");
-        window.location.href = "thank_you.html";
-        return;
-      }
-
-      // Randomly select a photo and remove it from the pool.
-      let randomIndex = Math.floor(Math.random() * photoPool.length);
-      let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
-      localStorage.setItem(poolKey, JSON.stringify(photoPool));
-
-      // Set the label above the photo and display the corresponding label underneath.
-      if (currentCondition.photoType === "ambiguous") {
-        document.getElementById("photoLabel").innerText = "Complex";
-        // Display the distinct label for the ambiguous image.
-        document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
-      } else {
-        document.getElementById("photoLabel").innerText = "Simple";
-        // Display the distinct label for the nonambiguous image.
-        document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
-      }
-
-      // Display the selected photo.
-      const photoElement = document.getElementById("photo");
-      photoElement.src = selectedPhoto;
-      photoElement.alt = `Selected Photo: ${selectedPhoto}`;
-
-      console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
-
-      // --- NEW AWS DATA INTEGRATION ---
-      // Retrieve participantSID from localStorage.
-      const participantSID = localStorage.getItem("participantSID");
-      // Build the data object including which photo is shown to which user.
-      const photoData = {
-        participantSID: participantSID,
-        surveyName: "PhotoSelection",
-        selectedPhoto: selectedPhoto,
-        condition: currentCondition,
-        timestamp: new Date().toISOString()
-      };
-      // Send the data using sendExperimentData (from dataSender.js).
-      sendExperimentData(photoData, function(err, result) {
-        if(err) {
-          console.error("Error sending photo selection data:", err);
-        } else {
-          console.log("Photo selection data sent successfully.");
-        }
+      // your existing logic to pick / display the next photo
+      // ...
+      // after setting photo src, label, etc., show the question container:
+      document.getElementById("questionContainer").style.display = "block";
+      
+      // Then set up event listener on the radio buttons to show Next button
+      const radioButtons = document.getElementsByName("videoScale");
+      const nextButtonContainer = document.getElementById("buttonContainer");
+      
+      // Show the Next button once a radio is selected
+      Array.from(radioButtons).forEach(radio => {
+        radio.addEventListener("change", () => {
+          nextButtonContainer.style.display = "block";
+        });
       });
-      // --- END AWS DATA INTEGRATION ---
-
-      // Increment the trial index for the next trial.
-      trialIndex++;
-      localStorage.setItem("trialIndex", trialIndex.toString());
-
-      // Automatically go to the next page after 10 seconds.
-      setTimeout(function() {
-        window.location.href = "video_display.html";
-      }, 10000);
+      
+      // Optionally, you can also send AWS data about which photo is shown, etc. 
+      // ...
     }
 
-    window.onload = selectPhoto;
+    // Called when user clicks Next
+    function goToVideo() {
+      // If you want to record the chosen scale value here, do so
+      const selected = document.querySelector('input[name="videoScale"]:checked');
+      if (!selected) {
+        alert("Please select a response first.");
+        return;
+      }
+      
+      // Example AWS data:
+      /*
+      const participantSID = localStorage.getItem("participantSID");
+      const experimentData = {
+        participantSID,
+        surveyName: "PhotoSelection",
+        chosenScale: selected.value,
+        // plus any info about chosen photo 
+        timestamp: new Date().toISOString()
+      };
+      sendExperimentData(experimentData, function(err, result) {
+        if (err) {
+          alert("Error submitting data. Please try again.");
+        } else {
+          // On success:
+          window.location.href = "video_display.html";
+        }
+      });
+      */
+
+      // Or, if you don't want to record anything else here, just:
+      window.location.href = "video_display.html";
+    }
   </script>
 </head>
 <body>
   <div id="photoLabel"></div>
   <img id="photo" src="" alt="Selected Photo">
   <div id="ambiguousLabel"></div>
+  
+  <!-- This container holds the question scale and the Next button -->
+  <div id="questionContainer">
+    <p>1. How interesting do you find this image?</p>
+    <div class="scale">
+      <!-- Make sure name="videoScale" matches the name in your code -->
+      <label class="option">
+        <input type="radio" name="videoScale" value="1">
+        <span class="label-text">
+          <span class="number">1</span>
+          <small>Not at all</small>
+        </span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="2">
+        <span class="label-text">
+          <span class="number">2</span>
+          <small>&nbsp;</small>
+        </span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="3">
+        <span class="label-text">
+          <span class="number">3</span>
+          <small>&nbsp;</small>
+        </span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="4">
+        <span class="label-text">
+          <span class="number">4</span>
+          <small>&nbsp;</small>
+        </span>
+      </label>
+      <label class="option">
+        <input type="radio" name="videoScale" value="5">
+        <span class="label-text">
+          <span class="number">5</span>
+          <small>Very much</small>
+        </span>
+      </label>
+    </div>
+    
+    <!-- Container for the Next button (initially hidden) -->
+    <div id="buttonContainer">
+      <button onclick="goToVideo()">Next</button>
+    </div>
+  </div>
 </body>
 </html>
