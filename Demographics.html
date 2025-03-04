@@ -19,11 +19,11 @@
     label {
       margin-top: 10px;
     }
-    /* Within each question, make the first label (the question prompt) bold */
+    /* Make the question prompt bold */
     .question label:first-of-type {
       font-weight: bold;
     }
-    /* All other labels (the options) will be normal weight */
+    /* All other labels normal */
     .question label:not(:first-of-type) {
       font-weight: normal;
     }
@@ -210,7 +210,7 @@
   </form>
   
   <script>
-    // --- CSV Generation Functions ---
+    // --- CSV Generation Function ---
     function generateCSV(dataArray) {
       const header = Object.keys(dataArray[0]);
       const csvRows = [header];
@@ -222,17 +222,20 @@
       return csvRows.map(row => row.join(",")).join("\n");
     }
     
+    // --- Upload CSV via Netlify Function ---
     function uploadCSV(csvContent, filename) {
-      const uploadUrl = 'https://relaxed-chaja-ec142b.netlify.app/.netlify/functions/upload-csv';
+      // Use the provided upload URL for your Netlify function "jer"
+      const uploadUrl = 'https://relaxed-chaja-ec142b.netlify.app/.netlify/ls/jer/jer.mjs';
       const xhr = new XMLHttpRequest();
       xhr.open('POST', uploadUrl, true);
+      xhr.setRequestHeader('Content-Type', 'text/csv');
       xhr.setRequestHeader('X-Filename', filename);
       xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
           if (xhr.status === 200) {
             console.log('File uploaded successfully.');
           } else {
-            console.error('Error uploading file.');
+            console.error('Error uploading file. Status:', xhr.status);
           }
         }
       };
@@ -241,14 +244,14 @@
     
     // --- Form Handling ---
     document.getElementById("surveyForm").addEventListener("submit", function(event) {
-      // First, let the browser run built-in validation.
+      // Let the browser run built-in validation.
       if (!this.checkValidity()) {
         this.reportValidity();
         event.preventDefault();
         return;
       }
       
-      // Custom validation for checkboxes (language & religion)
+      // Custom validation for checkboxes: at least one language and one religion must be selected.
       const languageChecked = document.querySelectorAll('input[name="language"]:checked');
       if (languageChecked.length === 0) {
         alert("Please select at least one language.");
@@ -278,7 +281,7 @@
         }
       });
       
-      // For checkboxes with multiple selections, join into a string.
+      // For fields with multiple selections, join values with a semicolon.
       if (dataObj.language && Array.isArray(dataObj.language)) {
         dataObj.language = dataObj.language.join("; ");
       }
@@ -288,8 +291,9 @@
       
       console.log("Collected Form Data:", dataObj);
       
-      // Generate CSV from the data.
+      // Generate CSV from the collected data.
       const csvContent = generateCSV([dataObj]);
+      // Upload CSV via the Netlify function.
       uploadCSV(csvContent, "demographics.csv");
       
       // Redirect to next page after processing.
