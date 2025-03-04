@@ -98,13 +98,7 @@
       <label for="multipleRaces">From multiple races</label><br>
       <input type="radio" id="someOtherRace" name="ethnicity" value="Some other race">
       <label for="otherEthnicity">Some other race (please specify):</label>
-      <input 
-        type="text" 
-        id="otherEthnicity" 
-        name="otherEthnicity" 
-        placeholder="" 
-        disabled
-      /><br>
+      <input type="text" id="otherEthnicity" name="otherEthnicity" placeholder="" disabled><br>
       <input type="radio" id="preferNot" name="ethnicity" value="Prefer not to disclose">
       <label for="preferNot">Prefer not to disclose</label>
     </div>
@@ -215,8 +209,97 @@
   </form>
 
   <script>
+    // --- CSV Generation Functions ---
+    function generateCSV(dataArray) {
+      // Define header from the keys of the first data object.
+      const header = Object.keys(dataArray[0]);
+      const csvRows = [header];
+  
+      // Helper to replace null or undefined values with an empty string.
+      const preserveValue = (val) => (val === null || val === undefined ? "" : val);
+  
+      dataArray.forEach(item => {
+        const row = header.map(key => preserveValue(item[key]));
+        csvRows.push(row);
+      });
+  
+      // Join the rows with commas and newlines.
+      return csvRows.map(row => row.join(",")).join("\n");
+    }
+  
+    function uploadCSV(csvContent, filename) {
+      const uploadUrl = '/.netlify/functions/upload-csv'; // Change this URL to your server endpoint if needed.
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', uploadUrl, true);
+      xhr.setRequestHeader('X-Filename', filename);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            console.log('File uploaded successfully.');
+          } else {
+            console.error('Error uploading file.');
+          }
+        }
+      };
+      xhr.send(csvContent);
+    }
+  
+    // --- Form Handling ---
+    document.getElementById("surveyForm").addEventListener("submit", function(event) {
+      event.preventDefault(); // Prevent the default submission.
+  
+      const formData = new FormData(this);
+      const dataObj = {};
+  
+      // Iterate through the FormData entries.
+      formData.forEach((value, key) => {
+        // If there are multiple values (e.g., checkboxes), accumulate them.
+        if (dataObj[key]) {
+          if (!Array.isArray(dataObj[key])) {
+            dataObj[key] = [dataObj[key]];
+          }
+          dataObj[key].push(value);
+        } else {
+          dataObj[key] = value;
+        }
+      });
+  
+      // For fields that allow multiple selections, join them into a single string.
+      if (dataObj.language && Array.isArray(dataObj.language)) {
+        dataObj.language = dataObj.language.join("; ");
+      }
+      if (dataObj.religion && Array.isArray(dataObj.religion)) {
+        dataObj.religion = dataObj.religion.join("; ");
+      }
+  
+      console.log("Collected Form Data:", dataObj);
+  
+      // Generate CSV from the collected data (wrap in an array if it represents one record).
+      const csvContent = generateCSV([dataObj]);
+  
+      // Upload the CSV (you could also trigger a download if preferred).
+      uploadCSV(csvContent, "demographics.csv");
+  
+      // Optional: To trigger a download instead of upload, uncomment the following code:
+      /*
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "demographics.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      */
+  
+      // Optional: Redirect to another page after processing.
+      // window.location.href = "Pretestsurvey.html";
+    });
+  
+    // --- Additional functionality for "Other" fields ---
     document.addEventListener("DOMContentLoaded", function () {
-      // --- Ethnicity: "Some other race" ---
+      // Ethnicity "Other"
       const otherRaceRadio = document.getElementById("someOtherRace");
       const otherRaceText  = document.getElementById("otherEthnicity");
       const ethnicityRadios  = document.querySelectorAll('input[name="ethnicity"]');
@@ -232,8 +315,8 @@
           }
         });
       });
-
-      // --- Language: "Other" checkbox ---
+  
+      // Language "Other" checkbox.
       const otherLangCheckbox = document.getElementById("other");
       const otherLangText = document.getElementById("other-language");
       otherLangCheckbox.addEventListener("change", () => {
@@ -246,8 +329,8 @@
           otherLangText.value = "";
         }
       });
-
-      // --- Religion: "Other" checkbox ---
+  
+      // Religion "Other" checkbox.
       const religionOtherCheckbox = document.getElementById("religion-other");
       const religionOtherText = document.getElementById("religion-other-text");
       religionOtherCheckbox.addEventListener("change", () => {
@@ -260,18 +343,16 @@
           religionOtherText.value = "";
         }
       });
-
-      // --- Form validation for checkbox groups ---
+  
+      // Ensure that at least one language and one religion checkbox is selected.
       const form = document.getElementById("surveyForm");
       form.addEventListener("submit", function (event) {
-        // Check that at least one language checkbox is checked
         const languageChecked = document.querySelectorAll('input[name="language"]:checked');
         if (languageChecked.length === 0) {
           alert("Please select at least one language.");
           event.preventDefault();
           return;
         }
-        // Check that at least one religion checkbox is checked
         const religionChecked = document.querySelectorAll('input[name="religion"]:checked');
         if (religionChecked.length === 0) {
           alert("Please select at least one religion.");
