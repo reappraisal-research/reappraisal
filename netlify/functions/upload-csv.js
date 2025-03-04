@@ -27,7 +27,7 @@ export default async function handler(event, context) {
   });
   
   const s3 = new AWS.S3();
-  const bucketName = process.env.reappraisal_experiment;
+  const bucketName = process.env.reappraisal-experiment;
   console.log("Bucket name:", bucketName);
   
   if (!bucketName) {
