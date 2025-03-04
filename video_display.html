@@ -168,8 +168,6 @@
       // Get the next video (remove it from the order so it won't be shown again)
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
-        // Save the selected video globally to record which video was shown
-        window.lastSelectedVideo = selectedVideo;
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
         const videoElement = document.getElementById("video");
         videoElement.src = selectedVideo.url;
@@ -191,44 +189,16 @@
       // Show the "Next" button when a radio is chosen
       const radioButtons = document.getElementsByName("videoScale");
       const nextButtonContainer = document.getElementById("buttonContainer");
+      // Convert NodeList to Array to use forEach
       Array.from(radioButtons).forEach(radio => {
         radio.addEventListener("change", () => {
           nextButtonContainer.style.display = "block";
         });
       });
-
-      // Attach event listener to the Next button for AWS integration
-      const nextButton = document.getElementById("nextButton");
-      nextButton.addEventListener("click", function(e) {
-        e.preventDefault();
-        // Retrieve the selected radio value
-        const selected = document.querySelector('input[name="videoScale"]:checked');
-        const responseValue = selected ? selected.value : null;
-        if (!responseValue) {
-          alert("Please select a response.");
-          return;
-        }
-        // Build the event data object including participantSID, surveyName, and which video was shown
-        const eventData = {
-          participantSID: localStorage.getItem("participantSID"),
-          surveyName: "VideoDisplay",
-          videoScale: responseValue,
-          selectedVideo: window.lastSelectedVideo,  // Record which video was shown
-          timestamp: new Date().toISOString()
-        };
-        // Send the data to AWS using sendExperimentData (from dataSender.js)
-        sendExperimentData(eventData, function(err, result) {
-          if (err) {
-            alert("Error submitting data. Please try again.");
-          } else {
-            // On success, redirect to survey.html
-            window.location.href = "survey.html";
-          }
-        });
-      });
     };
   </script>
 </head>
+
 <body>
   <p>Please watch the video below:</p>
   <video id="video">
@@ -301,7 +271,7 @@
 
   <!-- Next Button -->
   <div id="buttonContainer" class="button-container">
-    <button id="nextButton">Next</button>
+    <button id="nextButton" onclick="window.location.href='survey.html'">Next</button>
   </div>
 </body>
 </html>
