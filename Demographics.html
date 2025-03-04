@@ -43,6 +43,7 @@
       font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 20px;
     }
     button:hover {
       background-color: #0056b3;
@@ -152,7 +153,7 @@
       <label><input type="radio" name="living" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
 
-    <!-- Language (Checkboxes) -->
+    <!-- Language -->
     <div class="question">
       <label for="language">What language do you mainly speak at home? (Select all that apply)</label><br>
       <input type="checkbox" id="english" name="language" value="English">
@@ -168,7 +169,7 @@
       <input type="text" id="other-language" name="other-language" placeholder="" disabled>
     </div>
 
-    <!-- Religion (Checkboxes) -->
+    <!-- Religion -->
     <div class="question">
       <label for="religion">Do you identify with any of the following religions? (Select all that apply)</label><br>
       <input type="checkbox" id="religion-protestant" name="religion" value="Protestantism">
@@ -204,13 +205,14 @@
       <label><input type="radio" name="politics" value="Very conservative"> Very conservative</label><br>
       <label><input type="radio" name="politics" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
-
+    
     <button type="submit">Submit</button>
   </form>
-
+  
   <script>
     // --- CSV Generation Functions ---
     function generateCSV(dataArray) {
+<<<<<<< HEAD
       // Define header from the keys of the first data object.
       const header = Object.keys(dataArray[0]);
       const csvRows = [header];
@@ -218,10 +220,16 @@
       // Helper to replace null or undefined values with an empty string.
       const preserveValue = (val) => (val === null || val === undefined ? "" : val);
   
+=======
+      const header = Object.keys(dataArray[0]);
+      const csvRows = [header];
+      const preserveValue = (val) => (val === null || val === undefined ? "" : val);
+>>>>>>> 02961ddd0c5f9d40173e0ad51a04bc8a559909bf
       dataArray.forEach(item => {
         const row = header.map(key => preserveValue(item[key]));
         csvRows.push(row);
       });
+<<<<<<< HEAD
   
       // Join the rows with commas and newlines.
       return csvRows.map(row => row.join(",")).join("\n");
@@ -229,6 +237,13 @@
   
     function uploadCSV(csvContent, filename) {
       const uploadUrl = '/.netlify/functions/upload-csv'; // Change this URL to your server endpoint if needed.
+=======
+      return csvRows.map(row => row.join(",")).join("\n");
+    }
+    
+    function uploadCSV(csvContent, filename) {
+      const uploadUrl = 'https://relaxed-chaja-ec142b.netlify.app/.netlify/functions/upload-csv';
+>>>>>>> 02961ddd0c5f9d40173e0ad51a04bc8a559909bf
       const xhr = new XMLHttpRequest();
       xhr.open('POST', uploadUrl, true);
       xhr.setRequestHeader('X-Filename', filename);
@@ -243,6 +258,7 @@
       };
       xhr.send(csvContent);
     }
+<<<<<<< HEAD
   
     // --- Form Handling ---
     document.getElementById("surveyForm").addEventListener("submit", function(event) {
@@ -254,6 +270,38 @@
       // Iterate through the FormData entries.
       formData.forEach((value, key) => {
         // If there are multiple values (e.g., checkboxes), accumulate them.
+=======
+    
+    // --- Form Handling ---
+    document.getElementById("surveyForm").addEventListener("submit", function(event) {
+      // First, let the browser run built-in validation.
+      if (!this.checkValidity()) {
+        this.reportValidity();
+        event.preventDefault();
+        return;
+      }
+      
+      // Custom validation for checkboxes (language & religion)
+      const languageChecked = document.querySelectorAll('input[name="language"]:checked');
+      if (languageChecked.length === 0) {
+        alert("Please select at least one language.");
+        event.preventDefault();
+        return;
+      }
+      const religionChecked = document.querySelectorAll('input[name="religion"]:checked');
+      if (religionChecked.length === 0) {
+        alert("Please select at least one religion.");
+        event.preventDefault();
+        return;
+      }
+      
+      event.preventDefault();
+      
+      // Collect form data into an object.
+      const formData = new FormData(this);
+      const dataObj = {};
+      formData.forEach((value, key) => {
+>>>>>>> 02961ddd0c5f9d40173e0ad51a04bc8a559909bf
         if (dataObj[key]) {
           if (!Array.isArray(dataObj[key])) {
             dataObj[key] = [dataObj[key]];
@@ -263,14 +311,20 @@
           dataObj[key] = value;
         }
       });
+<<<<<<< HEAD
   
       // For fields that allow multiple selections, join them into a single string.
+=======
+      
+      // For checkboxes with multiple selections, join into a string.
+>>>>>>> 02961ddd0c5f9d40173e0ad51a04bc8a559909bf
       if (dataObj.language && Array.isArray(dataObj.language)) {
         dataObj.language = dataObj.language.join("; ");
       }
       if (dataObj.religion && Array.isArray(dataObj.religion)) {
         dataObj.religion = dataObj.religion.join("; ");
       }
+<<<<<<< HEAD
   
       console.log("Collected Form Data:", dataObj);
   
@@ -297,6 +351,19 @@
       // window.location.href = "Pretestsurvey.html";
     });
   
+=======
+      
+      console.log("Collected Form Data:", dataObj);
+      
+      // Generate CSV from the data.
+      const csvContent = generateCSV([dataObj]);
+      uploadCSV(csvContent, "demographics.csv");
+      
+      // Redirect to next page after processing.
+      window.location.href = "Pretestsurvey.html";
+    });
+    
+>>>>>>> 02961ddd0c5f9d40173e0ad51a04bc8a559909bf
     // --- Additional functionality for "Other" fields ---
     document.addEventListener("DOMContentLoaded", function () {
       // Ethnicity "Other"
@@ -315,7 +382,11 @@
           }
         });
       });
+<<<<<<< HEAD
   
+=======
+      
+>>>>>>> 02961ddd0c5f9d40173e0ad51a04bc8a559909bf
       // Language "Other" checkbox.
       const otherLangCheckbox = document.getElementById("other");
       const otherLangText = document.getElementById("other-language");
@@ -329,7 +400,11 @@
           otherLangText.value = "";
         }
       });
+<<<<<<< HEAD
   
+=======
+      
+>>>>>>> 02961ddd0c5f9d40173e0ad51a04bc8a559909bf
       // Religion "Other" checkbox.
       const religionOtherCheckbox = document.getElementById("religion-other");
       const religionOtherText = document.getElementById("religion-other-text");
@@ -343,6 +418,7 @@
           religionOtherText.value = "";
         }
       });
+<<<<<<< HEAD
   
       // Ensure that at least one language and one religion checkbox is selected.
       const form = document.getElementById("surveyForm");
@@ -360,6 +436,8 @@
           return;
         }
       });
+=======
+>>>>>>> 02961ddd0c5f9d40173e0ad51a04bc8a559909bf
     });
   </script>
 </body>
