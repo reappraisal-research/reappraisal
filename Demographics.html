@@ -228,7 +228,7 @@
     }
   
     function uploadCSV(csvContent, filename) {
-      const uploadUrl = '/.netlify/functions/upload-csv'; // Change this URL to your server endpoint if needed.
+      const uploadUrl = '/.netlify/Functions'; // Change this URL to your server endpoint if needed.
       const xhr = new XMLHttpRequest();
       xhr.open('POST', uploadUrl, true);
       xhr.setRequestHeader('X-Filename', filename);
