@@ -223,7 +223,7 @@
     }
     
     function uploadCSV(csvContent, filename) {
-      const uploadUrl = 'https://relaxed-chaja-ec142b.netlify.app/.netlify/ls/jer/jer';
+      const uploadUrl = 'https://relaxed-chaja-ec142b.netlify.app/.netlify/functions/jer;
       const xhr = new XMLHttpRequest();
       xhr.open('POST', uploadUrl, true);
       xhr.setRequestHeader('X-Filename', filename);
