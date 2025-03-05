@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Photo Selection</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Selection - TrainingCheck</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -29,8 +31,17 @@
       font-style: italic;
     }
   </style>
+  <!-- Include the centralized data sender script -->
+  <script src="dataSender.js"></script>
+</head>
+<body>
+  <!-- These elements display the photo and its labels -->
+  <div id="photoLabel"></div>
+  <img id="photo" src="" alt="Selected Photo">
+  <div id="ambiguousLabel"></div>
+  
   <script>
-    // Utility function to shuffle an array in place.
+    // Utility function to shuffle an array
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -39,7 +50,7 @@
       return array;
     }
 
-    // Define your photo pools.
+    // Define the photo pools
     const ambiguousPhotos = [
       "Stimulireal/horseback.jpg",
       "Stimulireal/donkey.seal.png",
@@ -65,7 +76,7 @@
       "Stimulireal/ur.profile.profile.jpg"
     ];
 
-    // Mapping for distinct labels for each ambiguous image.
+    // Define mappings for labels for ambiguous photos
     const ambiguousLabels = {
       "Stimulireal/horseback.jpg": "Riding a horse/ a man's face",
       "Stimulireal/donkey.seal.png": "Donkey/ seal",
@@ -79,7 +90,7 @@
       "Stimulireal/profile.profile.png": "Side view/ front view"
     };
 
-    // Mapping for distinct labels for each nonambiguous image.
+    // Define mappings for labels for nonambiguous photos
     const nonAmbiguousLabels = {
       "Stimulireal/ur.donkey.seal.jpg": "Fish",
       "Stimulireal/ur.jastrow.rabbit.jpg": "Horse",
@@ -93,7 +104,7 @@
       "Stimulireal/ur.profile.profile.jpg": "Front view"
     };
 
-    // Initialize photo pools in localStorage if not already set.
+    // Store the photo pools in localStorage if they don't exist
     if (!localStorage.getItem("ambiguousPhotos")) {
       localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
     }
@@ -101,21 +112,20 @@
       localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
     }
 
-    // Ensure trialIndex exists.
+    // Ensure a trial index exists; this tracks the number of visits to this page.
     if (!localStorage.getItem("trialIndex")) {
       localStorage.setItem("trialIndex", "0");
     }
 
-    // Retrieve the condition list (balanced image conditions).
+    // Retrieve or generate a condition list (balanced list of conditions).
     let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-    // If the condition list is empty, generate a balanced list of 20 conditions.
     if (!conditionList || conditionList.length === 0) {
       let conditions = [];
       // Create 4 conditions (each repeated 5 times = 20 trials):
-      // 1. ambiguous + "Situation rethinking"
-      // 2. ambiguous + "goal rethinking"
-      // 3. nonAmbiguous + "Situation rethinking"
-      // 4. nonAmbiguous + "goal rethinking"
+      // ambiguous + "Situation rethinking"
+      // ambiguous + "goal rethinking"
+      // nonAmbiguous + "Situation rethinking"
+      // nonAmbiguous + "goal rethinking"
       for (let i = 0; i < 5; i++) {
         conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
         conditions.push({ photoType: "ambiguous", rethinkingLabel: "goal rethinking" });
@@ -127,71 +137,99 @@
       conditionList = conditions;
     }
 
+    // Function to select a photo and send trial data as CSV
     function selectPhoto() {
+      // Retrieve the current trial index from localStorage (visit number)
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
+      let currentTrial = trialIndex + 1;
 
-      // If all trials are completed, redirect to thank_you.html.
+      // If all trials are complete, redirect to thank_you page.
       if (trialIndex >= conditionList.length) {
         alert("All trials completed. Thank you!");
         window.location.href = "thank_you.html";
         return;
       }
 
-      // Get the current condition based on trialIndex.
+      // Get the current condition for this trial
       let currentCondition = conditionList[trialIndex];
 
-      // Select the appropriate photo pool.
+      // Choose the photo pool based on condition
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
       let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
 
-      console.log("Trial:", trialIndex + 1, "Using Pool:", poolKey, "Pool Length:", photoPool.length);
-
+      console.log("Trial:", currentTrial, "Using Pool:", poolKey, "Pool Length:", photoPool.length);
       if (photoPool.length === 0) {
         alert("No photos remain in the pool. Thank you!");
         window.location.href = "thank_you.html";
         return;
       }
 
-      // Randomly select a photo and remove it from the pool.
+      // Randomly select a photo and remove it from the pool
       let randomIndex = Math.floor(Math.random() * photoPool.length);
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
-      // Set the label above the photo and display the corresponding label underneath.
+      // Set the label above the photo and display the corresponding label underneath
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
-        // Display the distinct label for the ambiguous image.
         document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
       } else {
         document.getElementById("photoLabel").innerText = "Simple";
-        // Display the distinct label for the nonambiguous image.
         document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
 
-      // Display the selected photo.
+      // Display the selected photo
       const photoElement = document.getElementById("photo");
       photoElement.src = selectedPhoto;
       photoElement.alt = `Selected Photo: ${selectedPhoto}`;
-
       console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
 
-      // Increment the trial index for the next trial.
+      // Build a trial data object
+      let trialData = {
+        participantSID: localStorage.getItem("participantSID"),
+        visitNumber: currentTrial,
+        photoType: currentCondition.photoType,
+        photoShown: selectedPhoto
+      };
+
+      // Helper function to generate CSV from trial data
+      function generateCSVFromTrial(dataObj) {
+        const headers = ["participantSID", "visitNumber", "photoType", "photoShown"];
+        const csvHeader = headers.join(",") + "\n";
+        const row = [
+          dataObj.participantSID,
+          dataObj.visitNumber,
+          dataObj.photoType,
+          dataObj.photoShown
+        ];
+        return csvHeader + row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
+      }
+      
+      let csvContent = generateCSVFromTrial(trialData);
+      // Create a filename with the participantSID and visit number
+      const filename = `trainingTrial_${trialData.participantSID}_visit${trialData.visitNumber}.csv`;
+
+      // Send the CSV data using the centralized function sendExperimentData
+      sendExperimentData(trialData, function(err, result) {
+        if (err) {
+          console.error("Error uploading CSV for trial:", err);
+        } else {
+          console.log("CSV successfully uploaded for trial:", result);
+        }
+      });
+
+      // Increment the trial index and save it
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
-      // Automatically go to the next page after 10 seconds.
+      // Redirect automatically after 10 seconds
       setTimeout(function() {
         window.location.href = "video_display.html";
       }, 10000);
     }
 
+    // On window load, call selectPhoto()
     window.onload = selectPhoto;
   </script>
-</head>
-<body>
-  <div id="photoLabel"></div>
-  <img id="photo" src="" alt="Selected Photo">
-  <div id="ambiguousLabel"></div>
 </body>
 </html>
-
