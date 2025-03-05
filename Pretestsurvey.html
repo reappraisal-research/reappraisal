@@ -40,43 +40,24 @@
       display: block;
       margin-bottom: 10px;
     }
-    /* 
-      The scale container spans the full width and uses 
-      space-evenly to ensure that even the end items get equal spacing.
-    */
     .scale {
       display: flex;
       justify-content: space-evenly;
       align-items: flex-start;
       width: 100%;
     }
-    /* 
-      Each scale label is made a flex item that:
-      - Takes equal available space (flex: 1)
-      - Stacks its children (radio input, number, optional sublabel) in a column
-      - Centers them horizontally
-      - Has a minimum height so that the number labels can be pushed to the bottom.
-    */
     .scale label {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 50px; /* adjust this value if needed */
+      min-height: 50px;
       margin: 0;
     }
-    /* 
-      The radio buttons get a small bottom margin 
-      and are vertically centered relative to their own line.
-    */
     .scale input[type="radio"] {
       margin-bottom: 5px;
       vertical-align: middle;
     }
-    /* 
-      The span holding the number is pushed to the bottom 
-      of its label container so that all numbers align on the same horizontal line.
-    */
     .scale label span {
       margin-top: auto;
       display: block;
@@ -99,7 +80,7 @@
 </head>
 <body>
   <div class="container">
-    <form action="bfis1.html" method="get">
+    <form action="bfis1.html" method="get" id="surveyForm">
       <!-- Intro -->
       <div class="intro">
         <p>
@@ -512,5 +493,94 @@
       <button type="submit">Submit</button>
     </form>
   </div>
+  
+  <script>
+    // Global variable for storing page data.
+    var pageData = {};
+
+    /**
+     * Generates a CSV string using a fixed header order.
+     * Here, the header ensures that the participantSID is first, followed by questions q1 to q10.
+     */
+    function generateCSVFromObject(dataObj) {
+      const headers = [
+        "participantSID",
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8",
+        "q9",
+        "q10"
+      ];
+      const csvHeader = headers.join(",") + "\n";
+      const row = headers.map(key => {
+        let value = dataObj[key] || "";
+        // Escape quotes and wrap the field in quotes.
+        value = String(value).replace(/"/g, '""');
+        return `"${value}"`;
+      }).join(",");
+      return csvHeader + row;
+    }
+    
+    // Form Handling
+    document.getElementById("surveyForm").addEventListener("submit", function(event) {
+      // Ensure form validations pass.
+      if (!this.checkValidity()) {
+        this.reportValidity();
+        event.preventDefault();
+        return;
+      }
+      
+      event.preventDefault();
+      
+      // Collect form data.
+      const formData = new FormData(this);
+      const dataObj = {};
+      formData.forEach((value, key) => {
+        // For multiple selections, convert to an array.
+        if (dataObj[key]) {
+          if (!Array.isArray(dataObj[key])) {
+            dataObj[key] = [dataObj[key]];
+          }
+          dataObj[key].push(value);
+        } else {
+          dataObj[key] = value;
+        }
+      });
+      
+      // For this survey, questions q1 to q10 are single answers so no join is required.
+      
+      // Retrieve the locally saved participant SID and add it as the first column.
+      const participantSID = localStorage.getItem("participantSID");
+      dataObj.participantSID = participantSID;
+      
+      // Save the collected data in the global variable.
+      pageData = dataObj;
+      console.log("Global Page Data:", pageData);
+      
+      // Generate CSV using the fixed header order.
+      const csvContent = generateCSVFromObject(pageData);
+      
+      // Create a unique filename using the participant SID and a timestamp.
+      const filename = `survey_${participantSID}_${Date.now()}.csv`;
+      
+      // Auto-download the CSV file.
+      const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Allow a short delay to ensure the download is triggered before redirecting.
+      setTimeout(() => {
+        window.location.href = "bfis1.html";
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
