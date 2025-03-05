@@ -104,7 +104,7 @@
     }
   </style>
   <script>
-    // IIFE to set up the condition list and insert the assigned label header.
+    // IIFE to set up the condition list and insert the assigned label as a header.
     (function() {
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -126,35 +126,30 @@
         localStorage.setItem("conditionList", JSON.stringify(conditions));
         conditionList = conditions;
       }
-      // Retrieve trialIndex. If not set or 0, default to 1.
+      // Retrieve trialIndex; if not set, default to 1 (assuming photo selection already incremented it).
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if(isNaN(trialIndex) || trialIndex <= 0) {
+      if(isNaN(trialIndex) || trialIndex < 1) {
         trialIndex = 1;
         localStorage.setItem("trialIndex", "1");
       }
-      // Since the photo selection page already incremented the trialIndex,
-      // the survey page should use the completed trial number which is trialIndex.
+      // Use the completed trial number (trialIndex) to get the condition for this survey.
       let currentTrial = trialIndex;
-      // Use the condition from the previous page, at index trialIndex - 1.
-      let conditionListArr = conditionList;
-      let currentCondition = conditionListArr[currentTrial - 1] || {};
+      let currentCondition = conditionList[currentTrial - 1] || {};
       
       document.addEventListener("DOMContentLoaded", function() {
-        // Insert the assigned label as a header.
         let header = document.createElement("h2");
         header.innerText = currentCondition.rethinkingLabel || "";
         document.querySelector(".container").insertBefore(header, document.querySelector(".container").firstChild);
       });
     })();
 
+    // Function to save survey responses.
     function saveResponses() {
-      // Get response from text box.
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       if (!rethinkingResponse) {
         alert("Please fill out your rethinking response.");
         return;
       }
-      // Get selected multiple-choice value.
       const radioOptions = document.getElementsByName("howDoYouFeel");
       let howDoYouFeelValue = "";
       for (let i = 0; i < radioOptions.length; i++) {
@@ -167,19 +162,16 @@
         alert("Please select how you feel.");
         return;
       }
-      // Get participant SID.
       const participantSID = localStorage.getItem("participantSID") || "unknown";
-      // Retrieve the trial index from localStorage.
+      // Use the trial index recorded by the photo selection page.
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if(isNaN(trialIndex) || trialIndex <= 0) trialIndex = 1;
-      // Use the current trial as the one recorded by the photo selection page.
+      if(isNaN(trialIndex) || trialIndex < 1) trialIndex = 1;
       let currentTrial = trialIndex;
-      // Retrieve condition list and get the label from the condition corresponding to trialIndex - 1.
       const conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
       let currentCondition = conditionList[currentTrial - 1] || {};
       const label = currentCondition.rethinkingLabel || "";
       
-      // Build trial data object.
+      // Build the survey response object.
       const trialData = {
         participantSID: participantSID,
         trialNumber: currentTrial,
@@ -188,7 +180,7 @@
         howDoYouFeel: howDoYouFeelValue
       };
 
-      // Generate CSV.
+      // Generate CSV string.
       function generateCSVFromTrial(dataObj) {
         const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel"];
         const csvHeader = headers.join(",") + "\n";
@@ -200,10 +192,9 @@
         return csvHeader + row;
       }
       const csvContent = generateCSVFromTrial(trialData);
-      // Create filename: "survey_{participantSID}_{trialNumber}.csv"
+      // Filename: survey_{participantSID}_{trialNumber}.csv
       const filename = `survey_${participantSID}_${currentTrial}.csv`;
 
-      // Send CSV via POST request.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -213,15 +204,13 @@
         body: csvContent
       })
       .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         return response.json();
       })
       .then(data => {
         console.log("CSV successfully uploaded:", data);
-        // Do NOT increment trialIndex here because the photo selection page already did.
-        // Simply redirect to the next page.
+        // Do not increment trialIndex here since the photo selection page already did.
+        // Redirect to photoselection.html (for trials 1-19).
         window.location.href = "photoselection.html";
       })
       .catch(error => {
