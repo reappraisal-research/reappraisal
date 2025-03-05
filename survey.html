@@ -31,21 +31,18 @@
       margin: 10px 0 5px;
       font-weight: bold;
     }
-    /* Scale container using flex to evenly distribute options */
     .scale {
       display: flex;
       justify-content: space-evenly;
       margin: 20px auto;
       width: 100%;
     }
-    /* Each option label gets a fixed width and an expanded height */
     .scale label {
       position: relative;
-      flex: 0 0 70px;      /* Fixed width for each option */
-      height: 140px;       /* Expanded height to accommodate extra text */
+      flex: 0 0 70px;
+      height: 140px;
       text-align: center;
     }
-    /* Style the radio “bubble” and position it at the top center */
     .scale label input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
@@ -65,20 +62,18 @@
       background-color: #000;
       color: #fff;
     }
-    /* Place the number on a fixed horizontal line */
     .scale label span {
       position: absolute;
-      top: 45px;           /* Fixed vertical offset for the number */
+      top: 45px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 16px;
       font-weight: bold;
       display: block;
     }
-    /* Position extra descriptive text (if any) further down */
     .scale label small {
       position: absolute;
-      top: 75px;           /* Fixed vertical offset for extra text */
+      top: 75px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 14px;
@@ -109,8 +104,15 @@
     }
   </style>
   <script>
-    // Immediately-Invoked Function Expression (IIFE) to set up conditions.
+    // IIFE to set up the condition list and add the assigned label as a header.
     (function() {
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
       let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
       if (conditionList.length === 0) {
         let conditions = [];
@@ -125,110 +127,135 @@
         conditionList = conditions;
       }
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-      let currentCondition = conditionList[trialIndex - 1] || {};
+      // Get current condition for this trial.
+      let currentCondition = conditionList[trialIndex] || {};
       
       document.addEventListener("DOMContentLoaded", function() {
+        // Insert the assigned label as a header.
         let header = document.createElement("h2");
         header.innerText = currentCondition.rethinkingLabel || "";
         document.querySelector(".container").insertBefore(header, document.querySelector(".container").firstChild);
       });
-
-      function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-      }
     })();
 
     function saveResponses() {
-      const shortAnswer = document.getElementById("shortAnswer").value.trim();
-      if (!shortAnswer) {
-        alert("Please fill out how you rethought the video.");
+      // Get the rethinking response from the text box.
+      const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
+      if (!rethinkingResponse) {
+        alert("Please fill out your rethinking response.");
         return;
       }
-      const scaledResponse = document.getElementsByName("scaledResponse");
-      let scaledResponseValue = "";
-      for (let i = 0; i < scaledResponse.length; i++) {
-        if (scaledResponse[i].checked) {
-          scaledResponseValue = scaledResponse[i].value;
+      // Get the selected value from the multiple choice.
+      const radioOptions = document.getElementsByName("howDoYouFeel");
+      let howDoYouFeelValue = "";
+      for (let i = 0; i < radioOptions.length; i++) {
+        if (radioOptions[i].checked) {
+          howDoYouFeelValue = radioOptions[i].value;
           break;
         }
       }
-      if (!scaledResponseValue) {
-        alert("Please select how negative you feel after rethinking.");
+      if (!howDoYouFeelValue) {
+        alert("Please select how you feel.");
         return;
       }
-      const responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
-      responses.push({
-        shortAnswer: shortAnswer,
-        scaledResponse: scaledResponseValue,
-        timestamp: new Date().toISOString()
-      });
-      localStorage.setItem("surveyResponses", JSON.stringify(responses));
+      // Get participant SID from localStorage.
+      const participantSID = localStorage.getItem("participantSID") || "unknown";
+      // Get the trial number (current trial = trialIndex + 1).
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
+      let currentTrial = trialIndex + 1;
+      // Retrieve condition list and current condition to get the assigned label.
+      const conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+      let currentCondition = conditionList[trialIndex] || {};
+      const label = currentCondition.rethinkingLabel || "";
       
-      // --- NEW AWS DATA INTEGRATION ---
-      const participantSID = localStorage.getItem("participantSID");
-      const surveyData = {
+      // Build the trial data object.
+      const trialData = {
         participantSID: participantSID,
-        surveyName: "Survey",
-        responses: responses,
-        timestamp: new Date().toISOString()
+        trialNumber: currentTrial,
+        label: label,
+        rethinkingResponse: rethinkingResponse,
+        howDoYouFeel: howDoYouFeelValue
       };
-      sendExperimentData(surveyData, function(err, result) {
-        if(err) {
-          alert("Error submitting data. Please try again.");
-        } else {
-          let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-          let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-          if (trialIndex >= conditionList.length) {
-            window.location.href = "Shiftingsuccess.html";
-          } else {
-            window.location.href = "photoselection.html";
-          }
+
+      // Helper function to generate CSV string.
+      function generateCSVFromTrial(dataObj) {
+        const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel"];
+        const csvHeader = headers.join(",") + "\n";
+        const row = headers.map(key => {
+          let value = dataObj[key] || "";
+          value = String(value).replace(/"/g, '""');
+          return `"${value}"`;
+        }).join(",");
+        return csvHeader + row;
+      }
+      const csvContent = generateCSVFromTrial(trialData);
+      // Create a filename: "survey_{participantSID}_{trialNumber}.csv"
+      const filename = `survey_${participantSID}_${currentTrial}.csv`;
+
+      // Send the CSV data via POST request.
+      fetch('/.netlify/functions/upload-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV successfully uploaded:", data);
+        // Increment trial index.
+        trialIndex++;
+        localStorage.setItem("trialIndex", trialIndex.toString());
+        // Redirect to the next page.
+        window.location.href = "photoselection.html";
+      })
+      .catch(error => {
+        console.error("Error uploading CSV:", error);
+        alert("Error submitting data. Please try again.");
       });
-      // --- END AWS DATA INTEGRATION ---
     }
   </script>
 </head>
 <body>
   <div class="container">
     <form>
-      <label for="shortAnswer">1. How did you re-think the video?</label>
-      <textarea id="shortAnswer" name="shortAnswer" rows="4"></textarea>
-      <label for="scaledResponse">2. How negative do you feel?</label>
+      <label for="rethinkingResponse">1. Rethinking Response</label>
+      <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
+      <label for="howDoYouFeel">2. How do you feel?</label>
       <div class="scale">
         <label>
-          <input type="radio" name="scaledResponse" value="1">
+          <input type="radio" name="howDoYouFeel" value="1">
           <span>1</span>
-          <small>Not negative<br>at all</small>
         </label>
         <label>
-          <input type="radio" name="scaledResponse" value="2">
+          <input type="radio" name="howDoYouFeel" value="2">
           <span>2</span>
         </label>
         <label>
-          <input type="radio" name="scaledResponse" value="3">
+          <input type="radio" name="howDoYouFeel" value="3">
           <span>3</span>
         </label>
         <label>
-          <input type="radio" name="scaledResponse" value="4">
+          <input type="radio" name="howDoYouFeel" value="4">
           <span>4</span>
         </label>
         <label>
-          <input type="radio" name="scaledResponse" value="5">
+          <input type="radio" name="howDoYouFeel" value="5">
           <span>5</span>
         </label>
         <label>
-          <input type="radio" name="scaledResponse" value="6">
+          <input type="radio" name="howDoYouFeel" value="6">
           <span>6</span>
         </label>
         <label>
-          <input type="radio" name="scaledResponse" value="7">
+          <input type="radio" name="howDoYouFeel" value="7">
           <span>7</span>
-          <small>Extremely<br>negative</small>
         </label>
       </div>
       <button type="button" onclick="saveResponses()">Next</button>
