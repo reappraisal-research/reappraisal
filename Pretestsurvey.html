@@ -505,16 +505,16 @@
     function generateCSVFromObject(dataObj) {
       const headers = [
         "participantSID",
-        "q1",
-        "q2",
-        "q3",
-        "q4",
-        "q5",
-        "q6",
-        "q7",
-        "q8",
-        "q9",
-        "q10"
+        "erq_1",
+        "erq_2",
+        "erq_3",
+        "erq_4",
+        "erq_5",
+        "erq_6",
+        "erq_7",
+        "erq_8",
+        "erq_9",
+        "erq_10"
       ];
       const csvHeader = headers.join(",") + "\n";
       const row = headers.map(key => {
@@ -564,7 +564,7 @@
       const csvContent = generateCSVFromObject(pageData);
       
       // Create a unique filename using the participant SID and a timestamp.
-      const filename = `survey_${participantSID}_${Date.now()}.csv`;
+      const filename = `ERQ_${participantSID}_${Date.now()}.csv`;
       
       // Send the CSV data to AWS via the Netlify function "upload-csv".
       fetch('/.netlify/functions/upload-csv', {
