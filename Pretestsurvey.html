@@ -495,47 +495,26 @@
   </div>
   
   <script>
-    // Global variable for storing page data.
-    var pageData = {};
-
-    /**
-     * Generates a CSV string using a fixed header order.
-     * The headers ensure that participantSID is first, followed by erq_1 to erq_10.
-     */
-    function generateCSVFromObject(dataObj) {
-      const headers = [
-        "participantSID",
-        "erq_1",
-        "erq_2",
-        "erq_3",
-        "erq_4",
-        "erq_5",
-        "erq_6",
-        "erq_7",
-        "erq_8",
-        "erq_9",
-        "erq_10"
-      ];
-      const csvHeader = headers.join(",") + "\n";
-      const row = headers.map(key => {
-        let value = dataObj[key] || "";
-        // Escape any double quotes by doubling them.
-        value = String(value).replace(/"/g, '""');
-        return `"${value}"`;
-      }).join(",");
-      return csvHeader + row;
-    }
+    // Global flag to prevent multiple submissions.
+    let submitted = false;
     
     // Form Handling
     document.getElementById("surveyForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      
+      // Prevent duplicate submissions.
+      if (submitted) return;
+      submitted = true;
+      // Disable the submit button.
+      document.querySelector("button[type='submit']").disabled = true;
+      
       // Ensure form validations pass.
       if (!this.checkValidity()) {
         this.reportValidity();
-        event.preventDefault();
+        submitted = false;
+        document.querySelector("button[type='submit']").disabled = false;
         return;
       }
-      
-      event.preventDefault();
       
       // Collect form data.
       const formData = new FormData(this);
@@ -549,11 +528,32 @@
       dataObj.participantSID = participantSID;
       
       // Save the collected data in the global variable.
-      pageData = dataObj;
-      console.log("Global Page Data:", pageData);
+      console.log("Global Page Data:", dataObj);
       
       // Generate CSV using the fixed header order.
-      const csvContent = generateCSVFromObject(pageData);
+      const csvContent = (function generateCSVFromObject(dataObj) {
+        const headers = [
+          "participantSID",
+          "erq_1",
+          "erq_2",
+          "erq_3",
+          "erq_4",
+          "erq_5",
+          "erq_6",
+          "erq_7",
+          "erq_8",
+          "erq_9",
+          "erq_10"
+        ];
+        const csvHeader = headers.join(",") + "\n";
+        const row = headers.map(key => {
+          let value = dataObj[key] || "";
+          // Escape any double quotes by doubling them.
+          value = String(value).replace(/"/g, '""');
+          return `"${value}"`;
+        }).join(",");
+        return csvHeader + row;
+      })(dataObj);
       
       // Create a unique filename using the participant SID and a timestamp.
       const filename = `ERQ_${participantSID}_${Date.now()}.csv`;
@@ -583,6 +583,9 @@
       .catch(error => {
         console.error("Error uploading CSV:", error);
         alert("Error submitting data. Please try again.");
+        // Allow resubmission in case of error.
+        submitted = false;
+        document.querySelector("button[type='submit']").disabled = false;
       });
     });
   </script>
