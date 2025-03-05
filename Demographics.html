@@ -207,16 +207,36 @@
     // Global variable for storing page data.
     var pageData = {};
 
-    // --- CSV Generation Function ---
-    function generateCSV(dataArray) {
-      const header = Object.keys(dataArray[0]);
-      const csvRows = [header];
-      const preserveValue = (val) => (val === null || val === undefined ? "" : val);
-      dataArray.forEach(item => {
-        const row = header.map(key => preserveValue(item[key]));
-        csvRows.push(row);
-      });
-      return csvRows.map(row => row.join(",")).join("\n");
+    /**
+     * Generates a CSV string from the provided data object using a fixed header order.
+     * The fixed header order ensures the participantSID is first and fields are in the desired order.
+     */
+    function generateCSVFromObject(dataObj) {
+      // Define the header order. Adjust these keys if you change your form.
+      const headers = [
+        "participantSID", 
+        "age", 
+        "gender", 
+        "ethnicity", 
+        "otherEthnicity", 
+        "education", 
+        "employment", 
+        "income", 
+        "living", 
+        "language", 
+        "other-language", 
+        "religion", 
+        "religion-other-text", 
+        "politics"
+      ];
+      const csvHeader = headers.join(",") + "\n";
+      const row = headers.map(key => {
+        // Escape double quotes by replacing them with two double quotes and enclose field in quotes.
+        let value = dataObj[key] || "";
+        value = String(value).replace(/"/g, '""');
+        return `"${value}"`;
+      }).join(",");
+      return csvHeader + row;
     }
     
     // --- Form Handling ---
@@ -248,6 +268,7 @@
       const formData = new FormData(this);
       const dataObj = {};
       formData.forEach((value, key) => {
+        // If a field already exists, convert it to an array (for multiple selections).
         if (dataObj[key]) {
           if (!Array.isArray(dataObj[key])) {
             dataObj[key] = [dataObj[key]];
@@ -274,10 +295,10 @@
       pageData = dataObj;
       console.log("Global Page Data:", pageData);
       
-      // Generate CSV from the data.
-      const csvContent = generateCSV([pageData]);
+      // Generate CSV from the data using the fixed header order.
+      const csvContent = generateCSVFromObject(pageData);
       
-      // Create a unique filename with the participant SID and timestamp.
+      // Create a unique filename with the participant SID and a timestamp.
       const filename = `demographics_${participantSID}_${Date.now()}.csv`;
       
       // Auto-download the CSV file.
