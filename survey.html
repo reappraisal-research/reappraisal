@@ -35,7 +35,7 @@
     .image-container img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Ensures the entire image is visible (no cropping) */
+      object-fit: contain; /* Ensures the entire image is visible */
     }
     p.prompt {
       font-size: 18px;
@@ -178,10 +178,9 @@
 
       const participantSID = localStorage.getItem("participantSID") || "unknown";
 
-      // Record the current trial's response.
+      // Record current trial response (only the file name of the image).
       responses.push({
         participantSID: participantSID,
-        // Only save the file name (remove path).
         image: images[trialIndex].split("/").pop(),
         perceptionResponse: perceptionResponse,
         positivityResponse: positivityResponse,
@@ -194,7 +193,7 @@
       localStorage.setItem("perceptionTrialIndex", trialIndex.toString());
 
       if (trialIndex >= images.length) {
-        // All 20 trials completed – compile responses into one CSV and submit.
+        // All trials complete – compile responses into one CSV and submit.
         submitResponsesCSV();
       } else {
         // For trials 1-19, simply display the next trial.
