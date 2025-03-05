@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Personality Survey</title>
+  <title>Personality Survey - BFS2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,7 +11,6 @@
       line-height: 1.6;
       background-color: #f9f9f9;
     }
-
     .container {
       max-width: 600px;
       margin: 0 auto;
@@ -19,23 +19,19 @@
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-
     h1 {
       text-align: center;
       font-size: 24px;
       margin-bottom: 10px;
     }
-
     p {
       font-size: 14px;
       margin-bottom: 20px;
     }
-
     .scale-visual {
       margin-bottom: 20px;
       position: relative;
     }
-
     .scale-visual ul {
       list-style: none;
       padding: 0;
@@ -45,13 +41,11 @@
       margin: 0;
       border-bottom: 1px solid #ccc;
     }
-
     .scale-visual ul li {
       text-align: center;
       flex: 1;
       position: relative;
     }
-
     .scale-visual ul li:not(:last-child)::after {
       content: "";
       position: absolute;
@@ -61,32 +55,26 @@
       width: 1px;
       background-color: #ccc;
     }
-
     .question {
       margin-bottom: 20px;
     }
-
     label {
       font-weight: bold;
       display: block;
       margin-bottom: 10px;
     }
-
     .scale {
       display: flex;
       justify-content: space-between;
     }
-
     .scale label {
       flex: 1;
       text-align: center;
       font-weight: normal;
     }
-
     .scale input {
       margin-right: 5px;
     }
-
     button {
       display: block;
       width: 100%;
@@ -99,19 +87,16 @@
       cursor: pointer;
       margin-top: 20px;
     }
-
     button:hover {
       background-color: #0056b3;
     }
   </style>
-  <!-- Include the centralized data sender -->
   <script src="dataSender.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Please rate how much each statement applies to you on a scale of 1 to 5</h1>
-    <p> Each statement begins with "I am a
-      person who..."</p>
+    <p>Each statement begins with "I am a person who..."</p>
     <div class="scale-visual">
       <ul>
         <li>1<br><small>(Disagree Strongly)</small></li>
@@ -121,7 +106,6 @@
         <li>5<br><small>(Agree Strongly)</small></li>
       </ul>
     </div>
-    <!-- Add id "personalitySurveyForm2" -->
     <form id="personalitySurveyForm2" action="bfis3.html" method="get">
       <div class="question">
         <label for="q1">1. Is full of energy.</label>
@@ -227,34 +211,57 @@
     </form>
   </div>
   <script>
+    var pageData = {};
+    function generateCSV(dataObj) {
+      const headers = ["participantSID", "surveyName", "timestamp", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"];
+      const csvHeader = headers.join(",") + "\n";
+      const row = [
+        dataObj.participantSID,
+        dataObj.surveyName,
+        dataObj.timestamp,
+        ...dataObj.responses.sort((a, b) => a.trial - b.trial).map(resp => resp.answer)
+      ];
+      const csvRow = row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
+      return csvHeader + csvRow;
+    }
     document.getElementById("personalitySurveyForm2").addEventListener("submit", function(e) {
-      e.preventDefault(); // Prevent the default submission
-      
-      // Use FormData to gather responses
+      e.preventDefault();
       const formData = new FormData(this);
       const responses = [];
       for (let i = 1; i <= 10; i++) {
         responses.push({ trial: i, answer: formData.get("q" + i) });
       }
-      
-      // Retrieve participantSID from localStorage
       const participantSID = localStorage.getItem("participantSID");
-      
       const experimentData = {
         participantSID: participantSID,
         surveyName: "BFS2",
-        responses: responses,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        responses: responses
       };
-      
-      // Call the function from dataSender.js to send data to AWS
-      sendExperimentData(experimentData, function(err, result) {
-        if (err) {
-          alert("Error submitting data. Please try again.");
-        } else {
-          // Redirect to the page originally specified in the form action
-          window.location.href = "bfis3.html";
+      pageData = experimentData;
+      const csvContent = generateCSV(pageData);
+      const filename = `bfis2_${participantSID}.csv`;
+      fetch('/.netlify/functions/upload-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
+        return response.json();
+      })
+      .then(data => {
+        setTimeout(() => {
+          window.location.href = "bfis3.html";
+        }, 1000);
+      })
+      .catch(error => {
+        alert("Error submitting data. Please try again.");
       });
     });
   </script>
