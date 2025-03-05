@@ -17,7 +17,7 @@
       background: #fff;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
@@ -95,7 +95,19 @@
 </head>
 <body>
   <div class="container">
-    <form id="personalitySurveyForm3" action="betweener.html" method="get">
+    <!-- Main header for the BFS3 page -->
+    <h1>Personality Survey - BFS3</h1>
+    <p>Please rate how much each statement applies to you on a scale of 1 to 5.</p>
+    <div class="scale-visual">
+      <ul>
+        <li>1<br><small>(Disagree Strongly)</small></li>
+        <li>2<br><small>(Disagree a Little)</small></li>
+        <li>3<br><small>(Neutral; No Opinion)</small></li>
+        <li>4<br><small>(Agree a Little)</small></li>
+        <li>5<br><small>(Agree Strongly)</small></li>
+      </ul>
+    </div>
+    <form id="personalitySurveyForm2" action="betweener.html" method="get">
       <div class="question">
         <label for="q1">1. Prefers to have others take charge.</label>
         <div class="scale">
@@ -200,10 +212,29 @@
     </form>
   </div>
   <script>
+    // Global variable to store collected data.
     var pageData = {};
+
+    // Function to generate a CSV string from the data object.
     function generateCSV(dataObj) {
-      const headers = ["participantSID", "surveyName", "timestamp", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"];
+      // Use custom question headers: bfis3_1, bfis3_2, ... bfis3_10.
+      const headers = [
+        "participantSID",
+        "surveyName",
+        "timestamp",
+        "bfis3_1",
+        "bfis3_2",
+        "bfis3_3",
+        "bfis3_4",
+        "bfis3_5",
+        "bfis3_6",
+        "bfis3_7",
+        "bfis3_8",
+        "bfis3_9",
+        "bfis3_10"
+      ];
       const csvHeader = headers.join(",") + "\n";
+      // Create an array of responses sorted by trial number.
       const row = [
         dataObj.participantSID,
         dataObj.surveyName,
@@ -213,13 +244,17 @@
       const csvRow = row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
       return csvHeader + csvRow;
     }
-    document.getElementById("personalitySurveyForm3").addEventListener("submit", function(e) {
+
+    // Add event listener for form submission.
+    document.getElementById("personalitySurveyForm2").addEventListener("submit", function(e) {
       e.preventDefault();
+      // Gather responses from the form.
       const formData = new FormData(this);
       const responses = [];
       for (let i = 1; i <= 10; i++) {
         responses.push({ trial: i, answer: formData.get("q" + i) });
       }
+      // Build the experiment data object.
       const experimentData = {
         participantSID: localStorage.getItem("participantSID"),
         surveyName: "BFS3",
@@ -227,8 +262,11 @@
         responses: responses
       };
       pageData = experimentData;
+      // Generate the CSV content.
       const csvContent = generateCSV(pageData);
+      // Set the filename (using bfis3 as the prefix).
       const filename = `bfis3_${experimentData.participantSID}.csv`;
+      // Send the CSV data via the centralized data sender.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -242,6 +280,7 @@
         return response.json();
       })
       .then(data => {
+        // Redirect to the next page.
         window.location.href = "betweener.html";
       })
       .catch(error => {
