@@ -1,3 +1,8 @@
+export default async function handler(event, context) {
+  console.log("HTTP method received:", event.httpMethod);
+  // ... rest of the code
+}
+
 import AWS from 'aws-sdk';
 
 export default async function handler(event, context) {
