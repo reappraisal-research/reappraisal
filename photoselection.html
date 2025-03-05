@@ -206,8 +206,8 @@
       }
       
       let csvContent = generateCSVFromTrial(trialData);
-      // Create a filename with the participantSID and visit number
-      const filename = `trainingTrial_${trialData.participantSID}_visit${trialData.visitNumber}.csv`;
+      // Create a filename with "photoSelection", then participantSID and the trial number
+      const filename = `photoSelection_${trialData.participantSID}_${trialData.visitNumber}.csv`;
 
       // Send the CSV data to AWS via the Netlify function "upload-csv"
       fetch('/.netlify/functions/upload-csv', {
