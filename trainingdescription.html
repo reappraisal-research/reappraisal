@@ -64,7 +64,6 @@
       cursor: pointer;
     }
   </style>
-  <script src="dataSender.js"></script>
 </head>
 <body>
   <h1>Training Check</h1>
@@ -91,6 +90,7 @@
   <button id="nextButton" style="display: none;">Got it</button>
   
   <script>
+    // Show the button after 22 seconds.
     window.onload = function() {
       setTimeout(function(){
         document.getElementById("nextButton").style.display = "inline-block";
@@ -104,7 +104,14 @@
         alert("Please fill in both explanations before proceeding.");
         return;
       }
+      
+      // Retrieve or create a participant SID.
       var participantSID = localStorage.getItem("participantSID");
+      if (!participantSID) {
+        participantSID = "participant_" + Date.now();
+        localStorage.setItem("participantSID", participantSID);
+      }
+      
       var experimentData = {
         participantSID: participantSID,
         surveyName: "TrainingCheck",
@@ -114,6 +121,8 @@
           goalResponse: goalText
         }
       };
+
+      // Generate CSV content.
       function generateCSV(dataObj) {
         const headers = ["participantSID", "surveyName", "timestamp", "situationResponse", "goalResponse"];
         const csvHeader = headers.join(",") + "\n";
@@ -127,14 +136,33 @@
         const csvRow = row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
         return csvHeader + csvRow;
       }
+      
       var csvContent = generateCSV(experimentData);
+      console.log("CSV Content:", csvContent);
       var filename = `trainingcheck_${participantSID}.csv`;
-      sendExperimentData(experimentData, function(err, result) {
-        if(err) {
-          alert("Error submitting data. Please try again.");
-        } else {
-          window.location.href = "trainingdescriptiontwo.html";
+
+      // Send the CSV data to the server using a POST request.
+      fetch('/.netlify/functions/upload-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV successfully uploaded:", data);
+        window.location.href = "trainingdescriptiontwo.html";
+      })
+      .catch(error => {
+        console.error("Error uploading CSV:", error);
+        alert("Error submitting data. Please try again.");
       });
     });
   </script>
