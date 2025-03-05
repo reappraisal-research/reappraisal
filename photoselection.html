@@ -33,13 +33,13 @@
   </style>
 </head>
 <body>
-  <!-- These elements display the photo and its labels -->
+  <!-- Display elements for photo and labels -->
   <div id="photoLabel"></div>
   <img id="photo" src="" alt="Selected Photo">
   <div id="ambiguousLabel"></div>
   
   <script>
-    // Utility function to shuffle an array
+    // Shuffle an array in place.
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -48,7 +48,7 @@
       return array;
     }
 
-    // Define the photo pools
+    // Define photo pools and label mappings.
     const ambiguousPhotos = [
       "Stimulireal/horseback.jpg",
       "Stimulireal/donkey.seal.png",
@@ -74,7 +74,6 @@
       "Stimulireal/ur.profile.profile.jpg"
     ];
 
-    // Define mappings for labels for ambiguous photos
     const ambiguousLabels = {
       "Stimulireal/horseback.jpg": "Riding a horse/ a man's face",
       "Stimulireal/donkey.seal.png": "Donkey/ seal",
@@ -88,7 +87,6 @@
       "Stimulireal/profile.profile.png": "Side view/ front view"
     };
 
-    // Define mappings for labels for nonambiguous photos
     const nonAmbiguousLabels = {
       "Stimulireal/ur.donkey.seal.jpg": "Fish",
       "Stimulireal/ur.jastrow.rabbit.jpg": "Horse",
@@ -102,7 +100,7 @@
       "Stimulireal/ur.profile.profile.jpg": "Front view"
     };
 
-    // Store the photo pools in localStorage if they don't exist
+    // Save photo pools in localStorage if not set.
     if (!localStorage.getItem("ambiguousPhotos")) {
       localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
     }
@@ -110,20 +108,15 @@
       localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
     }
 
-    // Ensure a trial index exists; this tracks the number of visits to this page.
+    // Initialize trialIndex if not set.
     if (!localStorage.getItem("trialIndex")) {
       localStorage.setItem("trialIndex", "0");
     }
 
-    // Retrieve or generate a condition list (balanced list of conditions).
+    // Retrieve or generate a balanced condition list.
     let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
     if (!conditionList || conditionList.length === 0) {
       let conditions = [];
-      // Create 4 conditions (each repeated 5 times = 20 trials):
-      // ambiguous + "Situation rethinking"
-      // ambiguous + "goal rethinking"
-      // nonAmbiguous + "Situation rethinking"
-      // nonAmbiguous + "goal rethinking"
       for (let i = 0; i < 5; i++) {
         conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
         conditions.push({ photoType: "ambiguous", rethinkingLabel: "goal rethinking" });
@@ -135,27 +128,23 @@
       conditionList = conditions;
     }
 
-    // Function to select a photo and send trial data as CSV.
+    // Function to process the current trial.
     function selectPhoto() {
-      // Prevent duplicate execution.
-      if (window._photoSelected) return;
-      window._photoSelected = true;
+      // Prevent duplicate processing on the same page load.
+      if (localStorage.getItem("photoTrialProcessed") === "true") return;
+      localStorage.setItem("photoTrialProcessed", "true");
 
-      // Retrieve the current trial index from localStorage (visit number)
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
       let currentTrial = trialIndex + 1;
 
-      // If all trials are complete, redirect to thank_you page.
+      // Check if all trials are done.
       if (trialIndex >= conditionList.length) {
         alert("All trials completed. Thank you!");
         window.location.href = "thank_you.html";
         return;
       }
 
-      // Get the current condition for this trial.
       let currentCondition = conditionList[trialIndex];
-
-      // Choose the photo pool based on condition.
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
       let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
 
@@ -166,12 +155,12 @@
         return;
       }
 
-      // Randomly select a photo and remove it from the pool.
+      // Select a random photo from the pool.
       let randomIndex = Math.floor(Math.random() * photoPool.length);
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
-      // Set the label above the photo and display the corresponding label underneath.
+      // Update labels and photo.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
         document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
@@ -179,38 +168,34 @@
         document.getElementById("photoLabel").innerText = "Simple";
         document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
-
-      // Display the selected photo.
       const photoElement = document.getElementById("photo");
       photoElement.src = selectedPhoto;
       photoElement.alt = `Selected Photo: ${selectedPhoto}`;
       console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
 
-      // Build a trial data object.
+      // Build trial data.
       let trialData = {
-        participantSID: localStorage.getItem("participantSID"),
+        participantSID: localStorage.getItem("participantSID") || "unknown",
         visitNumber: currentTrial,
         photoType: currentCondition.photoType,
         photoShown: selectedPhoto
       };
 
-      // Helper function to generate CSV from trial data.
+      // Helper to generate CSV.
       function generateCSVFromTrial(dataObj) {
         const headers = ["participantSID", "visitNumber", "photoType", "photoShown"];
         const csvHeader = headers.join(",") + "\n";
         const row = headers.map(key => {
           let value = dataObj[key] || "";
-          value = String(value).replace(/"/g, '""');
-          return `"${value}"`;
+          return `"${String(value).replace(/"/g, '""')}"`;
         }).join(",");
         return csvHeader + row;
       }
       
       let csvContent = generateCSVFromTrial(trialData);
-      // Create a filename with "photoSelection", then participantSID and the trial number.
       const filename = `photoSelection_${trialData.participantSID}_${trialData.visitNumber}.csv`;
 
-      // Send the CSV data to AWS via the Netlify function "upload-csv".
+      // Send CSV via POST request.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -220,9 +205,7 @@
         body: csvContent
       })
       .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         return response.json();
       })
       .then(data => {
@@ -232,5 +215,21 @@
         console.error("Error uploading CSV for trial:", error);
       });
       
-      // Increment the trial index and save it.
-      trialInde
+      // Increment and save trial index.
+      trialIndex++;
+      localStorage.setItem("trialIndex", trialIndex.toString());
+      
+      // Redirect after 10 seconds.
+      setTimeout(function() {
+        window.location.href = "video_display.html";
+      }, 10000);
+    }
+
+    // On page load, clear the flag and call selectPhoto.
+    document.addEventListener("DOMContentLoaded", function() {
+      localStorage.removeItem("photoTrialProcessed");
+      selectPhoto();
+    });
+  </script>
+</body>
+</html>
