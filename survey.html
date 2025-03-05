@@ -3,99 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Survey</title>
+  <title>Perception Shift Survey</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #f0f0f0;
       margin: 0;
       padding: 20px;
+      text-align: center;
     }
     .container {
       max-width: 600px;
       margin: 40px auto;
-      padding: 20px 30px;
       background-color: #fff;
+      padding: 20px 30px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    h1, h2 {
-      text-align: center;
+    /* Fixed-size container for images */
+    .image-container {
+      width: 100%;
+      height: 60vh; /* Fixed height for uniform display */
+      border: 1px solid #ccc;
+      border-radius: 8px;
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #fff;
     }
-    h2 {
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Ensures the entire image is visible (no cropping) */
+    }
+    p.prompt {
+      font-size: 18px;
       font-weight: bold;
+      margin: 20px 0;
     }
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-    }
+    /* Spread out scale */
     .scale {
       display: flex;
-      justify-content: space-evenly;
-      margin: 20px auto;
-      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+      width: 80%;
+      margin: 10px auto;
+      gap: 20px;
     }
     .scale label {
-      position: relative;
-      flex: 0 0 70px;
-      height: 140px;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: normal;
     }
-    .scale label input[type="radio"] {
+    .scale input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
       background-color: #fff;
       border: 2px solid #000;
       border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      width: 35px;
+      height: 35px;
+      margin-bottom: 5px;
       cursor: pointer;
-      transition: background-color 0.3s;
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      transition: background-color 0.3s, color 0.3s;
+      text-align: center;
     }
-    .scale label input[type="radio"]:checked {
+    .scale input[type="radio"]:checked {
       background-color: #000;
       color: #fff;
     }
-    .scale label span {
-      position: absolute;
-      top: 45px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 16px;
-      font-weight: bold;
-      display: block;
-    }
-    .scale label small {
-      position: absolute;
-      top: 75px;
-      left: 50%;
-      transform: translateX(-50%);
+    .scale-instructions {
+      display: flex;
+      justify-content: space-between;
       font-size: 14px;
-      line-height: 1.2;
-    }
-    textarea {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      resize: vertical;
+      width: 80%;
+      margin: 0 auto 20px;
     }
     button {
-      padding: 10px 20px;
+      padding: 12px 25px;
       background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      display: block;
-      width: 100%;
       font-size: 16px;
       margin-top: 20px;
     }
@@ -104,96 +98,124 @@
     }
   </style>
   <script>
-    // IIFE to set up the condition list and insert the assigned label as a header.
-    (function() {
-      function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
+    // --- Utility: Shuffle an array ---
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
-      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      if (conditionList.length === 0) {
-        let conditions = [];
-        for (let i = 0; i < 5; i++) {
-          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
-          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Goal rethinking" });
-          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
-          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Goal rethinking" });
-        }
-        conditions = shuffleArray(conditions);
-        localStorage.setItem("conditionList", JSON.stringify(conditions));
-        conditionList = conditions;
-      }
-      // Retrieve trialIndex; if not set, default to 1 (assuming photo selection already incremented it).
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if(isNaN(trialIndex) || trialIndex < 1) {
-        trialIndex = 1;
-        localStorage.setItem("trialIndex", "1");
-      }
-      // Use the completed trial number (trialIndex) to get the condition for this survey.
-      let currentTrial = trialIndex;
-      let currentCondition = conditionList[currentTrial - 1] || {};
-      
-      document.addEventListener("DOMContentLoaded", function() {
-        let header = document.createElement("h2");
-        header.innerText = currentCondition.rethinkingLabel || "";
-        document.querySelector(".container").insertBefore(header, document.querySelector(".container").firstChild);
-      });
-    })();
+      return array;
+    }
 
-    // Function to save survey responses.
-    function saveResponses() {
-      const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
-      if (!rethinkingResponse) {
-        alert("Please fill out your rethinking response.");
+    // --- Set Up Images ---
+    const defaultImages = [
+      "Stimulireal/horseback.jpg",
+      "Stimulireal/donkey.seal.png",
+      "Stimulireal/face.vase.png",
+      "Stimulireal/frog.horse.jpg",
+      "Stimulireal/jastrow.rabbit.jpg",
+      "Stimulireal/profile.profile.png",
+      "Stimulireal/old.young.png",
+      "Stimulireal/hug.png",
+      "Stimulireal/man.mouse.png",
+      "Stimulireal/woman.man.png",
+      "Stimulireal/ur.donkey.seal.jpg",
+      "Stimulireal/ur.face.vase.png",
+      "Stimulireal/ur.man.mouse.png",
+      "Stimulireal/ur.profile.profile.jpg",
+      "Stimulireal/ur.hug.png",
+      "Stimulireal/ur.woman.man.png",
+      "Stimulireal/ur.old.young.jpg",
+      "Stimulireal/ur.frog.horse.png",
+      "Stimulireal/ur.horseback.jpg",
+      "Stimulireal/ur.jastrow.rabbit.jpg"
+    ];
+    // Load or initialize the shuffled images array in localStorage.
+    let images;
+    if (localStorage.getItem("perceptionImages")) {
+      images = JSON.parse(localStorage.getItem("perceptionImages"));
+    } else {
+      images = shuffleArray(defaultImages.slice());
+      localStorage.setItem("perceptionImages", JSON.stringify(images));
+    }
+
+    // --- Trial Index and Responses ---
+    let trialIndex = parseInt(localStorage.getItem("perceptionTrialIndex"), 10);
+    if (isNaN(trialIndex)) {
+      trialIndex = 0;
+      localStorage.setItem("perceptionTrialIndex", "0");
+    }
+    // Array to store all trial responses.
+    let responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
+
+    // --- Display the Current Trial ---
+    function displayTrial() {
+      if (trialIndex >= images.length) {
         return;
       }
-      const radioOptions = document.getElementsByName("howDoYouFeel");
-      let howDoYouFeelValue = "";
-      for (let i = 0; i < radioOptions.length; i++) {
-        if (radioOptions[i].checked) {
-          howDoYouFeelValue = radioOptions[i].value;
-          break;
+      document.getElementById("trialImage").src = images[trialIndex];
+      // Reset radio selections.
+      document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
+    }
+
+    // --- Process the Response for the Current Trial ---
+    function nextTrial() {
+      const perceptionScale = document.getElementsByName("perceptionScale");
+      const positivityScale = document.getElementsByName("positivityScale");
+      let perceptionResponse = "", positivityResponse = "";
+      for (let i = 0; i < perceptionScale.length; i++) {
+        if (perceptionScale[i].checked) {
+          perceptionResponse = perceptionScale[i].value;
+        }
+        if (positivityScale[i].checked) {
+          positivityResponse = positivityScale[i].value;
         }
       }
-      if (!howDoYouFeelValue) {
-        alert("Please select how you feel.");
+      if (!perceptionResponse || !positivityResponse) {
+        alert("Please answer both questions before proceeding.");
         return;
       }
+
       const participantSID = localStorage.getItem("participantSID") || "unknown";
-      // Use the trial index recorded by the photo selection page.
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if(isNaN(trialIndex) || trialIndex < 1) trialIndex = 1;
-      let currentTrial = trialIndex;
-      const conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      let currentCondition = conditionList[currentTrial - 1] || {};
-      const label = currentCondition.rethinkingLabel || "";
-      
-      // Build the survey response object.
-      const trialData = {
-        participantSID: participantSID,
-        trialNumber: currentTrial,
-        label: label,
-        rethinkingResponse: rethinkingResponse,
-        howDoYouFeel: howDoYouFeelValue
-      };
 
-      // Generate CSV string.
-      function generateCSVFromTrial(dataObj) {
-        const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel"];
-        const csvHeader = headers.join(",") + "\n";
-        const row = headers.map(key => {
-          let value = dataObj[key] || "";
-          value = String(value).replace(/"/g, '""');
-          return `"${value}"`;
-        }).join(",");
-        return csvHeader + row;
+      // Record the current trial's response.
+      responses.push({
+        participantSID: participantSID,
+        // Only save the file name (remove path).
+        image: images[trialIndex].split("/").pop(),
+        perceptionResponse: perceptionResponse,
+        positivityResponse: positivityResponse,
+        trial: trialIndex + 1,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem("perceptionResponses", JSON.stringify(responses));
+
+      trialIndex++;
+      localStorage.setItem("perceptionTrialIndex", trialIndex.toString());
+
+      if (trialIndex >= images.length) {
+        // All 20 trials completed – compile responses into one CSV and submit.
+        submitResponsesCSV();
+      } else {
+        // For trials 1-19, simply display the next trial.
+        displayTrial();
       }
-      const csvContent = generateCSVFromTrial(trialData);
-      // Filename: survey_{participantSID}_{trialNumber}.csv
-      const filename = `survey_${participantSID}_${currentTrial}.csv`;
+    }
+
+    // --- Compile and Send the Big CSV ---
+    function submitResponsesCSV() {
+      const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
+      const headers = ["participantSID", "image", "perceptionResponse", "positivityResponse", "trial", "timestamp"];
+      let csvContent = headers.join(",") + "\n";
+      responses.forEach(row => {
+        let line = headers.map(key => {
+          let value = row[key] || "";
+          return `"${String(value).replace(/"/g, '""')}"`;
+        }).join(",");
+        csvContent += line + "\n";
+      });
+      const participantSID = localStorage.getItem("participantSID") || "unknown";
+      const filename = `perception_${participantSID}.csv`;
 
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
@@ -209,55 +231,51 @@
       })
       .then(data => {
         console.log("CSV successfully uploaded:", data);
-        // Do not increment trialIndex here since the photo selection page already did.
-        // Redirect to photoselection.html (for trials 1-19).
-        window.location.href = "photoselection.html";
+        localStorage.removeItem("perceptionResponses");
+        // After final submission, redirect to Shiftingsuccess.html.
+        window.location.href = "Shiftingsuccess.html";
       })
       .catch(error => {
         console.error("Error uploading CSV:", error);
         alert("Error submitting data. Please try again.");
       });
     }
+
+    window.onload = displayTrial;
   </script>
 </head>
 <body>
   <div class="container">
-    <form>
-      <label for="rethinkingResponse">1. Rethinking Response</label>
-      <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
-      <label for="howDoYouFeel">2. How do you feel?</label>
-      <div class="scale">
-        <label>
-          <input type="radio" name="howDoYouFeel" value="1">
-          <span>1</span>
-        </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="2">
-          <span>2</span>
-        </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="3">
-          <span>3</span>
-        </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="4">
-          <span>4</span>
-        </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="5">
-          <span>5</span>
-        </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="6">
-          <span>6</span>
-        </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="7">
-          <span>7</span>
-        </label>
-      </div>
-      <button type="button" onclick="saveResponses()">Next</button>
-    </form>
+    <div class="image-container">
+      <img id="trialImage" src="" alt="Trial Image" />
+    </div>
+    <p class="prompt">How frequently did your perception of this image shift?</p>
+    <div class="scale">
+      <label><input type="radio" name="perceptionScale" value="1"><small>Not at all</small></label>
+      <label><input type="radio" name="perceptionScale" value="2"><small>Once every 4 seconds</small></label>
+      <label><input type="radio" name="perceptionScale" value="3"><small>Once every 3 seconds</small></label>
+      <label><input type="radio" name="perceptionScale" value="4"><small>Once every 2 seconds</small></label>
+      <label><input type="radio" name="perceptionScale" value="5"><small>1 time per second</small></label>
+      <label><input type="radio" name="perceptionScale" value="6"><small>2 times per second</small></label>
+      <label><input type="radio" name="perceptionScale" value="7"><small>3 times per second</small></label>
+    </div>
+
+    <p class="prompt">How did you find this image?</p>
+    <div class="scale">
+      <label><input type="radio" name="positivityScale" value="1">1</label>
+      <label><input type="radio" name="positivityScale" value="2">2</label>
+      <label><input type="radio" name="positivityScale" value="3">3</label>
+      <label><input type="radio" name="positivityScale" value="4">4</label>
+      <label><input type="radio" name="positivityScale" value="5">5</label>
+      <label><input type="radio" name="positivityScale" value="6">6</label>
+      <label><input type="radio" name="positivityScale" value="7">7</label>
+    </div>
+    <div class="scale-instructions">
+      <span>Extremely negative</span>
+      <span>Extremely positive</span>
+    </div>
+
+    <button type="button" onclick="nextTrial()">Next</button>
   </div>
 </body>
 </html>
