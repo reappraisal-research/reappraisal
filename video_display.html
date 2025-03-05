@@ -5,7 +5,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    /* (your existing CSS here) */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+      background-color: #f9f9f9;
+      position: relative;
+      min-height: 100vh;
+    }
+    video {
+      width: 80vw;
+      max-height: 60vh;
+      display: block;
+      margin: 20px auto;
+    }
+    .question-container {
+      display: none; /* Hidden until the video ends */
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .scale {
+      display: flex;
+      width: 700px;
+      margin: 10px auto;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    .option {
+      flex: 1; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+    .option input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+      border: 2px solid #000;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .option input[type="radio"]:checked {
+      background-color: #000;
+      color: #fff;
+    }
+    .label-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 50px;
+      line-height: 1.2;
+    }
+    .label-text .number {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    .label-text small {
+      font-size: 14px;
+      margin-top: 0;
+    }
+    .button-container {
+      display: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 20px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 auto;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
   </style>
   <script>
     // Play the video until a total of 3 seconds have elapsed.
@@ -70,20 +158,15 @@
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
       }
 
-      // Get the next video.
+      // Get the next video (remove it from the order).
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
         const videoElement = document.getElementById("video");
         videoElement.src = selectedVideo.url;
       } else {
-        // If no videos remain, reshuffle for the next cycle.
-        videoOrder = shuffleArray(videos.slice());
-        localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
-        const selectedVideo = videoOrder.shift();
-        localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
-        const videoElement = document.getElementById("video");
-        videoElement.src = selectedVideo.url;
+        document.getElementById("video").style.display = "none";
+        document.getElementById("questionContainer").innerHTML = "<p>All videos have been shown.</p>";
       }
 
       // Play the video until 3 seconds have elapsed, then show the question.
@@ -94,6 +177,7 @@
 
     // Function to send trial data as CSV and redirect.
     function nextPage() {
+      // Ensure a video trial index exists.
       if (!localStorage.getItem("videoTrialIndex")) {
         localStorage.setItem("videoTrialIndex", "0");
       }
@@ -115,12 +199,12 @@
         const row = headers.map(key => {
           let value = dataObj[key] || "";
           value = String(value).replace(/"/g, '""');
-          return `"${value}"`;
+          return "${value}";
         }).join(",");
         return csvHeader + row;
       }
       const csvContent = generateCSVFromTrial(trialData);
-      const filename = `videoDisplay_${participantSID}_${currentTrial}.csv`;
+      const filename = videoDisplay_${participantSID}_${currentTrial}.csv;
 
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
@@ -149,7 +233,14 @@
 
     window.onload = function() {
       selectVideo();
-      // Attach event listener to the Next button.
+      // When a radio is chosen, show the Next button (if applicable).
+      const radioButtons = document.getElementsByName("videoScale");
+      const nextButtonContainer = document.getElementById("buttonContainer");
+      Array.from(radioButtons).forEach(radio => {
+        radio.addEventListener("change", () => {
+          nextButtonContainer.style.display = "block";
+        });
+      });
       document.getElementById("nextButton").addEventListener("click", nextPage);
     };
   </script>
