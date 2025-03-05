@@ -221,7 +221,7 @@
      * The header order is: participantSID, surveyName, timestamp, then q1 to q10.
      */
     function generateCSV(dataObj) {
-      const headers = ["participantSID", "surveyName", "timestamp", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"];
+      const headers = ["participantSID", "surveyName", "timestamp", "bfis1_1", "bfis1_2", "bfis1_3", "bfis1_4", "bfis1_5", "bfis1_6", "bfis1_7", "bfis1_8", "bfis1_9", "bfis1_10"];
       const csvHeader = headers.join(",") + "\n";
       // Create an array for the row values.
       const row = [
