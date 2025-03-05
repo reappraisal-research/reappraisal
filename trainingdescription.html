@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Training Introduction</title>
+  <title>Training Check</title>
   <style>
     body {
       text-align: center;
@@ -19,7 +19,6 @@
     }
     p {
       font-size: 20px;
-      text-align: center;
       margin-bottom: 30px;
     }
     .definition {
@@ -58,80 +57,86 @@
       font-size: 16px;
       padding: 10px 20px;
       margin: 20px;
-      cursor: pointer;
-    }
-  </style>
-  <script>
-    window.onload = function() {
-      // After 22 seconds, show the Next button.
-      setTimeout(function(){
-        document.getElementById("nextButton").style.display = "inline-block";
-      }, 22000);
-    };
-
-    function validateAndProceed() {
-      // Retrieve the trimmed values of the textareas
-      var situationText = document.getElementById("situationResponse").value.trim();
-      var goalText = document.getElementById("goalResponse").value.trim();
-      
-      // Check if both textareas are filled in
-      if (situationText === "" || goalText === "") {
-        alert("Please fill in both explanations before proceeding.");
-        return false;
-      }
-      
-      // If both are filled, proceed to the next page
-      window.location.href = "trainingdescriptiontwo.html";
-    }
-  </script>
-</head>
-<body>
-
-  <p>
-    Next you will use one of two different strategies to rethink the video you just watched. <br>
-  </p>
-
-  <!-- Situation Rethinking -->
-  <p class="definition">Situation Rethinking</p>
-  <p class="description">
-    <strong>This strategy is about changing how you interpret the events of a situation so you feel less negative.</strong> 
-  </p>
-
-  <p class="example"><em>e.g.</em> You see a video of some people falling and injuring themselves, but you tell yourself that it was likely just a stunt and no one got hurt.</p>
-  <p class="example"><em>e.g.</em> You see a video of someone berating another person, but you tell yourself they are only doing it because they care about the other person and want them to be safe.</p>
-
-  <label for="situationResponse" class="description">Explain this strategy <strong>in your own words:</strong></label>
-  <textarea id="situationResponse" name="situationResponse" rows="4"></textarea>
-
-  <!-- Goal Rethinking -->
-  <p class="definition">Goal Rethinking</p>
-  <p class="description">
-    <strong>This strategy is about realizing how a negative event might actually serve other goals.</strong> 
-  </p>
-
-  <p class="example"><em>e.g.</em> You see a movie where someone is crying, but you tell yourself the video is helping you practice using empathy.</p>
-  <p class="example"><em>e.g.</em> You see a video of a car crash, but you tell yourself you now know to avoid similar situations in your life.</p><br>
-
-  <label for="goalResponse" class="description">Explain this strategy <strong>in your own words:</strong> </label>
-  <textarea id="goalResponse" name="goalResponse" rows="4"></textarea>
-
-  <!-- Next button initially hidden, appears after 22 seconds -->
-  <button
-    id="nextButton"
-    onclick="validateAndProceed()"
-    style="
-      display: none;
-      padding: 10px 20px;
-      font-size: 16px;
       background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-    "
-  >
-    Got it
-  </button>
+    }
+  </style>
+  <script src="dataSender.js"></script>
+</head>
+<body>
+  <h1>Training Check</h1>
+  <p>
+    Next you will use one of two different strategies to rethink the video you just watched.
+  </p>
+  <p class="definition">Situation Rethinking</p>
+  <p class="description">
+    <strong>This strategy is about changing how you interpret the events of a situation so you feel less negative.</strong>
+  </p>
+  <p class="example"><em>e.g.</em> You see a video of some people falling, but you tell yourself that it was likely just a stunt.</p>
+  <p class="example"><em>e.g.</em> You see a video of someone yelling, but you tell yourself they care deeply about the other person.</p>
+  <label for="situationResponse" class="description">Explain this strategy <strong>in your own words:</strong></label>
+  <textarea id="situationResponse" name="situationResponse" rows="4"></textarea>
+  <p class="definition">Goal Rethinking</p>
+  <p class="description">
+    <strong>This strategy is about realizing how a negative event might actually serve other goals.</strong>
+  </p>
+  <p class="example"><em>e.g.</em> You see a movie where someone is crying, but you tell yourself the video is helping you practice empathy.</p>
+  <p class="example"><em>e.g.</em> You see a video of a car crash, but you tell yourself you now know to avoid similar situations.</p>
+  <label for="goalResponse" class="description">Explain this strategy <strong>in your own words:</strong></label>
+  <textarea id="goalResponse" name="goalResponse" rows="4"></textarea>
+  <br>
+  <button id="nextButton" style="display: none;">Got it</button>
+  
+  <script>
+    window.onload = function() {
+      setTimeout(function(){
+        document.getElementById("nextButton").style.display = "inline-block";
+      }, 22000);
+    };
 
+    document.getElementById("nextButton").addEventListener("click", function() {
+      var situationText = document.getElementById("situationResponse").value.trim();
+      var goalText = document.getElementById("goalResponse").value.trim();
+      if (situationText === "" || goalText === "") {
+        alert("Please fill in both explanations before proceeding.");
+        return;
+      }
+      var participantSID = localStorage.getItem("participantSID");
+      var experimentData = {
+        participantSID: participantSID,
+        surveyName: "TrainingCheck",
+        timestamp: new Date().toISOString(),
+        responses: {
+          situationResponse: situationText,
+          goalResponse: goalText
+        }
+      };
+      function generateCSV(dataObj) {
+        const headers = ["participantSID", "surveyName", "timestamp", "situationResponse", "goalResponse"];
+        const csvHeader = headers.join(",") + "\n";
+        const row = [
+          dataObj.participantSID,
+          dataObj.surveyName,
+          dataObj.timestamp,
+          dataObj.responses.situationResponse,
+          dataObj.responses.goalResponse
+        ];
+        const csvRow = row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
+        return csvHeader + csvRow;
+      }
+      var csvContent = generateCSV(experimentData);
+      var filename = `trainingcheck_${participantSID}.csv`;
+      sendExperimentData(experimentData, function(err, result) {
+        if(err) {
+          alert("Error submitting data. Please try again.");
+        } else {
+          window.location.href = "trainingdescriptiontwo.html";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
