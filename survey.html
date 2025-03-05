@@ -104,7 +104,7 @@
     }
   </style>
   <script>
-    // IIFE to set up the condition list and add the assigned label as a header.
+    // IIFE to set up the condition list and insert the assigned label header.
     (function() {
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -126,9 +126,18 @@
         localStorage.setItem("conditionList", JSON.stringify(conditions));
         conditionList = conditions;
       }
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-      // Get current condition for this trial.
-      let currentCondition = conditionList[trialIndex] || {};
+      // Retrieve trialIndex. If not set or 0, default to 1.
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
+      if(isNaN(trialIndex) || trialIndex <= 0) {
+        trialIndex = 1;
+        localStorage.setItem("trialIndex", "1");
+      }
+      // Since the photo selection page already incremented the trialIndex,
+      // the survey page should use the completed trial number which is trialIndex.
+      let currentTrial = trialIndex;
+      // Use the condition from the previous page, at index trialIndex - 1.
+      let conditionListArr = conditionList;
+      let currentCondition = conditionListArr[currentTrial - 1] || {};
       
       document.addEventListener("DOMContentLoaded", function() {
         // Insert the assigned label as a header.
@@ -139,13 +148,13 @@
     })();
 
     function saveResponses() {
-      // Get the rethinking response from the text box.
+      // Get response from text box.
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       if (!rethinkingResponse) {
         alert("Please fill out your rethinking response.");
         return;
       }
-      // Get the selected value from the multiple choice.
+      // Get selected multiple-choice value.
       const radioOptions = document.getElementsByName("howDoYouFeel");
       let howDoYouFeelValue = "";
       for (let i = 0; i < radioOptions.length; i++) {
@@ -158,17 +167,19 @@
         alert("Please select how you feel.");
         return;
       }
-      // Get participant SID from localStorage.
+      // Get participant SID.
       const participantSID = localStorage.getItem("participantSID") || "unknown";
-      // Get the trial number (current trial = trialIndex + 1).
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 0;
-      let currentTrial = trialIndex + 1;
-      // Retrieve condition list and current condition to get the assigned label.
+      // Retrieve the trial index from localStorage.
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
+      if(isNaN(trialIndex) || trialIndex <= 0) trialIndex = 1;
+      // Use the current trial as the one recorded by the photo selection page.
+      let currentTrial = trialIndex;
+      // Retrieve condition list and get the label from the condition corresponding to trialIndex - 1.
       const conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      let currentCondition = conditionList[trialIndex] || {};
+      let currentCondition = conditionList[currentTrial - 1] || {};
       const label = currentCondition.rethinkingLabel || "";
       
-      // Build the trial data object.
+      // Build trial data object.
       const trialData = {
         participantSID: participantSID,
         trialNumber: currentTrial,
@@ -177,7 +188,7 @@
         howDoYouFeel: howDoYouFeelValue
       };
 
-      // Helper function to generate CSV string.
+      // Generate CSV.
       function generateCSVFromTrial(dataObj) {
         const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel"];
         const csvHeader = headers.join(",") + "\n";
@@ -189,10 +200,10 @@
         return csvHeader + row;
       }
       const csvContent = generateCSVFromTrial(trialData);
-      // Create a filename: "survey_{participantSID}_{trialNumber}.csv"
+      // Create filename: "survey_{participantSID}_{trialNumber}.csv"
       const filename = `survey_${participantSID}_${currentTrial}.csv`;
 
-      // Send the CSV data via POST request.
+      // Send CSV via POST request.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -209,10 +220,8 @@
       })
       .then(data => {
         console.log("CSV successfully uploaded:", data);
-        // Increment trial index.
-        trialIndex++;
-        localStorage.setItem("trialIndex", trialIndex.toString());
-        // Redirect to the next page.
+        // Do NOT increment trialIndex here because the photo selection page already did.
+        // Simply redirect to the next page.
         window.location.href = "photoselection.html";
       })
       .catch(error => {
