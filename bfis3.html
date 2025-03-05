@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personality Survey</title>
+  <meta charset="UTF-8">
+  <title>Personality Survey - BFS3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -91,12 +91,11 @@
       background-color: #0056b3;
     }
   </style>
-  <!-- Include dataSender.js -->
   <script src="dataSender.js"></script>
 </head>
 <body>
   <div class="container">
-    <form id="personalitySurveyForm3">
+    <form id="personalitySurveyForm3" action="betweener.html" method="get">
       <div class="question">
         <label for="q1">1. Prefers to have others take charge.</label>
         <div class="scale">
@@ -201,25 +200,52 @@
     </form>
   </div>
   <script>
+    var pageData = {};
+    function generateCSV(dataObj) {
+      const headers = ["participantSID", "surveyName", "timestamp", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"];
+      const csvHeader = headers.join(",") + "\n";
+      const row = [
+        dataObj.participantSID,
+        dataObj.surveyName,
+        dataObj.timestamp,
+        ...dataObj.responses.sort((a, b) => a.trial - b.trial).map(resp => resp.answer)
+      ];
+      const csvRow = row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
+      return csvHeader + csvRow;
+    }
     document.getElementById("personalitySurveyForm3").addEventListener("submit", function(e) {
       e.preventDefault();
       const formData = new FormData(this);
-      const responses = {};
-      formData.forEach((value, key) => {
-        responses[key] = value;
-      });
+      const responses = [];
+      for (let i = 1; i <= 10; i++) {
+        responses.push({ trial: i, answer: formData.get("q" + i) });
+      }
       const experimentData = {
         participantSID: localStorage.getItem("participantSID"),
         surveyName: "BFS3",
-        responses: responses,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        responses: responses
       };
-      sendExperimentData(experimentData, function(err, result) {
-        if(err) {
-          alert("Error submitting data. Please try again.");
-        } else {
-          window.location.href = "betweener.html";
-        }
+      pageData = experimentData;
+      const csvContent = generateCSV(pageData);
+      const filename = `bfis3_${experimentData.participantSID}.csv`;
+      fetch('/.netlify/functions/upload-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(data => {
+        window.location.href = "betweener.html";
+      })
+      .catch(error => {
+        alert("Error submitting data. Please try again.");
       });
     });
   </script>
