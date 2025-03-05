@@ -10,24 +10,18 @@
       margin: 20px;
       padding: 20px;
       line-height: 1.6;
+      background-color: #f2f2f2;
     }
     h1 {
       text-align: center;
       color: #333;
     }
-    label {
-      margin-top: 10px;
-    }
-    .question label:first-of-type {
-      font-weight: bold;
-    }
     .question {
       margin-bottom: 20px;
     }
-    .question input,
-    .question select,
-    .question textarea {
-      margin-top: 5px;
+    .question label {
+      margin-top: 10px;
+      display: block;
     }
     button {
       background-color: #007BFF;
@@ -38,6 +32,8 @@
       border-radius: 5px;
       cursor: pointer;
       margin-top: 20px;
+      display: block;
+      width: 100%;
     }
     button:hover {
       background-color: #0056b3;
@@ -45,158 +41,138 @@
   </style>
 </head>
 <body>
-  <h1>Please carefully fill out the questions</h1>
-  <form action="Pretestsurvey.html" method="get" id="surveyForm">
+  <h1>Please Fill Out the Demographics Questions</h1>
+  <form id="surveyForm" action="Pretestsurvey.html" method="get">
     <!-- Age -->
     <div class="question">
-      <label for="age">What is your age?</label><br>
-      <label><input type="radio" name="age" value="15 or younger" required> 15 or younger</label><br>
-      <label><input type="radio" name="age" value="16–19"> 16–19</label><br>
-      <label><input type="radio" name="age" value="20–24"> 20–24</label><br>
-      <label><input type="radio" name="age" value="25–29"> 25–29</label><br>
-      <label><input type="radio" name="age" value="30–34"> 30–34</label><br>
-      <label><input type="radio" name="age" value="35–39"> 35–39</label><br>
-      <label><input type="radio" name="age" value="40–44"> 40–44</label><br>
-      <label><input type="radio" name="age" value="45–49"> 45–49</label><br>
-      <label><input type="radio" name="age" value="50–54"> 50–54</label><br>
-      <label><input type="radio" name="age" value="55–59"> 55–59</label><br>
-      <label><input type="radio" name="age" value="60–64"> 60–64</label><br>
+      <label for="age">What is your age?</label>
+      <label><input type="radio" name="age" value="15 or younger" required> 15 or younger</label>
+      <label><input type="radio" name="age" value="16–19"> 16–19</label>
+      <label><input type="radio" name="age" value="20–24"> 20–24</label>
+      <label><input type="radio" name="age" value="25–29"> 25–29</label>
+      <label><input type="radio" name="age" value="30–34"> 30–34</label>
+      <label><input type="radio" name="age" value="35–39"> 35–39</label>
+      <label><input type="radio" name="age" value="40–44"> 40–44</label>
+      <label><input type="radio" name="age" value="45–49"> 45–49</label>
+      <label><input type="radio" name="age" value="50–54"> 50–54</label>
+      <label><input type="radio" name="age" value="55–59"> 55–59</label>
+      <label><input type="radio" name="age" value="60–64"> 60–64</label>
       <label><input type="radio" name="age" value="65 or older"> 65 or older</label>
     </div>
     
     <!-- Gender -->
     <div class="question">
-      <label for="gender">What is your gender?</label><br>
-      <label><input type="radio" name="gender" value="Female" required> Female</label><br>
-      <label><input type="radio" name="gender" value="Male"> Male</label><br>
-      <label><input type="radio" name="gender" value="Non-binary"> Non-binary</label><br>
-      <label><input type="radio" name="gender" value="Prefer not to disclose"> Prefer not to disclose</label><br>
+      <label for="gender">What is your gender?</label>
+      <label><input type="radio" name="gender" value="Female" required> Female</label>
+      <label><input type="radio" name="gender" value="Male"> Male</label>
+      <label><input type="radio" name="gender" value="Non-binary"> Non-binary</label>
+      <label><input type="radio" name="gender" value="Prefer not to disclose"> Prefer not to disclose</label>
       <label><input type="radio" name="gender" value="Other"> Other</label>
     </div>
     
     <!-- Ethnicity -->
     <div class="question">
-      <label for="ethnicity">How would you describe your ethnicity?</label><br>
-      <input type="radio" id="white" name="ethnicity" value="White" required>
-      <label for="white">White</label><br>
-      <input type="radio" id="black" name="ethnicity" value="Black or African-American">
-      <label for="black">Black or African-American</label><br>
-      <input type="radio" id="americanIndian" name="ethnicity" value="American Indian or Alaskan Native">
-      <label for="americanIndian">American Indian or Alaskan Native</label><br>
-      <input type="radio" id="asian" name="ethnicity" value="Asian">
-      <label for="asian">Asian</label><br>
-      <input type="radio" id="southAsian" name="ethnicity" value="South Asian">
-      <label for="southAsian">South Asian</label><br>
-      <input type="radio" id="nativeHawaiian" name="ethnicity" value="Native Hawaiian or other Pacific islander">
-      <label for="nativeHawaiian">Native Hawaiian or other Pacific islander</label><br>
-      <input type="radio" id="multipleRaces" name="ethnicity" value="From multiple races">
-      <label for="multipleRaces">From multiple races</label><br>
-      <input type="radio" id="someOtherRace" name="ethnicity" value="Some other race">
-      <label for="otherEthnicity">Some other race (please specify):</label>
-      <input type="text" id="otherEthnicity" name="otherEthnicity" placeholder="" disabled><br>
-      <input type="radio" id="preferNot" name="ethnicity" value="Prefer not to disclose">
-      <label for="preferNot">Prefer not to disclose</label>
+      <label for="ethnicity">How would you describe your ethnicity?</label>
+      <label><input type="radio" id="white" name="ethnicity" value="White" required> White</label>
+      <label><input type="radio" id="black" name="ethnicity" value="Black or African-American"> Black or African-American</label>
+      <label><input type="radio" id="americanIndian" name="ethnicity" value="American Indian or Alaskan Native"> American Indian or Alaskan Native</label>
+      <label><input type="radio" id="asian" name="ethnicity" value="Asian"> Asian</label>
+      <label><input type="radio" id="southAsian" name="ethnicity" value="South Asian"> South Asian</label>
+      <label><input type="radio" id="nativeHawaiian" name="ethnicity" value="Native Hawaiian or other Pacific islander"> Native Hawaiian or other Pacific islander</label>
+      <label><input type="radio" id="multipleRaces" name="ethnicity" value="From multiple races"> From multiple races</label>
+      <label><input type="radio" id="someOtherRace" name="ethnicity" value="Some other race"> Some other race (please specify):</label>
+      <input type="text" id="otherEthnicity" name="otherEthnicity" placeholder="" disabled>
+      <label><input type="radio" id="preferNot" name="ethnicity" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
     
     <!-- Education -->
     <div class="question">
-      <label for="education">What is the highest level of school you have completed?</label><br>
-      <label><input type="radio" name="education" value="Less than high school degree" required> Less than high school degree</label><br>
-      <label><input type="radio" name="education" value="High school degree or equivalent (e.g., GED)"> High school degree or equivalent (e.g., GED)</label><br>
-      <label><input type="radio" name="education" value="Some college but no degree"> Some college but no degree</label><br>
-      <label><input type="radio" name="education" value="Associate degree"> Associate degree</label><br>
-      <label><input type="radio" name="education" value="Bachelor degree"> Bachelor degree</label><br>
+      <label for="education">What is the highest level of school you have completed?</label>
+      <label><input type="radio" name="education" value="Less than high school degree" required> Less than high school degree</label>
+      <label><input type="radio" name="education" value="High school degree or equivalent (e.g., GED)"> High school degree or equivalent (e.g., GED)</label>
+      <label><input type="radio" name="education" value="Some college but no degree"> Some college but no degree</label>
+      <label><input type="radio" name="education" value="Associate degree"> Associate degree</label>
+      <label><input type="radio" name="education" value="Bachelor degree"> Bachelor degree</label>
       <label><input type="radio" name="education" value="Graduate degree (e.g., Masters, PhD, M.D)"> Graduate degree (e.g., Masters, PhD, M.D)</label>
     </div>
     
     <!-- Employment -->
     <div class="question">
-      <label for="employment">Which of the following categories best describes your employment status?</label><br>
-      <label><input type="radio" name="employment" value="Employed part time" required> Employed part time</label><br>
-      <label><input type="radio" name="employment" value="Employed full time"> Employed full time</label><br>
-      <label><input type="radio" name="employment" value="Not employed, looking for work"> Not employed, looking for work</label><br>
-      <label><input type="radio" name="employment" value="Not employed, not looking for work"> Not employed, not looking for work</label><br>
-      <label><input type="radio" name="employment" value="Retired"> Retired</label><br>
-      <label><input type="radio" name="employment" value="Disabled, not able to work"> Disabled, not able to work</label><br>
+      <label for="employment">Which of the following categories best describes your employment status?</label>
+      <label><input type="radio" name="employment" value="Employed part time" required> Employed part time</label>
+      <label><input type="radio" name="employment" value="Employed full time"> Employed full time</label>
+      <label><input type="radio" name="employment" value="Not employed, looking for work"> Not employed, looking for work</label>
+      <label><input type="radio" name="employment" value="Not employed, not looking for work"> Not employed, not looking for work</label>
+      <label><input type="radio" name="employment" value="Retired"> Retired</label>
+      <label><input type="radio" name="employment" value="Disabled, not able to work"> Disabled, not able to work</label>
       <label><input type="radio" name="employment" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
     
     <!-- Income -->
     <div class="question">
-      <label for="income">What was your combined household income in the last year?</label><br>
-      <label><input type="radio" name="income" value="$0 – $9,999" required> $0 – $9,999</label><br>
-      <label><input type="radio" name="income" value="$10,000 – $19,999"> $10,000 – $19,999</label><br>
-      <label><input type="radio" name="income" value="$20,000 – $29,999"> $20,000 – $29,999</label><br>
-      <label><input type="radio" name="income" value="$30,000 – $39,999"> $30,000 – $39,999</label><br>
-      <label><input type="radio" name="income" value="$40,000 – $49,999"> $40,000 – $49,999</label><br>
-      <label><input type="radio" name="income" value="$50,000 – $59,999"> $50,000 – $59,999</label><br>
-      <label><input type="radio" name="income" value="$60,000 – $69,999"> $60,000 – $69,999</label><br>
-      <label><input type="radio" name="income" value="$70,000 – $79,999"> $70,000 – $79,999</label><br>
-      <label><input type="radio" name="income" value="$80,000 – $89,999"> $80,000 – $89,999</label><br>
-      <label><input type="radio" name="income" value="$90,000 – $99,999"> $90,000 – $99,999</label><br>
-      <label><input type="radio" name="income" value="$100,000 or more"> $100,000 or more</label><br>
+      <label for="income">What was your combined household income in the last year?</label>
+      <label><input type="radio" name="income" value="$0 – $9,999" required> $0 – $9,999</label>
+      <label><input type="radio" name="income" value="$10,000 – $19,999"> $10,000 – $19,999</label>
+      <label><input type="radio" name="income" value="$20,000 – $29,999"> $20,000 – $29,999</label>
+      <label><input type="radio" name="income" value="$30,000 – $39,999"> $30,000 – $39,999</label>
+      <label><input type="radio" name="income" value="$40,000 – $49,999"> $40,000 – $49,999</label>
+      <label><input type="radio" name="income" value="$50,000 – $59,999"> $50,000 – $59,999</label>
+      <label><input type="radio" name="income" value="$60,000 – $69,999"> $60,000 – $69,999</label>
+      <label><input type="radio" name="income" value="$70,000 – $79,999"> $70,000 – $79,999</label>
+      <label><input type="radio" name="income" value="$80,000 – $89,999"> $80,000 – $89,999</label>
+      <label><input type="radio" name="income" value="$90,000 – $99,999"> $90,000 – $99,999</label>
+      <label><input type="radio" name="income" value="$100,000 or more"> $100,000 or more</label>
       <label><input type="radio" name="income" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
     
     <!-- Living Situation -->
     <div class="question">
-      <label for="living">Which of the following describes your current living situation?</label><br>
-      <label><input type="radio" name="living" value="Own my home" required> Own my home</label><br>
-      <label><input type="radio" name="living" value="Rent my home"> Rent my home</label><br>
-      <label><input type="radio" name="living" value="Other"> Other</label><br>
+      <label for="living">Which of the following describes your current living situation?</label>
+      <label><input type="radio" name="living" value="Own my home" required> Own my home</label>
+      <label><input type="radio" name="living" value="Rent my home"> Rent my home</label>
+      <label><input type="radio" name="living" value="Other"> Other</label>
       <label><input type="radio" name="living" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
     
     <!-- Language -->
     <div class="question">
-      <label for="language">What language do you mainly speak at home? (Select all that apply)</label><br>
-      <input type="checkbox" id="english" name="language" value="English">
-      <label for="english">English</label><br>
-      <input type="checkbox" id="spanish" name="language" value="Spanish">
-      <label for="spanish">Spanish</label><br>
-      <input type="checkbox" id="chinese" name="language" value="Chinese">
-      <label for="chinese">Chinese</label><br>
-      <input type="checkbox" id="french" name="language" value="French">
-      <label for="french">French</label><br>
-      <input type="checkbox" id="other" name="language" value="Other">
-      <label for="other-language">Other (please specify):</label>
-      <input type="text" id="other-language" name="other-language" placeholder="" disabled>
+      <label for="language">What language do you mainly speak at home? (Select all that apply)</label>
+      <label><input type="checkbox" id="english" name="language" value="English"> English</label>
+      <label><input type="checkbox" id="spanish" name="language" value="Spanish"> Spanish</label>
+      <label><input type="checkbox" id="chinese" name="language" value="Chinese"> Chinese</label>
+      <label><input type="checkbox" id="french" name="language" value="French"> French</label>
+      <label>
+        <input type="checkbox" id="other" name="language" value="Other"> Other (please specify):
+        <input type="text" id="other-language" name="other-language" placeholder="" disabled>
+      </label>
     </div>
     
     <!-- Religion -->
     <div class="question">
-      <label for="religion">Do you identify with any of the following religions? (Select all that apply)</label><br>
-      <input type="checkbox" id="religion-protestant" name="religion" value="Protestantism">
-      <label for="religion-protestant">Protestantism</label><br>
-      <input type="checkbox" id="religion-catholic" name="religion" value="Catholicism">
-      <label for="religion-catholic">Catholicism</label><br>
-      <input type="checkbox" id="religion-christianity" name="religion" value="Christianity">
-      <label for="religion-christianity">Christianity</label><br>
-      <input type="checkbox" id="religion-judaism" name="religion" value="Judaism">
-      <label for="religion-judaism">Judaism</label><br>
-      <input type="checkbox" id="religion-islam" name="religion" value="Islam">
-      <label for="religion-islam">Islam</label><br>
-      <input type="checkbox" id="religion-buddhism" name="religion" value="Buddhism">
-      <label for="religion-buddhism">Buddhism</label><br>
-      <input type="checkbox" id="religion-hinduism" name="religion" value="Hinduism">
-      <label for="religion-hinduism">Hinduism</label><br>
-      <input type="checkbox" id="religion-nondenom" name="religion" value="Inter/Non-denominational">
-      <label for="religion-nondenom">Inter/Non-denominational</label><br>
-      <input type="checkbox" id="religion-noreligion" name="religion" value="No religion">
-      <label for="religion-noreligion">No religion</label><br>
-      <input type="checkbox" id="religion-other" name="religion" value="Other">
-      <label for="religion-other">Other (please specify):</label>
-      <input type="text" id="religion-other-text" name="religion-other-text" placeholder="" disabled>
+      <label for="religion">Do you identify with any of the following religions? (Select all that apply)</label>
+      <label><input type="checkbox" id="religion-protestant" name="religion" value="Protestantism"> Protestantism</label>
+      <label><input type="checkbox" id="religion-catholic" name="religion" value="Catholicism"> Catholicism</label>
+      <label><input type="checkbox" id="religion-christianity" name="religion" value="Christianity"> Christianity</label>
+      <label><input type="checkbox" id="religion-judaism" name="religion" value="Judaism"> Judaism</label>
+      <label><input type="checkbox" id="religion-islam" name="religion" value="Islam"> Islam</label>
+      <label><input type="checkbox" id="religion-buddhism" name="religion" value="Buddhism"> Buddhism</label>
+      <label><input type="checkbox" id="religion-hinduism" name="religion" value="Hinduism"> Hinduism</label>
+      <label><input type="checkbox" id="religion-nondenom" name="religion" value="Inter/Non-denominational"> Inter/Non-denominational</label>
+      <label><input type="checkbox" id="religion-noreligion" name="religion" value="No religion"> No religion</label>
+      <label>
+        <input type="checkbox" id="religion-other" name="religion" value="Other"> Other (please specify):
+        <input type="text" id="religion-other-text" name="religion-other-text" placeholder="" disabled>
+      </label>
     </div>
     
     <!-- Political Viewpoints -->
     <div class="question">
-      <label for="politics">How would you describe your political viewpoints?</label><br>
-      <label><input type="radio" name="politics" value="Very liberal" required> Very liberal</label><br>
-      <label><input type="radio" name="politics" value="Slightly liberal"> Slightly liberal</label><br>
-      <label><input type="radio" name="politics" value="Moderate"> Moderate</label><br>
-      <label><input type="radio" name="politics" value="Slightly conservative"> Slightly conservative</label><br>
-      <label><input type="radio" name="politics" value="Very conservative"> Very conservative</label><br>
+      <label for="politics">How would you describe your political viewpoints?</label>
+      <label><input type="radio" name="politics" value="Very liberal" required> Very liberal</label>
+      <label><input type="radio" name="politics" value="Slightly liberal"> Slightly liberal</label>
+      <label><input type="radio" name="politics" value="Moderate"> Moderate</label>
+      <label><input type="radio" name="politics" value="Slightly conservative"> Slightly conservative</label>
+      <label><input type="radio" name="politics" value="Very conservative"> Very conservative</label>
       <label><input type="radio" name="politics" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
     
@@ -204,35 +180,34 @@
   </form>
   
   <script>
-    // Global variable for storing page data.
+    // Global variable to store the demographics page data.
     var pageData = {};
 
     /**
-     * Generates a CSV string from the provided data object using a fixed header order.
-     * The fixed header order ensures the participantSID is first and fields are in the desired order.
+     * Generates a CSV string using a fixed header order.
+     * The header order ensures the participantSID is first.
      */
     function generateCSVFromObject(dataObj) {
-      // Define the header order. Adjust these keys if you change your form.
       const headers = [
-        "participantSID", 
-        "age", 
-        "gender", 
-        "ethnicity", 
-        "otherEthnicity", 
-        "education", 
-        "employment", 
-        "income", 
-        "living", 
-        "language", 
-        "other-language", 
-        "religion", 
-        "religion-other-text", 
+        "participantSID",
+        "age",
+        "gender",
+        "ethnicity",
+        "otherEthnicity",
+        "education",
+        "employment",
+        "income",
+        "living",
+        "language",
+        "other-language",
+        "religion",
+        "religion-other-text",
         "politics"
       ];
       const csvHeader = headers.join(",") + "\n";
       const row = headers.map(key => {
-        // Escape double quotes by replacing them with two double quotes and enclose field in quotes.
         let value = dataObj[key] || "";
+        // Escape double quotes by doubling them.
         value = String(value).replace(/"/g, '""');
         return `"${value}"`;
       }).join(",");
@@ -241,14 +216,14 @@
     
     // --- Form Handling ---
     document.getElementById("surveyForm").addEventListener("submit", function(event) {
-      // Ensure built-in validations pass.
+      // Check HTML5 validations.
       if (!this.checkValidity()) {
         this.reportValidity();
         event.preventDefault();
         return;
       }
       
-      // Custom validation for checkboxes.
+      // Custom validation for multi-select fields.
       const languageChecked = document.querySelectorAll('input[name="language"]:checked');
       if (languageChecked.length === 0) {
         alert("Please select at least one language.");
@@ -268,7 +243,6 @@
       const formData = new FormData(this);
       const dataObj = {};
       formData.forEach((value, key) => {
-        // If a field already exists, convert it to an array (for multiple selections).
         if (dataObj[key]) {
           if (!Array.isArray(dataObj[key])) {
             dataObj[key] = [dataObj[key]];
@@ -279,7 +253,7 @@
         }
       });
       
-      // For multi-select fields (checkboxes), join the values.
+      // For checkboxes (multi-select), join the values with a semicolon.
       if (dataObj.language && Array.isArray(dataObj.language)) {
         dataObj.language = dataObj.language.join("; ");
       }
@@ -287,43 +261,55 @@
         dataObj.religion = dataObj.religion.join("; ");
       }
       
-      // Retrieve the locally saved participant SID and add it to our data.
+      // Retrieve the locally saved participant SID and add it to the data.
       const participantSID = localStorage.getItem("participantSID");
       dataObj.participantSID = participantSID;
       
-      // Store the collected data in the global variable.
+      // Save collected data in the global variable.
       pageData = dataObj;
       console.log("Global Page Data:", pageData);
       
       // Generate CSV from the data using the fixed header order.
       const csvContent = generateCSVFromObject(pageData);
       
-      // Create a unique filename with the participant SID and a timestamp.
+      // Create a unique filename using the participant SID and a timestamp.
       const filename = `demographics_${participantSID}_${Date.now()}.csv`;
       
-      // Auto-download the CSV file.
-      const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      
-      // Allow a short delay to ensure the download is triggered before redirecting.
-      setTimeout(() => {
+      // Send the CSV data to AWS via the Netlify function "upload-csv.js".
+      fetch('/.netlify/functions/upload-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV successfully uploaded:", data);
+        // Redirect to the next page after a successful upload.
         window.location.href = "Pretestsurvey.html";
-      }, 1000);
+      })
+      .catch(error => {
+        console.error("Error uploading CSV:", error);
+        alert("Error submitting data. Please try again.");
+      });
     });
     
     // --- Additional functionality for "Other" fields ---
     document.addEventListener("DOMContentLoaded", function () {
-      // Ethnicity "Other"
+      // Enable/disable the "Other" text input for ethnicity.
       const otherRaceRadio = document.getElementById("someOtherRace");
       const otherRaceText  = document.getElementById("otherEthnicity");
-      const ethnicityRadios  = document.querySelectorAll('input[name="ethnicity"]');
-      ethnicityRadios.forEach((radio) => {
+      const ethnicityRadios = document.querySelectorAll('input[name="ethnicity"]');
+      ethnicityRadios.forEach(radio => {
         radio.addEventListener("change", () => {
-          if (otherRaceRadio.checked) {
+          if (otherRaceRadio && otherRaceRadio.checked) {
             otherRaceText.disabled = false;
             otherRaceText.required = true;
           } else {
@@ -334,30 +320,30 @@
         });
       });
       
-      // Language "Other" checkbox.
+      // Enable/disable the "Other" text input for language.
       const otherLangCheckbox = document.getElementById("other");
       const otherLangText = document.getElementById("other-language");
       otherLangCheckbox.addEventListener("change", () => {
         if (otherLangCheckbox.checked) {
-          otherLangText.required = true;
           otherLangText.disabled = false;
+          otherLangText.required = true;
         } else {
-          otherLangText.required = false;
           otherLangText.disabled = true;
+          otherLangText.required = false;
           otherLangText.value = "";
         }
       });
       
-      // Religion "Other" checkbox.
+      // Enable/disable the "Other" text input for religion.
       const religionOtherCheckbox = document.getElementById("religion-other");
       const religionOtherText = document.getElementById("religion-other-text");
       religionOtherCheckbox.addEventListener("change", () => {
         if (religionOtherCheckbox.checked) {
-          religionOtherText.required = true;
           religionOtherText.disabled = false;
+          religionOtherText.required = true;
         } else {
-          religionOtherText.required = false;
           religionOtherText.disabled = true;
+          religionOtherText.required = false;
           religionOtherText.value = "";
         }
       });
