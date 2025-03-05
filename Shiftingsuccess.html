@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Perception Shift Survey</title>
   <style>
     body {
@@ -35,29 +35,24 @@
     .image-container img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Ensures the entire image is visible (no cropping) */
+      object-fit: contain; /* Ensure entire image is visible */
     }
     p.prompt {
       font-size: 18px;
       font-weight: bold;
       margin: 20px 0;
     }
-    /* Spread out scale */
+    /* Scale styling */
     .scale {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      width: 80%;
+      width: 90%;
       margin: 10px auto;
       gap: 20px;
     }
     .scale label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 16px;
       cursor: pointer;
-      font-weight: normal;
     }
     .scale input[type="radio"] {
       -webkit-appearance: none;
@@ -107,7 +102,7 @@
       return array;
     }
 
-    // Define the default list of images.
+    // Default list of images.
     const defaultImages = [
       "Stimulireal/horseback.jpg",
       "Stimulireal/donkey.seal.png",
@@ -131,39 +126,37 @@
       "Stimulireal/ur.jastrow.rabbit.jpg"
     ];
 
-    // Load or initialize the shuffled images array from localStorage.
+    // Load or initialize the shuffled images array in localStorage.
     let images;
     if (localStorage.getItem("perceptionImages")) {
       images = JSON.parse(localStorage.getItem("perceptionImages"));
     } else {
-      images = shuffleArray(defaultImages.slice()); // Shuffle a copy of the default list
+      images = shuffleArray(defaultImages.slice());
       localStorage.setItem("perceptionImages", JSON.stringify(images));
     }
 
-    // Get the current trial index from localStorage or initialize it.
+    // Retrieve or initialize the trial index (0-based)
     let trialIndex = parseInt(localStorage.getItem("perceptionTrialIndex"), 10);
     if (isNaN(trialIndex)) {
       trialIndex = 0;
+      localStorage.setItem("perceptionTrialIndex", "0");
     }
 
-    // Display the current trial image or redirect if all images have been shown.
+    // Display the current trial image.
     function displayTrial() {
       if (trialIndex >= images.length) {
-        // All images have been used; redirect to thank_you.html
-        window.location.href = "thank_you.html";
         return;
       }
       document.getElementById("trialImage").src = images[trialIndex];
-
-      // Reset radio selections for the new trial
+      // Reset radio buttons.
       document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
     }
 
+    // Function to go to the next trial.
     function nextTrial() {
-      // Get responses from the perception and positivity scales.
+      // Get responses from both scales.
       const perceptionScale = document.getElementsByName("perceptionScale");
       const positivityScale = document.getElementsByName("positivityScale");
-
       let perceptionResponse = "", positivityResponse = "";
       for (let i = 0; i < perceptionScale.length; i++) {
         if (perceptionScale[i].checked) {
@@ -174,28 +167,81 @@
         }
       }
 
-      // Ensure both questions have been answered.
+      // Check that both responses have been given.
       if (!perceptionResponse || !positivityResponse) {
         alert("Please answer both questions before proceeding.");
         return;
       }
 
-      // Save the responses (if needed).
-      const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
+      // Retrieve any previously recorded responses.
+      let responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
+      // Get participant id.
+      const participantSID = localStorage.getItem("participantSID") || "unknown";
+      // Record the current trial's responses.
       responses.push({
-        trial: trialIndex + 1,
+        participantSID: participantSID,
         image: images[trialIndex],
         perceptionResponse: perceptionResponse,
         positivityResponse: positivityResponse,
+        trial: trialIndex + 1,
         timestamp: new Date().toISOString()
       });
       localStorage.setItem("perceptionResponses", JSON.stringify(responses));
 
-      // Increment the trial index and update localStorage.
       trialIndex++;
-      localStorage.setItem("perceptionTrialIndex", trialIndex);
+      localStorage.setItem("perceptionTrialIndex", trialIndex.toString());
 
-      displayTrial();
+      if (trialIndex >= images.length) {
+        // All trials completed: compile responses into a single CSV and submit.
+        submitResponsesCSV();
+      } else {
+        displayTrial();
+      }
+    }
+
+    // Function to compile and send all responses as a single CSV.
+    function submitResponsesCSV() {
+      const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
+      const participantSID = localStorage.getItem("participantSID") || "unknown";
+      // Build CSV: header row + one row per trial.
+      const headers = ["participantSID", "image", "perceptionResponse", "positivityResponse", "trial", "timestamp"];
+      let csvContent = headers.join(",") + "\n";
+      responses.forEach(row => {
+        let line = headers.map(key => {
+          let value = row[key] || "";
+          return `"${String(value).replace(/"/g, '""')}"`;
+        }).join(",");
+        csvContent += line + "\n";
+      });
+
+      // Create a filename using participant id.
+      const filename = `shifting_${participantSID}.csv`;
+
+      // Send CSV via POST request.
+      fetch('/.netlify/functions/upload-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV successfully uploaded:", data);
+        // Optionally clear the responses.
+        localStorage.removeItem("perceptionResponses");
+        window.location.href = "thank_you.html";
+      })
+      .catch(error => {
+        console.error("Error uploading CSV:", error);
+        alert("Error submitting data. Please try again.");
+      });
     }
 
     window.onload = displayTrial;
@@ -203,52 +249,20 @@
 </head>
 <body>
   <div class="container">
-    <!-- Fixed-size container for the trial image -->
     <div class="image-container">
       <img id="trialImage" src="" alt="Trial Image" />
     </div>
-    <!-- Perception Shift Question -->
     <p class="prompt">How frequently did your perception of this image shift?</p>
-    <div class="scale" style="
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: nowrap;
-      width: 90%;
-      margin: 10px auto;
-      gap: 20px;">
-      
-      <label>
-        <input type="radio" name="perceptionScale" value="1">
-        <small>Not at all</small>
-      </label>
-      <label>
-        <input type="radio" name="perceptionScale" value="2">
-        <small>Once every 4 seconds</small>
-      </label>
-      <label>
-        <input type="radio" name="perceptionScale" value="3">
-        <small>Once every 3 seconds</small>
-      </label>
-      <label>
-        <input type="radio" name="perceptionScale" value="4">
-        <small>Once every 2 seconds</small>
-      </label>
-      <label>
-        <input type="radio" name="perceptionScale" value="5">
-        <small>1 time per second</small>
-      </label>
-      <label>
-        <input type="radio" name="perceptionScale" value="6">
-        <small>2 times per second</small>
-      </label>
-      <label>
-        <input type="radio" name="perceptionScale" value="7">
-        <small>3 times per second</small>
-      </label>
+    <div class="scale">
+      <label><input type="radio" name="perceptionScale" value="1"><small>Not at all</small></label>
+      <label><input type="radio" name="perceptionScale" value="2"><small>Once every 4 seconds</small></label>
+      <label><input type="radio" name="perceptionScale" value="3"><small>Once every 3 seconds</small></label>
+      <label><input type="radio" name="perceptionScale" value="4"><small>Once every 2 seconds</small></label>
+      <label><input type="radio" name="perceptionScale" value="5"><small>1 time per second</small></label>
+      <label><input type="radio" name="perceptionScale" value="6"><small>2 times per second</small></label>
+      <label><input type="radio" name="perceptionScale" value="7"><small>3 times per second</small></label>
     </div>
 
-    <!-- Positivity Question -->
     <p class="prompt">How did you find this image?</p>
     <div class="scale">
       <label><input type="radio" name="positivityScale" value="1">1</label>
@@ -260,8 +274,8 @@
       <label><input type="radio" name="positivityScale" value="7">7</label>
     </div>
     <div class="scale-instructions">
-      <span>Extremely<br>negative</span>
-      <span>Extremely<br>positive</span>
+      <span>Extremely negative</span>
+      <span>Extremely positive</span>
     </div>
 
     <button type="button" onclick="nextTrial()">Next</button>
