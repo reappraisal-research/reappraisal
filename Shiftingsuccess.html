@@ -35,24 +35,29 @@
     .image-container img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Ensure entire image is visible */
+      object-fit: contain; /* Ensures the entire image is visible (no cropping) */
     }
     p.prompt {
       font-size: 18px;
       font-weight: bold;
       margin: 20px 0;
     }
-    /* Scale styling */
+    /* Spread out scale */
     .scale {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      width: 90%;
+      width: 80%;
       margin: 10px auto;
       gap: 20px;
     }
     .scale label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 16px;
       cursor: pointer;
+      font-weight: normal;
     }
     .scale input[type="radio"] {
       -webkit-appearance: none;
@@ -93,7 +98,7 @@
     }
   </style>
   <script>
-    // Utility function to shuffle an array
+    // --- Utility: Shuffle Array ---
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -102,7 +107,7 @@
       return array;
     }
 
-    // Default list of images.
+    // --- Set Up Images ---
     const defaultImages = [
       "Stimulireal/horseback.jpg",
       "Stimulireal/donkey.seal.png",
@@ -125,7 +130,6 @@
       "Stimulireal/ur.horseback.jpg",
       "Stimulireal/ur.jastrow.rabbit.jpg"
     ];
-
     // Load or initialize the shuffled images array in localStorage.
     let images;
     if (localStorage.getItem("perceptionImages")) {
@@ -135,26 +139,26 @@
       localStorage.setItem("perceptionImages", JSON.stringify(images));
     }
 
-    // Retrieve or initialize the trial index (0-based)
+    // --- Trial Index and Responses ---
     let trialIndex = parseInt(localStorage.getItem("perceptionTrialIndex"), 10);
     if (isNaN(trialIndex)) {
       trialIndex = 0;
       localStorage.setItem("perceptionTrialIndex", "0");
     }
+    let responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
 
-    // Display the current trial image.
+    // --- Display the Current Trial ---
     function displayTrial() {
       if (trialIndex >= images.length) {
         return;
       }
       document.getElementById("trialImage").src = images[trialIndex];
-      // Reset radio buttons.
+      // Reset radio selections.
       document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
     }
 
-    // Function to go to the next trial.
+    // --- Process the Response for the Current Trial ---
     function nextTrial() {
-      // Get responses from both scales.
       const perceptionScale = document.getElementsByName("perceptionScale");
       const positivityScale = document.getElementsByName("positivityScale");
       let perceptionResponse = "", positivityResponse = "";
@@ -166,21 +170,18 @@
           positivityResponse = positivityScale[i].value;
         }
       }
-
-      // Check that both responses have been given.
       if (!perceptionResponse || !positivityResponse) {
         alert("Please answer both questions before proceeding.");
         return;
       }
 
-      // Retrieve any previously recorded responses.
-      let responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
       // Get participant id.
       const participantSID = localStorage.getItem("participantSID") || "unknown";
-      // Record the current trial's responses.
+
+      // Record the current trial's response.
       responses.push({
         participantSID: participantSID,
-        image: images[trialIndex],
+        image: images[trialIndex].split("/").pop(),
         perceptionResponse: perceptionResponse,
         positivityResponse: positivityResponse,
         trial: trialIndex + 1,
@@ -192,18 +193,18 @@
       localStorage.setItem("perceptionTrialIndex", trialIndex.toString());
 
       if (trialIndex >= images.length) {
-        // All trials completed: compile responses into a single CSV and submit.
+        // All 20 trials completed – compile responses into a single CSV and submit.
         submitResponsesCSV();
       } else {
+        // Redirect to photoselection (or simply display next trial).
+        // Assuming this page handles all 20 trials, just display next trial.
         displayTrial();
       }
     }
 
-    // Function to compile and send all responses as a single CSV.
+    // --- Compile and Send CSV ---
     function submitResponsesCSV() {
       const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
-      const participantSID = localStorage.getItem("participantSID") || "unknown";
-      // Build CSV: header row + one row per trial.
       const headers = ["participantSID", "image", "perceptionResponse", "positivityResponse", "trial", "timestamp"];
       let csvContent = headers.join(",") + "\n";
       responses.forEach(row => {
@@ -213,11 +214,9 @@
         }).join(",");
         csvContent += line + "\n";
       });
+      const participantSID = localStorage.getItem("participantSID") || "unknown";
+      const filename = `perception_${participantSID}.csv`;
 
-      // Create a filename using participant id.
-      const filename = `shifting_${participantSID}.csv`;
-
-      // Send CSV via POST request.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -227,16 +226,14 @@
         body: csvContent
       })
       .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         return response.json();
       })
       .then(data => {
         console.log("CSV successfully uploaded:", data);
-        // Optionally clear the responses.
         localStorage.removeItem("perceptionResponses");
-        window.location.href = "thank_you.html";
+        // After final submission, redirect to thankyou.html.
+        window.location.href = "thankyou.html";
       })
       .catch(error => {
         console.error("Error uploading CSV:", error);
