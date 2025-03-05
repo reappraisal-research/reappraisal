@@ -31,8 +31,6 @@
       font-style: italic;
     }
   </style>
-  <!-- If you still need dataSender.js for other functionality, you can include it here -->
-  <!-- <script src="dataSender.js"></script> -->
 </head>
 <body>
   <!-- These elements display the photo and its labels -->
@@ -137,8 +135,12 @@
       conditionList = conditions;
     }
 
-    // Function to select a photo and send trial data as CSV
+    // Function to select a photo and send trial data as CSV.
     function selectPhoto() {
+      // Prevent duplicate execution.
+      if (window._photoSelected) return;
+      window._photoSelected = true;
+
       // Retrieve the current trial index from localStorage (visit number)
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
       let currentTrial = trialIndex + 1;
@@ -150,10 +152,10 @@
         return;
       }
 
-      // Get the current condition for this trial
+      // Get the current condition for this trial.
       let currentCondition = conditionList[trialIndex];
 
-      // Choose the photo pool based on condition
+      // Choose the photo pool based on condition.
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
       let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
 
@@ -164,12 +166,12 @@
         return;
       }
 
-      // Randomly select a photo and remove it from the pool
+      // Randomly select a photo and remove it from the pool.
       let randomIndex = Math.floor(Math.random() * photoPool.length);
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
 
-      // Set the label above the photo and display the corresponding label underneath
+      // Set the label above the photo and display the corresponding label underneath.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
         document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
@@ -178,13 +180,13 @@
         document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
 
-      // Display the selected photo
+      // Display the selected photo.
       const photoElement = document.getElementById("photo");
       photoElement.src = selectedPhoto;
       photoElement.alt = `Selected Photo: ${selectedPhoto}`;
       console.log("Selected Photo:", selectedPhoto, "Condition:", currentCondition);
 
-      // Build a trial data object
+      // Build a trial data object.
       let trialData = {
         participantSID: localStorage.getItem("participantSID"),
         visitNumber: currentTrial,
@@ -192,13 +194,12 @@
         photoShown: selectedPhoto
       };
 
-      // Helper function to generate CSV from trial data
+      // Helper function to generate CSV from trial data.
       function generateCSVFromTrial(dataObj) {
         const headers = ["participantSID", "visitNumber", "photoType", "photoShown"];
         const csvHeader = headers.join(",") + "\n";
         const row = headers.map(key => {
           let value = dataObj[key] || "";
-          // Escape any double quotes by doubling them.
           value = String(value).replace(/"/g, '""');
           return `"${value}"`;
         }).join(",");
@@ -206,10 +207,10 @@
       }
       
       let csvContent = generateCSVFromTrial(trialData);
-      // Create a filename with "photoSelection", then participantSID and the trial number
+      // Create a filename with "photoSelection", then participantSID and the trial number.
       const filename = `photoSelection_${trialData.participantSID}_${trialData.visitNumber}.csv`;
 
-      // Send the CSV data to AWS via the Netlify function "upload-csv"
+      // Send the CSV data to AWS via the Netlify function "upload-csv".
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -231,18 +232,5 @@
         console.error("Error uploading CSV for trial:", error);
       });
       
-      // Increment the trial index and save it
-      trialIndex++;
-      localStorage.setItem("trialIndex", trialIndex.toString());
-      
-      // Redirect automatically after 10 seconds
-      setTimeout(function() {
-        window.location.href = "video_display.html";
-      }, 10000);
-    }
-
-    // On window load, call selectPhoto()
-    window.onload = selectPhoto;
-  </script>
-</body>
-</html>
+      // Increment the trial index and save it.
+      trialInde
