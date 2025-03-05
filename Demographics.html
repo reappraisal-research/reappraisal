@@ -15,11 +15,9 @@
       text-align: center;
       color: #333;
     }
-    /* Global label style */
     label {
       margin-top: 10px;
     }
-    /* Make the question prompt bold */
     .question label:first-of-type {
       font-weight: bold;
     }
@@ -206,7 +204,10 @@
   </form>
   
   <script>
-    // --- CSV Generation Functions ---
+    // Global variable for storing page data.
+    var pageData = {};
+
+    // --- CSV Generation Function ---
     function generateCSV(dataArray) {
       const header = Object.keys(dataArray[0]);
       const csvRows = [header];
@@ -218,27 +219,9 @@
       return csvRows.map(row => row.join(",")).join("\n");
     }
     
-    function uploadCSV(csvContent, filename) {
-      // Correct endpoint for your Netlify function "upload-cvs.js"
-      const uploadUrl = 'https://relaxed-chaja-ec142b.netlify.app/.netlify/functions/upload-cvs';
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', uploadUrl, true);
-      xhr.setRequestHeader('X-Filename', filename);
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-          if (xhr.status === 200) {
-            console.log('File uploaded successfully.');
-          } else {
-            console.error('Error uploading file.');
-          }
-        }
-      };
-      xhr.send(csvContent);
-    }
-    
     // --- Form Handling ---
     document.getElementById("surveyForm").addEventListener("submit", function(event) {
-      // Run built-in HTML5 validations.
+      // Ensure built-in validations pass.
       if (!this.checkValidity()) {
         this.reportValidity();
         event.preventDefault();
@@ -275,7 +258,7 @@
         }
       });
       
-      // Join checkbox values for multi-select fields.
+      // For multi-select fields (checkboxes), join the values.
       if (dataObj.language && Array.isArray(dataObj.language)) {
         dataObj.language = dataObj.language.join("; ");
       }
@@ -283,14 +266,32 @@
         dataObj.religion = dataObj.religion.join("; ");
       }
       
-      console.log("Collected Form Data:", dataObj);
+      // Retrieve the locally saved participant SID and add it to our data.
+      const participantSID = localStorage.getItem("participantSID");
+      dataObj.participantSID = participantSID;
       
-      // Generate CSV and upload.
-      const csvContent = generateCSV([dataObj]);
-      uploadCSV(csvContent, "demographics.csv");
+      // Store the collected data in the global variable.
+      pageData = dataObj;
+      console.log("Global Page Data:", pageData);
       
-      // Redirect to next page after processing.
-      window.location.href = "Pretestsurvey.html";
+      // Generate CSV from the data.
+      const csvContent = generateCSV([pageData]);
+      
+      // Create a unique filename with the participant SID and timestamp.
+      const filename = `demographics_${participantSID}_${Date.now()}.csv`;
+      
+      // Auto-download the CSV file.
+      const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Allow a short delay to ensure the download is triggered before redirecting.
+      setTimeout(() => {
+        window.location.href = "Pretestsurvey.html";
+      }, 1000);
     });
     
     // --- Additional functionality for "Other" fields ---
