@@ -22,9 +22,9 @@ module.exports.handler = async function(event, context) {
   AWS.config.update({
     accessKeyId: process.env.key_id,
     secretAccessKey: process.env.secret_key,
-    region: process.env.region,
-    s3ForcePathStyle: true,
-    endpoint: process.env.endpoint  // e.g., "https://s3.amazonaws.com" if using standard S3
+    region: 'us-east-2',  // Set your bucket's region here.
+    s3ForcePathStyle: true
+    // No endpoint needed for standard S3 buckets.
   });
   
   const s3 = new AWS.S3();
