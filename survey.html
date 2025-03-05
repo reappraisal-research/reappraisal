@@ -145,7 +145,12 @@
       trialIndex = 0;
       localStorage.setItem("perceptionTrialIndex", "0");
     }
-    // Array to store all trial responses.
+    // If trialIndex is equal to or exceeds the number of images (20), reset it.
+    if (trialIndex >= images.length) {
+      trialIndex = 0;
+      localStorage.setItem("perceptionTrialIndex", "0");
+      localStorage.removeItem("perceptionResponses");
+    }
     let responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
 
     // --- Display the Current Trial ---
@@ -178,7 +183,7 @@
 
       const participantSID = localStorage.getItem("participantSID") || "unknown";
 
-      // Record current trial response (only the file name of the image).
+      // Record current trial's response (using only the file name).
       responses.push({
         participantSID: participantSID,
         image: images[trialIndex].split("/").pop(),
@@ -193,10 +198,10 @@
       localStorage.setItem("perceptionTrialIndex", trialIndex.toString());
 
       if (trialIndex >= images.length) {
-        // All trials complete – compile responses into one CSV and submit.
+        // All 20 trials complete – compile responses into one CSV and submit.
         submitResponsesCSV();
       } else {
-        // For trials 1-19, simply display the next trial.
+        // For trials 1-19, display the next trial.
         displayTrial();
       }
     }
