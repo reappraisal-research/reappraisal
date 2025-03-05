@@ -158,7 +158,7 @@
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
       }
 
-      // Get the next video (remove it from the order).
+      // Select the next video.
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
@@ -184,6 +184,7 @@
       let trialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
       let currentTrial = trialIndex + 1;
 
+      // Build trial data object.
       const participantSID = localStorage.getItem("participantSID");
       const videoElement = document.getElementById("video");
       const trialData = {
@@ -199,13 +200,16 @@
         const row = headers.map(key => {
           let value = dataObj[key] || "";
           value = String(value).replace(/"/g, '""');
-          return "${value}";
+          return `"${value}"`;
         }).join(",");
         return csvHeader + row;
       }
       const csvContent = generateCSVFromTrial(trialData);
-      const filename = videoDisplay_${participantSID}_${currentTrial}.csv;
 
+      // Create filename: "videoDisplay_{participantSID}_{trialNumber}.csv"
+      const filename = `videoDisplay_${participantSID}_${currentTrial}.csv`;
+
+      // Send the CSV data via POST request.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -215,14 +219,17 @@
         body: csvContent
       })
       .then(response => {
-        if (!response.ok) throw new Error("Network response was not ok");
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
         return response.json();
       })
       .then(data => {
         console.log("CSV successfully uploaded for video trial:", data);
+        // Increment and store the video trial index.
         trialIndex++;
         localStorage.setItem("videoTrialIndex", trialIndex.toString());
-        // Redirect to survey.html after each video trial.
+        // Redirect to the next page.
         window.location.href = "survey.html";
       })
       .catch(error => {
@@ -232,8 +239,10 @@
     }
 
     window.onload = function() {
+      // Start the video selection logic.
       selectVideo();
-      // When a radio is chosen, show the Next button (if applicable).
+
+      // When a radio button is chosen, show the Next button.
       const radioButtons = document.getElementsByName("videoScale");
       const nextButtonContainer = document.getElementById("buttonContainer");
       Array.from(radioButtons).forEach(radio => {
@@ -241,10 +250,13 @@
           nextButtonContainer.style.display = "block";
         });
       });
+
+      // Attach event listener to the Next button.
       document.getElementById("nextButton").addEventListener("click", nextPage);
     };
   </script>
 </head>
+
 <body>
   <p>Please watch the video below:</p>
   <video id="video">
