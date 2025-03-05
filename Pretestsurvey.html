@@ -556,7 +556,7 @@
       })(dataObj);
       
       // Create a unique filename using the participant SID and a timestamp.
-      const filename = `ERQ_${participantSID}_${Date.now()}.csv`;
+      const filename = `ERQ_${participantSID}.csv`;
       
       // Send the CSV data to AWS via the Netlify function "upload-csv".
       fetch('/.netlify/functions/upload-csv', {
