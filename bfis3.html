@@ -95,9 +95,9 @@
 </head>
 <body>
   <div class="container">
-    <!-- Main header for the BFS3 page -->
-    <h1>Personality Survey - BFS3</h1>
-    <p>Please rate how much each statement applies to you on a scale of 1 to 5.</p>
+    <!-- Main header as in BFS2 -->
+    <h1>Please rate how much each statement applies to you on a scale of 1 to 5</h1>
+    <p>Each statement begins with "I am a person who..."</p>
     <div class="scale-visual">
       <ul>
         <li>1<br><small>(Disagree Strongly)</small></li>
@@ -107,7 +107,7 @@
         <li>5<br><small>(Agree Strongly)</small></li>
       </ul>
     </div>
-    <form id="personalitySurveyForm2" action="betweener.html" method="get">
+    <form id="personalitySurveyForm3" action="betweener.html" method="get">
       <div class="question">
         <label for="q1">1. Prefers to have others take charge.</label>
         <div class="scale">
@@ -215,9 +215,9 @@
     // Global variable to store collected data.
     var pageData = {};
 
-    // Function to generate a CSV string from the data object.
+    // Generates a CSV string from the experiment data with custom headers.
     function generateCSV(dataObj) {
-      // Use custom question headers: bfis3_1, bfis3_2, ... bfis3_10.
+      // Custom headers: bfis3_1, bfis3_2, ... bfis3_10
       const headers = [
         "participantSID",
         "surveyName",
@@ -246,7 +246,7 @@
     }
 
     // Add event listener for form submission.
-    document.getElementById("personalitySurveyForm2").addEventListener("submit", function(e) {
+    document.getElementById("personalitySurveyForm3").addEventListener("submit", function(e) {
       e.preventDefault();
       // Gather responses from the form.
       const formData = new FormData(this);
@@ -262,11 +262,9 @@
         responses: responses
       };
       pageData = experimentData;
-      // Generate the CSV content.
       const csvContent = generateCSV(pageData);
-      // Set the filename (using bfis3 as the prefix).
+      // Create filename using prefix "bfis3" with participantSID.
       const filename = `bfis3_${experimentData.participantSID}.csv`;
-      // Send the CSV data via the centralized data sender.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -280,7 +278,6 @@
         return response.json();
       })
       .then(data => {
-        // Redirect to the next page.
         window.location.href = "betweener.html";
       })
       .catch(error => {
