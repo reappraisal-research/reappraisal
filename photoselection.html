@@ -31,8 +31,8 @@
       font-style: italic;
     }
   </style>
-  <!-- Include the centralized data sender script -->
-  <script src="dataSender.js"></script>
+  <!-- If you still need dataSender.js for other functionality, you can include it here -->
+  <!-- <script src="dataSender.js"></script> -->
 </head>
 <body>
   <!-- These elements display the photo and its labels -->
@@ -196,32 +196,45 @@
       function generateCSVFromTrial(dataObj) {
         const headers = ["participantSID", "visitNumber", "photoType", "photoShown"];
         const csvHeader = headers.join(",") + "\n";
-        const row = [
-          dataObj.participantSID,
-          dataObj.visitNumber,
-          dataObj.photoType,
-          dataObj.photoShown
-        ];
-        return csvHeader + row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
+        const row = headers.map(key => {
+          let value = dataObj[key] || "";
+          // Escape any double quotes by doubling them.
+          value = String(value).replace(/"/g, '""');
+          return `"${value}"`;
+        }).join(",");
+        return csvHeader + row;
       }
       
       let csvContent = generateCSVFromTrial(trialData);
       // Create a filename with the participantSID and visit number
       const filename = `trainingTrial_${trialData.participantSID}_visit${trialData.visitNumber}.csv`;
 
-      // Send the CSV data using the centralized function sendExperimentData
-      sendExperimentData(trialData, function(err, result) {
-        if (err) {
-          console.error("Error uploading CSV for trial:", err);
-        } else {
-          console.log("CSV successfully uploaded for trial:", result);
+      // Send the CSV data to AWS via the Netlify function "upload-csv"
+      fetch('/.netlify/functions/upload-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV successfully uploaded for trial:", data);
+      })
+      .catch(error => {
+        console.error("Error uploading CSV for trial:", error);
       });
-
+      
       // Increment the trial index and save it
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
-
+      
       // Redirect automatically after 10 seconds
       setTimeout(function() {
         window.location.href = "video_display.html";
