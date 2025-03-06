@@ -20,10 +20,9 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    /* Fixed-size container for images */
     .image-container {
       width: 100%;
-      height: 60vh; /* Fixed height for uniform display */
+      height: 60vh;
       border: 1px solid #ccc;
       border-radius: 8px;
       margin-bottom: 20px;
@@ -35,14 +34,13 @@
     .image-container img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Ensures the entire image is visible (no cropping) */
+      object-fit: contain;
     }
     p.prompt {
       font-size: 18px;
       font-weight: bold;
       margin: 20px 0;
     }
-    /* Spread out scale */
     .scale {
       display: flex;
       justify-content: space-between;
@@ -130,7 +128,7 @@
       "Stimulireal/ur.horseback.jpg",
       "Stimulireal/ur.jastrow.rabbit.jpg"
     ];
-    // Load or initialize the shuffled images array in localStorage.
+    // Initialize or load the shuffled images array from localStorage
     let images;
     if (localStorage.getItem("perceptionImages")) {
       images = JSON.parse(localStorage.getItem("perceptionImages"));
@@ -139,7 +137,7 @@
       localStorage.setItem("perceptionImages", JSON.stringify(images));
     }
 
-    // --- Trial Index and Responses ---
+    // --- Initialize the Trial Counter and Responses ---
     let trialIndex = parseInt(localStorage.getItem("perceptionTrialIndex"), 10);
     if (isNaN(trialIndex)) {
       trialIndex = 0;
@@ -149,11 +147,13 @@
 
     // --- Display the Current Trial ---
     function displayTrial() {
+      // If all images have been used, redirect immediately
       if (trialIndex >= images.length) {
+        submitResponsesCSV();
         return;
       }
       document.getElementById("trialImage").src = images[trialIndex];
-      // Reset radio selections.
+      // Reset radio selections for both scales.
       document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
     }
 
@@ -175,10 +175,10 @@
         return;
       }
 
-      // Get participant id.
+      // Retrieve participant ID
       const participantSID = localStorage.getItem("participantSID") || "unknown";
 
-      // Record the current trial's response.
+      // Record the response for the current trial.
       responses.push({
         participantSID: participantSID,
         image: images[trialIndex].split("/").pop(),
@@ -189,20 +189,19 @@
       });
       localStorage.setItem("perceptionResponses", JSON.stringify(responses));
 
+      // Increment and store the trial counter.
       trialIndex++;
       localStorage.setItem("perceptionTrialIndex", trialIndex.toString());
 
+      // If all images have been used, proceed to CSV submission and redirection.
       if (trialIndex >= images.length) {
-        // All 20 trials completed – compile responses into a single CSV and submit.
         submitResponsesCSV();
       } else {
-        // Redirect to photoselection (or simply display next trial).
-        // Assuming this page handles all 20 trials, just display next trial.
         displayTrial();
       }
     }
 
-    // --- Compile and Send CSV ---
+    // --- Compile and Upload CSV, then Redirect ---
     function submitResponsesCSV() {
       const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
       const headers = ["participantSID", "image", "perceptionResponse", "positivityResponse", "trial", "timestamp"];
@@ -232,7 +231,7 @@
       .then(data => {
         console.log("CSV successfully uploaded:", data);
         localStorage.removeItem("perceptionResponses");
-        // After final submission, redirect to thankyou.html.
+        // Redirect to thank_you.html after the final submission.
         window.location.href = "thank_you.html";
       })
       .catch(error => {
