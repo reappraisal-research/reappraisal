@@ -6,7 +6,7 @@
   <title>Survey</title>
   <style>
     body {
-      font-family: Arial, sans-serif; /* edit this one for me to do all that */
+      font-family: Arial, sans-serif;
       background-color: #f0f0f0;
       margin: 0;
       padding: 20px;
@@ -128,7 +128,7 @@
       }
       // Retrieve trialIndex. If not set or <= 0, default to 1.
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if (isNaN(trialIndex) || trialIndex <= 0) {
+      if(isNaN(trialIndex) || trialIndex <= 0) {
         trialIndex = 1;
         localStorage.setItem("trialIndex", "1");
       }
@@ -138,18 +138,18 @@
       let conditionListArr = conditionList;
       let currentCondition = conditionListArr[currentTrial - 1] || {};
       
-      // Use a default header text if none is set.
-      let headerText = currentCondition.rethinkingLabel || "Default Header";
-      
       document.addEventListener("DOMContentLoaded", function() {
         let header = document.createElement("h2");
-        header.innerText = headerText;
+        header.innerText = currentCondition.rethinkingLabel || "Default Header";
         let container = document.querySelector(".container");
         if (container) {
           container.insertBefore(header, container.firstChild);
         }
       });
     })();
+
+    // Retrieve stored survey responses array from localStorage or initialize it.
+    let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
 
     function saveResponses() {
       // Get the text response.
@@ -185,26 +185,43 @@
         trialNumber: currentTrial,
         label: label,
         rethinkingResponse: rethinkingResponse,
-        howDoYouFeel: howDoYouFeelValue
+        howDoYouFeel: howDoYouFeelValue,
+        timestamp: new Date().toISOString()
       };
 
       console.log("Saving trial data:", trialData);
+      // Append this trial's data to the surveyResponses array.
+      surveyResponses.push(trialData);
+      // Save the updated responses array to localStorage.
+      localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
 
-      // Generate CSV string.
-      function generateCSVFromTrial(dataObj) {
-        const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel"];
-        const csvHeader = headers.join(",") + "\n";
-        const row = headers.map(key => {
-          let value = dataObj[key] || "";
+      // Increment trial counter.
+      trialIndex++;
+      localStorage.setItem("trialIndex", trialIndex.toString());
+
+      // If this is the final trial (20), compile and send the big CSV.
+      if (currentTrial >= 20) {
+        sendResponsesCSV();
+      } else {
+        // Otherwise, redirect back to photoselection for the next trial.
+        window.location.href = "photoselection.html";
+      }
+    }
+
+    // Function to compile all survey responses into one CSV and send it.
+    function sendResponsesCSV() {
+      let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
+      const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
+      let csvContent = headers.join(",") + "\n";
+      responses.forEach(response => {
+        let row = headers.map(key => {
+          let value = response[key] || "";
           return `"${String(value).replace(/"/g, '""')}"`;
         }).join(",");
-        return csvHeader + row;
-      }
-      const csvContent = generateCSVFromTrial(trialData);
-      // Correctly create the filename using template literals.
-      const filename = `survey_${participantSID}_${currentTrial}.csv`;
+        csvContent += row + "\n";
+      });
+      const filename = `survey_${localStorage.getItem("participantSID") || "unknown"}.csv`;
 
-      // Send CSV via POST request.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -221,12 +238,9 @@
       })
       .then(data => {
         console.log("CSV successfully uploaded:", data);
-        // After CSV upload is complete, move to the next trial.
-        if (currentTrial >= 20) {
-          window.location.href = "Shiftingsuccess.html";
-        } else {
-          window.location.href = "photoselection.html";
-        }
+        localStorage.removeItem("surveyResponses");
+        // After final submission, redirect to Shiftingsuccess.html.
+        window.location.href = "Shiftingsuccess.html";
       })
       .catch(error => {
         console.error("Error uploading CSV:", error);
