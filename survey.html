@@ -6,7 +6,7 @@
   <title>Survey</title>
   <style>
     body {
-      font-family: Arial, sans-serif; /* Use this font for the entire page */
+      font-family: Arial, sans-serif; /* Using Arial for the entire page */
       background-color: #f0f0f0;
       margin: 0;
       padding: 20px;
@@ -18,6 +18,7 @@
       background-color: #fff;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
     }
     h1, h2 {
       text-align: center;
@@ -30,6 +31,14 @@
       display: block;
       margin: 10px 0 5px;
       font-weight: bold;
+    }
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
     }
     .scale {
       display: flex;
@@ -79,14 +88,6 @@
       font-size: 14px;
       line-height: 1.2;
     }
-    textarea {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      resize: vertical;
-    }
     button {
       padding: 10px 20px;
       background-color: #4CAF50;
@@ -104,7 +105,7 @@
     }
   </style>
   <script>
-    // IIFE: Set up condition list and add assigned header.
+    // IIFE: Set up condition list and insert header.
     (function() {
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -125,20 +126,18 @@
         conditionList = shuffleArray(conditions);
         localStorage.setItem("conditionList", JSON.stringify(conditionList));
       }
-      // Retrieve global trialIndex. If not set or <= 0, default to 1.
+      // Retrieve global trialIndex; default to 1 if not set.
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if(isNaN(trialIndex) || trialIndex <= 0) {
+      if (isNaN(trialIndex) || trialIndex <= 0) {
         trialIndex = 1;
         localStorage.setItem("trialIndex", "1");
       }
-      // Use the current trial (from photoselection).
       let currentTrial = trialIndex;
-      // Get the condition corresponding to currentTrial - 1.
-      let conditionListArr = conditionList;
-      let currentCondition = conditionListArr[currentTrial - 1] || {};
+      let currentCondition = conditionList[currentTrial - 1] || {};
       
       document.addEventListener("DOMContentLoaded", function() {
         let header = document.createElement("h2");
+        // Insert the condition label header.
         header.innerText = currentCondition.rethinkingLabel || "Default Header";
         let container = document.querySelector(".container");
         if (container) {
@@ -151,13 +150,11 @@
     let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
 
     function saveResponses() {
-      // Get text response.
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       if (!rethinkingResponse) {
         alert("Please fill out your rethinking response.");
         return;
       }
-      // Get selected radio option.
       const radioOptions = document.getElementsByName("howDoYouFeel");
       let howDoYouFeelValue = "";
       for (let i = 0; i < radioOptions.length; i++) {
@@ -167,7 +164,7 @@
         }
       }
       if (!howDoYouFeelValue) {
-        alert("Please select how you feel.");
+        alert("Please select how negative you feel.");
         return;
       }
       const participantSID = localStorage.getItem("participantSID") || "unknown";
@@ -178,11 +175,11 @@
       let currentCondition = conditionList[currentTrial - 1] || {};
       const label = currentCondition.rethinkingLabel || "";
       
-      // Build survey response object.
       const trialData = {
         participantSID: participantSID,
         trialNumber: currentTrial,
         label: label,
+        // Updated first question text.
         rethinkingResponse: rethinkingResponse,
         howDoYouFeel: howDoYouFeelValue,
         timestamp: new Date().toISOString()
@@ -192,11 +189,9 @@
       surveyResponses.push(trialData);
       localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
 
-      // Increment global trial counter.
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
-      // If final trial (20), compile all responses into one CSV and send it.
       if (currentTrial >= 20) {
         sendResponsesCSV();
       } else {
@@ -204,7 +199,6 @@
       }
     }
 
-    // Compile all responses into one CSV and send.
     function sendResponsesCSV() {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
@@ -235,7 +229,6 @@
       .then(data => {
         console.log("CSV successfully uploaded:", data);
         localStorage.removeItem("surveyResponses");
-        // Redirect to Shiftingsuccess.html after final submission.
         window.location.href = "Shiftingsuccess.html";
       })
       .catch(error => {
@@ -248,13 +241,15 @@
 <body>
   <div class="container">
     <form>
-      <label for="rethinkingResponse">1. Rethinking Response</label>
+      <!-- Updated question text -->
+      <label for="rethinkingResponse">How could you rethink the video?</label>
       <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
-      <label for="howDoYouFeel">2. How do you feel?</label>
+      <label for="howDoYouFeel">How negative do you feel?</label>
       <div class="scale">
         <label>
           <input type="radio" name="howDoYouFeel" value="1">
           <span>1</span>
+          <small>Not negative at all</small>
         </label>
         <label>
           <input type="radio" name="howDoYouFeel" value="2">
@@ -279,6 +274,7 @@
         <label>
           <input type="radio" name="howDoYouFeel" value="7">
           <span>7</span>
+          <small>Very negative</small>
         </label>
       </div>
       <button type="button" onclick="saveResponses()">Next</button>
