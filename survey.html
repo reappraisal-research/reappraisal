@@ -6,7 +6,7 @@
   <title>Survey</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial, sans-serif; /* Use this font for the entire page */
       background-color: #f0f0f0;
       margin: 0;
       padding: 20px;
@@ -104,7 +104,7 @@
     }
   </style>
   <script>
-    // IIFE to set up the condition list and insert the assigned header.
+    // IIFE: Set up condition list and add assigned header.
     (function() {
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -122,18 +122,20 @@
           conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
           conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Goal rethinking" });
         }
-        conditions = shuffleArray(conditions);
-        localStorage.setItem("conditionList", JSON.stringify(conditions));
-        conditionList = conditions;
+        conditionList = shuffleArray(conditions);
+        localStorage.setItem("conditionList", JSON.stringify(conditionList));
       }
-      // Retrieve the global trialIndex. This is updated only on the survey page.
+      // Retrieve global trialIndex. If not set or <= 0, default to 1.
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if (isNaN(trialIndex) || trialIndex <= 0) {
+      if(isNaN(trialIndex) || trialIndex <= 0) {
         trialIndex = 1;
         localStorage.setItem("trialIndex", "1");
       }
+      // Use the current trial (from photoselection).
       let currentTrial = trialIndex;
-      let currentCondition = conditionList[currentTrial - 1] || {};
+      // Get the condition corresponding to currentTrial - 1.
+      let conditionListArr = conditionList;
+      let currentCondition = conditionListArr[currentTrial - 1] || {};
       
       document.addEventListener("DOMContentLoaded", function() {
         let header = document.createElement("h2");
@@ -145,15 +147,17 @@
       });
     })();
 
-    // Retrieve stored survey responses array or initialize it.
+    // Retrieve stored survey responses or initialize.
     let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
 
     function saveResponses() {
+      // Get text response.
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       if (!rethinkingResponse) {
         alert("Please fill out your rethinking response.");
         return;
       }
+      // Get selected radio option.
       const radioOptions = document.getElementsByName("howDoYouFeel");
       let howDoYouFeelValue = "";
       for (let i = 0; i < radioOptions.length; i++) {
@@ -192,15 +196,15 @@
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
-      // If this is the final trial (20), compile and send all responses in one CSV.
+      // If final trial (20), compile all responses into one CSV and send it.
       if (currentTrial >= 20) {
         sendResponsesCSV();
       } else {
-        // Otherwise, redirect back to photoselection for the next trial.
         window.location.href = "photoselection.html";
       }
     }
 
+    // Compile all responses into one CSV and send.
     function sendResponsesCSV() {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
@@ -231,7 +235,7 @@
       .then(data => {
         console.log("CSV successfully uploaded:", data);
         localStorage.removeItem("surveyResponses");
-        // After final submission, redirect to Shiftingsuccess.html.
+        // Redirect to Shiftingsuccess.html after final submission.
         window.location.href = "Shiftingsuccess.html";
       })
       .catch(error => {
