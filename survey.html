@@ -104,7 +104,7 @@
     }
   </style>
   <script>
-    // IIFE to set up the condition list and insert the assigned label header.
+    // IIFE to set up the condition list and insert the assigned header.
     (function() {
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -126,17 +126,14 @@
         localStorage.setItem("conditionList", JSON.stringify(conditions));
         conditionList = conditions;
       }
-      // Retrieve trialIndex. If not set or <= 0, default to 1.
+      // Retrieve the global trialIndex. This is updated only on the survey page.
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if(isNaN(trialIndex) || trialIndex <= 0) {
+      if (isNaN(trialIndex) || trialIndex <= 0) {
         trialIndex = 1;
         localStorage.setItem("trialIndex", "1");
       }
-      // Use the completed trial number from photo selection.
       let currentTrial = trialIndex;
-      // Get the condition from the previous page (at index currentTrial - 1).
-      let conditionListArr = conditionList;
-      let currentCondition = conditionListArr[currentTrial - 1] || {};
+      let currentCondition = conditionList[currentTrial - 1] || {};
       
       document.addEventListener("DOMContentLoaded", function() {
         let header = document.createElement("h2");
@@ -148,17 +145,15 @@
       });
     })();
 
-    // Retrieve stored survey responses array from localStorage or initialize it.
+    // Retrieve stored survey responses array or initialize it.
     let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
 
     function saveResponses() {
-      // Get the text response.
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       if (!rethinkingResponse) {
         alert("Please fill out your rethinking response.");
         return;
       }
-      // Get the selected multiple-choice response.
       const radioOptions = document.getElementsByName("howDoYouFeel");
       let howDoYouFeelValue = "";
       for (let i = 0; i < radioOptions.length; i++) {
@@ -179,7 +174,7 @@
       let currentCondition = conditionList[currentTrial - 1] || {};
       const label = currentCondition.rethinkingLabel || "";
       
-      // Build the survey response object.
+      // Build survey response object.
       const trialData = {
         participantSID: participantSID,
         trialNumber: currentTrial,
@@ -190,16 +185,14 @@
       };
 
       console.log("Saving trial data:", trialData);
-      // Append this trial's data to the surveyResponses array.
       surveyResponses.push(trialData);
-      // Save the updated responses array to localStorage.
       localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
 
-      // Increment trial counter.
+      // Increment global trial counter.
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
-      // If this is the final trial (20), compile and send the big CSV.
+      // If this is the final trial (20), compile and send all responses in one CSV.
       if (currentTrial >= 20) {
         sendResponsesCSV();
       } else {
@@ -208,7 +201,6 @@
       }
     }
 
-    // Function to compile all survey responses into one CSV and send it.
     function sendResponsesCSV() {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
