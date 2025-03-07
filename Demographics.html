@@ -42,7 +42,7 @@
 </head>
 <body>
   <h1>Please Fill Out the Demographics Questions</h1>
-  <form id="surveyForm" action="Pretestsurvey.html" method="get">
+  <form id="surveyForm">
     <!-- Age -->
     <div class="question">
       <label for="age">What is your age?</label>
@@ -73,27 +73,27 @@
     <!-- Ethnicity -->
     <div class="question">
       <label for="ethnicity">How would you describe your ethnicity?</label>
-      <label><input type="radio" id="white" name="ethnicity" value="White" required> White</label>
-      <label><input type="radio" id="black" name="ethnicity" value="Black or African-American"> Black or African-American</label>
-      <label><input type="radio" id="americanIndian" name="ethnicity" value="American Indian or Alaskan Native"> American Indian or Alaskan Native</label>
-      <label><input type="radio" id="asian" name="ethnicity" value="Asian"> Asian</label>
-      <label><input type="radio" id="southAsian" name="ethnicity" value="South Asian"> South Asian</label>
-      <label><input type="radio" id="nativeHawaiian" name="ethnicity" value="Native Hawaiian or other Pacific islander"> Native Hawaiian or other Pacific islander</label>
-      <label><input type="radio" id="multipleRaces" name="ethnicity" value="From multiple races"> From multiple races</label>
-      <label><input type="radio" id="someOtherRace" name="ethnicity" value="Some other race"> Some other race (please specify):</label>
+      <label><input type="radio" name="ethnicity" value="White" required> White</label>
+      <label><input type="radio" name="ethnicity" value="Black or African-American"> Black or African-American</label>
+      <label><input type="radio" name="ethnicity" value="American Indian or Alaskan Native"> American Indian or Alaskan Native</label>
+      <label><input type="radio" name="ethnicity" value="Asian"> Asian</label>
+      <label><input type="radio" name="ethnicity" value="South Asian"> South Asian</label>
+      <label><input type="radio" name="ethnicity" value="Native Hawaiian or other Pacific islander"> Native Hawaiian or other Pacific islander</label>
+      <label><input type="radio" name="ethnicity" value="From multiple races"> From multiple races</label>
+      <label><input type="radio" name="ethnicity" value="Some other race" id="someOtherRace"> Some other race (please specify):</label>
       <input type="text" id="otherEthnicity" name="otherEthnicity" placeholder="" disabled>
-      <label><input type="radio" id="preferNot" name="ethnicity" value="Prefer not to disclose"> Prefer not to disclose</label>
+      <label><input type="radio" name="ethnicity" value="Prefer not to disclose"> Prefer not to disclose</label>
     </div>
     
     <!-- Education -->
     <div class="question">
       <label for="education">What is the highest level of school you have completed?</label>
       <label><input type="radio" name="education" value="Less than high school degree" required> Less than high school degree</label>
-      <label><input type="radio" name="education" value="High school degree or equivalent (e.g., GED)"> High school degree or equivalent (e.g., GED)</label>
+      <label><input type="radio" name="education" value="High school degree or equivalent"> High school degree or equivalent (e.g., GED)</label>
       <label><input type="radio" name="education" value="Some college but no degree"> Some college but no degree</label>
       <label><input type="radio" name="education" value="Associate degree"> Associate degree</label>
       <label><input type="radio" name="education" value="Bachelor degree"> Bachelor degree</label>
-      <label><input type="radio" name="education" value="Graduate degree (e.g., Masters, PhD, M.D)"> Graduate degree (e.g., Masters, PhD, M.D)</label>
+      <label><input type="radio" name="education" value="Graduate degree"> Graduate degree (e.g., Masters, PhD, M.D)</label>
     </div>
     
     <!-- Employment -->
@@ -137,12 +137,12 @@
     <!-- Language -->
     <div class="question">
       <label for="language">What language do you mainly speak at home? (Select all that apply)</label>
-      <label><input type="checkbox" id="english" name="language" value="English"> English</label>
-      <label><input type="checkbox" id="spanish" name="language" value="Spanish"> Spanish</label>
-      <label><input type="checkbox" id="chinese" name="language" value="Chinese"> Chinese</label>
-      <label><input type="checkbox" id="french" name="language" value="French"> French</label>
+      <label><input type="checkbox" name="language" value="English"> English</label>
+      <label><input type="checkbox" name="language" value="Spanish"> Spanish</label>
+      <label><input type="checkbox" name="language" value="Chinese"> Chinese</label>
+      <label><input type="checkbox" name="language" value="French"> French</label>
       <label>
-        <input type="checkbox" id="other" name="language" value="Other"> Other (please specify):
+        <input type="checkbox" name="language" value="Other" id="otherLangCheckbox"> Other (please specify):
         <input type="text" id="other-language" name="other-language" placeholder="" disabled>
       </label>
     </div>
@@ -150,17 +150,17 @@
     <!-- Religion -->
     <div class="question">
       <label for="religion">Do you identify with any of the following religions? (Select all that apply)</label>
-      <label><input type="checkbox" id="religion-protestant" name="religion" value="Protestantism"> Protestantism</label>
-      <label><input type="checkbox" id="religion-catholic" name="religion" value="Catholicism"> Catholicism</label>
-      <label><input type="checkbox" id="religion-christianity" name="religion" value="Christianity"> Christianity</label>
-      <label><input type="checkbox" id="religion-judaism" name="religion" value="Judaism"> Judaism</label>
-      <label><input type="checkbox" id="religion-islam" name="religion" value="Islam"> Islam</label>
-      <label><input type="checkbox" id="religion-buddhism" name="religion" value="Buddhism"> Buddhism</label>
-      <label><input type="checkbox" id="religion-hinduism" name="religion" value="Hinduism"> Hinduism</label>
-      <label><input type="checkbox" id="religion-nondenom" name="religion" value="Inter/Non-denominational"> Inter/Non-denominational</label>
-      <label><input type="checkbox" id="religion-noreligion" name="religion" value="No religion"> No religion</label>
+      <label><input type="checkbox" name="religion" value="Protestantism"> Protestantism</label>
+      <label><input type="checkbox" name="religion" value="Catholicism"> Catholicism</label>
+      <label><input type="checkbox" name="religion" value="Christianity"> Christianity</label>
+      <label><input type="checkbox" name="religion" value="Judaism"> Judaism</label>
+      <label><input type="checkbox" name="religion" value="Islam"> Islam</label>
+      <label><input type="checkbox" name="religion" value="Buddhism"> Buddhism</label>
+      <label><input type="checkbox" name="religion" value="Hinduism"> Hinduism</label>
+      <label><input type="checkbox" name="religion" value="Inter/Non-denominational"> Inter/Non-denominational</label>
+      <label><input type="checkbox" name="religion" value="No religion"> No religion</label>
       <label>
-        <input type="checkbox" id="religion-other" name="religion" value="Other"> Other (please specify):
+        <input type="checkbox" name="religion" value="Other" id="religionOtherCheckbox"> Other (please specify):
         <input type="text" id="religion-other-text" name="religion-other-text" placeholder="" disabled>
       </label>
     </div>
@@ -180,173 +180,46 @@
   </form>
   
   <script>
-    // Global variable to store the demographics page data.
-    var pageData = {};
-
-    /**
-     * Generates a CSV string using a fixed header order.
-     * The header order ensures the participantSID is first.
-     */
-    function generateCSVFromObject(dataObj) {
-      const headers = [
-        "participantSID",
-        "age",
-        "gender",
-        "ethnicity",
-        "otherEthnicity",
-        "education",
-        "employment",
-        "income",
-        "living",
-        "language",
-        "other-language",
-        "religion",
-        "religion-other-text",
-        "politics"
-      ];
-      const csvHeader = headers.join(",") + "\n";
-      const row = headers.map(key => {
-        let value = dataObj[key] || "";
-        // Escape double quotes by doubling them.
-        value = String(value).replace(/"/g, '""');
-        return `"${value}"`;
-      }).join(",");
-      return csvHeader + row;
-    }
-    
-    // --- Form Handling ---
-    document.getElementById("surveyForm").addEventListener("submit", function(event) {
-      // Check HTML5 validations.
-      if (!this.checkValidity()) {
-        this.reportValidity();
-        event.preventDefault();
-        return;
-      }
-      
-      // Custom validation for multi-select fields.
-      const languageChecked = document.querySelectorAll('input[name="language"]:checked');
-      if (languageChecked.length === 0) {
-        alert("Please select at least one language.");
-        event.preventDefault();
-        return;
-      }
-      const religionChecked = document.querySelectorAll('input[name="religion"]:checked');
-      if (religionChecked.length === 0) {
-        alert("Please select at least one religion.");
-        event.preventDefault();
-        return;
-      }
-      
-      event.preventDefault();
-      
-      // Collect form data.
-      const formData = new FormData(this);
-      const dataObj = {};
-      formData.forEach((value, key) => {
-        if (dataObj[key]) {
-          if (!Array.isArray(dataObj[key])) {
-            dataObj[key] = [dataObj[key]];
-          }
-          dataObj[key].push(value);
+    // Enable/disable "Other" text for ethnicity.
+    const ethnicityRadios = document.querySelectorAll('input[name="ethnicity"]');
+    ethnicityRadios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        const otherEthnicity = document.getElementById("otherEthnicity");
+        if (document.getElementById("someOtherRace").checked) {
+          otherEthnicity.disabled = false;
+          otherEthnicity.required = true;
         } else {
-          dataObj[key] = value;
+          otherEthnicity.disabled = true;
+          otherEthnicity.required = false;
+          otherEthnicity.value = "";
         }
-      });
-      
-      // For checkboxes (multi-select), join the values with a semicolon.
-      if (dataObj.language && Array.isArray(dataObj.language)) {
-        dataObj.language = dataObj.language.join("; ");
-      }
-      if (dataObj.religion && Array.isArray(dataObj.religion)) {
-        dataObj.religion = dataObj.religion.join("; ");
-      }
-      
-      // Retrieve the locally saved participant SID and add it to the data.
-      const participantSID = localStorage.getItem("participantSID");
-      dataObj.participantSID = participantSID;
-      
-      // Save collected data in the global variable.
-      pageData = dataObj;
-      console.log("Global Page Data:", pageData);
-      
-      // Generate CSV from the data using the fixed header order.
-      const csvContent = generateCSVFromObject(pageData);
-      
-      // Create a unique filename using the participant SID and a timestamp.
-      const filename = `demographics_${participantSID}.csv`;
-      
-      // Send the CSV data to AWS via the Netlify function "upload-csv.js".
-      fetch('/.netlify/functions/upload-csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/csv',
-          'X-Filename': filename
-        },
-        body: csvContent
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log("CSV successfully uploaded:", data);
-        // Redirect to the next page after a successful upload.
-        window.location.href = "Pretestsurvey.html";
-      })
-      .catch(error => {
-        console.error("Error uploading CSV:", error);
-        alert("Error submitting data. Please try again.");
       });
     });
-    
-    // --- Additional functionality for "Other" fields ---
-    document.addEventListener("DOMContentLoaded", function () {
-      // Enable/disable the "Other" text input for ethnicity.
-      const otherRaceRadio = document.getElementById("someOtherRace");
-      const otherRaceText  = document.getElementById("otherEthnicity");
-      const ethnicityRadios = document.querySelectorAll('input[name="ethnicity"]');
-      ethnicityRadios.forEach(radio => {
-        radio.addEventListener("change", () => {
-          if (otherRaceRadio && otherRaceRadio.checked) {
-            otherRaceText.disabled = false;
-            otherRaceText.required = true;
-          } else {
-            otherRaceText.disabled = true;
-            otherRaceText.required = false;
-            otherRaceText.value = "";
-          }
-        });
-      });
-      
-      // Enable/disable the "Other" text input for language.
-      const otherLangCheckbox = document.getElementById("other");
-      const otherLangText = document.getElementById("other-language");
-      otherLangCheckbox.addEventListener("change", () => {
-        if (otherLangCheckbox.checked) {
-          otherLangText.disabled = false;
-          otherLangText.required = true;
-        } else {
-          otherLangText.disabled = true;
-          otherLangText.required = false;
-          otherLangText.value = "";
-        }
-      });
-      
-      // Enable/disable the "Other" text input for religion.
-      const religionOtherCheckbox = document.getElementById("religion-other");
-      const religionOtherText = document.getElementById("religion-other-text");
-      religionOtherCheckbox.addEventListener("change", () => {
-        if (religionOtherCheckbox.checked) {
-          religionOtherText.disabled = false;
-          religionOtherText.required = true;
-        } else {
-          religionOtherText.disabled = true;
-          religionOtherText.required = false;
-          religionOtherText.value = "";
-        }
-      });
+    // Enable/disable "Other" text for language.
+    const otherLangCheckbox = document.getElementById("otherLangCheckbox");
+    const otherLangText = document.getElementById("other-language");
+    otherLangCheckbox.addEventListener("change", () => {
+      if (otherLangCheckbox.checked) {
+        otherLangText.disabled = false;
+        otherLangText.required = true;
+      } else {
+        otherLangText.disabled = true;
+        otherLangText.required = false;
+        otherLangText.value = "";
+      }
+    });
+    // Enable/disable "Other" text for religion.
+    const religionOtherCheckbox = document.getElementById("religionOtherCheckbox");
+    const religionOtherText = document.getElementById("religion-other-text");
+    religionOtherCheckbox.addEventListener("change", () => {
+      if (religionOtherCheckbox.checked) {
+        religionOtherText.disabled = false;
+        religionOtherText.required = true;
+      } else {
+        religionOtherText.disabled = true;
+        religionOtherText.required = false;
+        religionOtherText.value = "";
+      }
     });
   </script>
 </body>
