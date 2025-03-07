@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Personality Survey - BFS3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personality Survey - BFS3</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
-      line-height: 1.6;
       background-color: #f9f9f9;
     }
     .container {
@@ -19,95 +18,42 @@
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    h1 {
-      text-align: center;
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-    .scale-visual {
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .scale-visual ul {
-      list-style: none;
-      padding: 0;
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin: 0;
-      border-bottom: 1px solid #ccc;
-    }
-    .scale-visual ul li {
-      text-align: center;
-      flex: 1;
-      position: relative;
-    }
-    .scale-visual ul li:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background-color: #ccc;
-    }
     .question {
       margin-bottom: 20px;
     }
-    label {
-      font-weight: bold;
+    .question label {
       display: block;
       margin-bottom: 10px;
+      font-weight: bold;
     }
     .scale {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-evenly;
     }
     .scale label {
       flex: 1;
       text-align: center;
-      font-weight: normal;
-    }
-    .scale input {
-      margin-right: 5px;
     }
     button {
-      display: block;
-      width: 100%;
       background-color: #007BFF;
       color: white;
       border: none;
-      padding: 10px;
+      padding: 10px 20px;
       font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
       margin-top: 20px;
+      display: block;
+      width: 100%;
     }
     button:hover {
       background-color: #0056b3;
     }
   </style>
-  <script src="dataSender.js"></script>
 </head>
 <body>
   <div class="container">
-    <!-- Main header as in BFS2 -->
-    <h1>Please rate how much each statement applies to you on a scale of 1 to 5</h1>
-    <p>Each statement begins with "I am a person who..."</p>
-    <div class="scale-visual">
-      <ul>
-        <li>1<br><small>(Disagree Strongly)</small></li>
-        <li>2<br><small>(Disagree a Little)</small></li>
-        <li>3<br><small>(Neutral; No Opinion)</small></li>
-        <li>4<br><small>(Agree a Little)</small></li>
-        <li>5<br><small>(Agree Strongly)</small></li>
-      </ul>
-    </div>
-    <form id="personalitySurveyForm3" action="betweener.html" method="get">
+    <form id="personalitySurveyForm3">
       <div class="question">
         <label for="q1">1. Prefers to have others take charge.</label>
         <div class="scale">
@@ -129,7 +75,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q3">3. Is persistent, works until the task is finished.</label>
+        <label for="q3">3. Is reliable, can always be counted on.</label>
         <div class="scale">
           <label><input type="radio" name="q3" value="1" required> 1</label>
           <label><input type="radio" name="q3" value="2"> 2</label>
@@ -139,7 +85,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q4">4. Feels secure, comfortable with self.</label>
+        <label for="q4">4. Is emotionally stable, not easily upset.</label>
         <div class="scale">
           <label><input type="radio" name="q4" value="1" required> 1</label>
           <label><input type="radio" name="q4" value="2"> 2</label>
@@ -149,7 +95,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q5">5. Is complex, a deep thinker.</label>
+        <label for="q5">5. Is original, comes up with new ideas.</label>
         <div class="scale">
           <label><input type="radio" name="q5" value="1" required> 1</label>
           <label><input type="radio" name="q5" value="2"> 2</label>
@@ -159,7 +105,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q6">6. Is less active than other people.</label>
+        <label for="q6">6. Is outgoing, sociable.</label>
         <div class="scale">
           <label><input type="radio" name="q6" value="1" required> 1</label>
           <label><input type="radio" name="q6" value="2"> 2</label>
@@ -169,7 +115,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q7">7. Tends to find fault with others.</label>
+        <label for="q7">7. Can be cold and uncaring.</label>
         <div class="scale">
           <label><input type="radio" name="q7" value="1" required> 1</label>
           <label><input type="radio" name="q7" value="2"> 2</label>
@@ -179,7 +125,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q8">8. Can be somewhat careless.</label>
+        <label for="q8">8. Keeps things neat and tidy.</label>
         <div class="scale">
           <label><input type="radio" name="q8" value="1" required> 1</label>
           <label><input type="radio" name="q8" value="2"> 2</label>
@@ -189,7 +135,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q9">9. Is temperamental, gets emotional easily.</label>
+        <label for="q9">9. Is relaxed, handles stress well.</label>
         <div class="scale">
           <label><input type="radio" name="q9" value="1" required> 1</label>
           <label><input type="radio" name="q9" value="2"> 2</label>
@@ -199,7 +145,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q10">10. Has little creativity.</label>
+        <label for="q10">10. Has few artistic interests.</label>
         <div class="scale">
           <label><input type="radio" name="q10" value="1" required> 1</label>
           <label><input type="radio" name="q10" value="2"> 2</label>
@@ -211,78 +157,27 @@
       <button type="submit">Submit</button>
     </form>
   </div>
+  
   <script>
-    // Global variable to store collected data.
-    var pageData = {};
-
-    // Generates a CSV string from the experiment data with custom headers.
-    function generateCSV(dataObj) {
-      // Custom headers: bfis3_1, bfis3_2, ... bfis3_10
-      const headers = [
-        "participantSID",
-        "surveyName",
-        "timestamp",
-        "bfis3_1",
-        "bfis3_2",
-        "bfis3_3",
-        "bfis3_4",
-        "bfis3_5",
-        "bfis3_6",
-        "bfis3_7",
-        "bfis3_8",
-        "bfis3_9",
-        "bfis3_10"
-      ];
-      const csvHeader = headers.join(",") + "\n";
-      // Create an array of responses sorted by trial number.
-      const row = [
-        dataObj.participantSID,
-        dataObj.surveyName,
-        dataObj.timestamp,
-        ...dataObj.responses.sort((a, b) => a.trial - b.trial).map(resp => resp.answer)
-      ];
-      const csvRow = row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
-      return csvHeader + csvRow;
-    }
-
-    // Add event listener for form submission.
     document.getElementById("personalitySurveyForm3").addEventListener("submit", function(e) {
       e.preventDefault();
-      // Gather responses from the form.
+      
       const formData = new FormData(this);
       const responses = [];
       for (let i = 1; i <= 10; i++) {
         responses.push({ trial: i, answer: formData.get("q" + i) });
       }
-      // Build the experiment data object.
+      const participantSID = localStorage.getItem("participantSID") || "unknown";
       const experimentData = {
-        participantSID: localStorage.getItem("participantSID"),
-        surveyName: "BFIS3",
+        participantSID: participantSID,
+        surveyName: "BFS3",
         timestamp: new Date().toISOString(),
         responses: responses
       };
-      pageData = experimentData;
-      const csvContent = generateCSV(pageData);
-      // Create filename using prefix "bfis3" with participantSID.
-      const filename = `bfis3_${experimentData.participantSID}.csv`;
-      fetch('/.netlify/functions/upload-csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/csv',
-          'X-Filename': filename
-        },
-        body: csvContent
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Network response was not ok");
-        return response.json();
-      })
-      .then(data => {
-        window.location.href = "betweener.html";
-      })
-      .catch(error => {
-        alert("Error submitting data. Please try again.");
-      });
+      localStorage.setItem("bfis3Data", JSON.stringify(experimentData));
+      
+      // Redirect to final combined page.
+      window.location.href = "betweener.html";
     });
   </script>
 </body>
