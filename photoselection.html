@@ -39,7 +39,7 @@
       return array;
     }
 
-    // Photo pools and label mappings.
+    // Photo pools and their labels.
     const ambiguousPhotos = [
       "Stimulireal/horseback.jpg",
       "Stimulireal/donkey.seal.png",
@@ -120,7 +120,7 @@
     // Retrieve or initialize an array for photoselection responses.
     let photoResponses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
 
-    // Display the current photoselection trial.
+    // Function to display the current photoselection trial.
     function displayPhotoTrial() {
       if (photoTrialIndex >= conditionList.length) {
         alert("All photoselection trials complete.");
@@ -129,16 +129,14 @@
       let currentCondition = conditionList[photoTrialIndex];
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
       let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
-
       if (photoPool.length === 0) {
         alert("No photos remain in the pool.");
         return;
       }
-      // Select a random photo.
+      // Randomly select a photo.
       let randomIndex = Math.floor(Math.random() * photoPool.length);
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
-
       // Update labels.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
@@ -151,12 +149,13 @@
       document.getElementById("photo").alt = `Selected Photo: ${selectedPhoto}`;
     }
 
-    // Function to save the current trial's data into photoResponses and either compile/send CSV or proceed.
+    // Function to save photoselection trial data and then redirect.
     function nextPhotoTrial() {
       const participantSID = localStorage.getItem("participantSID") || "unknown";
       let currentTrial = photoTrialIndex + 1;
       let currentCondition = JSON.parse(localStorage.getItem("conditionList"))[photoTrialIndex];
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
+      // Extract only the file name (remove path) from the photo src.
       let selectedPhoto = document.getElementById("photo").src.split("/").pop();
 
       let trialData = {
@@ -167,7 +166,7 @@
         timestamp: new Date().toISOString()
       };
 
-      // Append this trial's data to photoResponses.
+      // Append the current trial's data.
       photoResponses.push(trialData);
       localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
 
@@ -175,10 +174,10 @@
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
-      // Set final trial number (adjust as needed).
+      // Define final trial number.
       const finalPhotoTrial = 20;
       if (currentTrial >= finalPhotoTrial) {
-        // Compile all photo responses into one CSV.
+        // Compile all responses into one CSV.
         let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
         const headers = ["participantSID", "visitNumber", "photoType", "photoShown", "timestamp"];
         let csvContent = headers.join(",") + "\n";
@@ -204,7 +203,6 @@
         })
         .then(data => {
           console.log("Photo Selection CSV successfully uploaded:", data);
-          // Optionally clear responses.
           localStorage.removeItem("photoResponses");
           // After final photoselection trial, redirect to video display.
           window.location.href = "video_display.html";
@@ -214,16 +212,14 @@
           alert("Error submitting data. Please try again.");
         });
       } else {
-        // For non-final trials, redirect to video display.
+        // For non-final trials, redirect to video display after a short delay.
         setTimeout(() => {
           window.location.href = "video_display.html";
         }, 1000);
       }
     }
 
-    // On page load, clear any duplicate processing flag and display trial.
     window.addEventListener("load", function() {
-      // Auto display trial.
       displayPhotoTrial();
       // Auto-advance after a fixed delay (e.g., 10 seconds).
       setTimeout(nextPhotoTrial, 10000);
