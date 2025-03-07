@@ -33,7 +33,7 @@
       flex-wrap: nowrap;
     }
     .option {
-      flex: 1; 
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -103,7 +103,6 @@
       const videoPlayer = document.getElementById("video");
       videoPlayer.style.display = "block";
       videoPlayer.play();
-
       videoPlayer.onended = videoPlayer.onpause = () => {
         cumulativeTime += Date.now() - startTime;
         if (cumulativeTime < 3000) {
@@ -125,7 +124,7 @@
       return array;
     }
 
-    // Define a video list.
+    // Define video list.
     const videos = [
       { url: "Videos/0015.mp4", label: "v1" },
       { url: "Videos/0299.mp4", label: "v2" },
@@ -230,6 +229,14 @@
 
     window.onload = function() {
       selectVideo();
+      // Show the Next button only after a radio selection is made.
+      const radioButtons = document.getElementsByName("videoScale");
+      const nextButtonContainer = document.getElementById("buttonContainer");
+      Array.from(radioButtons).forEach(radio => {
+        radio.addEventListener("change", () => {
+          nextButtonContainer.style.display = "block";
+        });
+      });
       document.getElementById("nextButton").addEventListener("click", nextPage);
     };
   </script>
