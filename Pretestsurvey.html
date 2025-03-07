@@ -1,53 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pretest Survey</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survey Form</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
       padding: 20px;
-      background-color: #f9f9f9;
       line-height: 1.6;
+      background-color: #f9f9f9;
     }
     .container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 0 auto;
       background: #fff;
       padding: 20px 30px;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    h1 {
-      text-align: center;
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: #333;
-    }
-    .question {
+    .intro {
       margin-bottom: 20px;
     }
-    .question label {
-      display: block;
-      margin-bottom: 5px;
+    .intro p {
+      font-size: 24px;
       font-weight: bold;
+      margin-bottom: 20px;
     }
-    .options label {
-      margin-right: 10px;
+    .subtext {
+      font-size: 0.8em;
+      font-weight: normal;
+    }
+    .question {
+      margin-bottom: 30px;
+    }
+    .question label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .scale {
+      display: flex;
+      justify-content: space-evenly;
+      align-items: flex-start;
+      width: 100%;
+    }
+    .scale label {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 50px;
+      margin: 0;
+    }
+    .scale input[type="radio"] {
+      margin-bottom: 5px;
+      vertical-align: middle;
+    }
+    .scale label span {
+      margin-top: auto;
+      display: block;
     }
     button {
-      display: block;
-      width: 100%;
-      background-color: #007BFF;
+      background-color: #007bff;
       color: white;
       border: none;
-      padding: 10px;
+      padding: 10px 20px;
       font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
       margin-top: 20px;
+      width: 100%;
     }
     button:hover {
       background-color: #0056b3;
@@ -56,163 +80,454 @@
 </head>
 <body>
   <div class="container">
-    <h1>Pretest Survey</h1>
-    <form id="pretestForm">
+    <form id="surveyForm">
+      <!-- Intro -->
+      <div class="intro">
+        <p>
+          Please rate the following statements on a scale of 1 to 7<br>
+          <span class="subtext">with 1 indicating "Strongly Disagree", 4 indicating "Neutral", and 7 indicating "Strongly Agree".</span>
+        </p>
+      </div>
+
       <!-- Question 1 -->
       <div class="question">
-        <label for="q1">1. How would you rate your current mood?</label>
-        <div class="options">
-          <label><input type="radio" name="q1" value="Very Negative" required> Very Negative</label>
-          <label><input type="radio" name="q1" value="Negative"> Negative</label>
-          <label><input type="radio" name="q1" value="Neutral"> Neutral</label>
-          <label><input type="radio" name="q1" value="Positive"> Positive</label>
-          <label><input type="radio" name="q1" value="Very Positive"> Very Positive</label>
+        <label for="erq_1">
+          1. When I want to feel more positive emotion (such as joy or amusement), I change what I’m thinking about.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_1" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_1" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_1" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_1" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_1" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_1" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_1" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 2 -->
       <div class="question">
-        <label for="q2">2. How well did you sleep last night?</label>
-        <div class="options">
-          <label><input type="radio" name="q2" value="Poorly" required> Poorly</label>
-          <label><input type="radio" name="q2" value="Fair"> Fair</label>
-          <label><input type="radio" name="q2" value="Good"> Good</label>
-          <label><input type="radio" name="q2" value="Very Good"> Very Good</label>
+        <label for="erq_2">
+          2. I keep my emotions to myself.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_2" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_2" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_2" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_2" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_2" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_2" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_2" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 3 -->
       <div class="question">
-        <label for="q3">3. How stressed do you feel right now?</label>
-        <div class="options">
-          <label><input type="radio" name="q3" value="Not at all" required> Not at all</label>
-          <label><input type="radio" name="q3" value="A little"> A little</label>
-          <label><input type="radio" name="q3" value="Moderately"> Moderately</label>
-          <label><input type="radio" name="q3" value="Very"> Very</label>
-          <label><input type="radio" name="q3" value="Extremely"> Extremely</label>
+        <label for="erq_3">
+          3. I control my emotions by changing the way I think about the situation I’m in.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_3" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_3" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_3" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_3" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_3" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_3" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_3" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 4 -->
       <div class="question">
-        <label for="q4">4. How clear is your thinking right now?</label>
-        <div class="options">
-          <label><input type="radio" name="q4" value="Very Unclear" required> Very Unclear</label>
-          <label><input type="radio" name="q4" value="Unclear"> Unclear</label>
-          <label><input type="radio" name="q4" value="Neutral"> Neutral</label>
-          <label><input type="radio" name="q4" value="Clear"> Clear</label>
-          <label><input type="radio" name="q4" value="Very Clear"> Very Clear</label>
+        <label for="erq_4">
+          4. When I am feeling positive emotions, I am careful not to express them.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_4" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_4" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_4" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_4" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_4" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_4" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_4" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 5 -->
       <div class="question">
-        <label for="q5">5. How focused are you today?</label>
-        <div class="options">
-          <label><input type="radio" name="q5" value="Not at all focused" required> Not at all focused</label>
-          <label><input type="radio" name="q5" value="Slightly focused"> Slightly focused</label>
-          <label><input type="radio" name="q5" value="Moderately focused"> Moderately focused</label>
-          <label><input type="radio" name="q5" value="Very focused"> Very focused</label>
-          <label><input type="radio" name="q5" value="Extremely focused"> Extremely focused</label>
+        <label for="erq_5">
+          5. When I’m faced with a stressful situation, I make myself think about it in a way that helps me stay calm.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_5" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_5" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_5" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_5" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_5" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_5" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_5" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 6 -->
       <div class="question">
-        <label for="q6">6. How energetic do you feel right now?</label>
-        <div class="options">
-          <label><input type="radio" name="q6" value="Very low energy" required> Very low energy</label>
-          <label><input type="radio" name="q6" value="Low energy"> Low energy</label>
-          <label><input type="radio" name="q6" value="Moderate"> Moderate</label>
-          <label><input type="radio" name="q6" value="High"> High</label>
-          <label><input type="radio" name="q6" value="Very high energy"> Very high energy</label>
+        <label for="erq_6">
+          6. I control my emotions by not expressing them.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_6" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_6" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_6" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_6" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_6" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_6" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_6" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 7 -->
       <div class="question">
-        <label for="q7">7. How motivated are you today?</label>
-        <div class="options">
-          <label><input type="radio" name="q7" value="Not at all" required> Not at all</label>
-          <label><input type="radio" name="q7" value="Slightly"> Slightly</label>
-          <label><input type="radio" name="q7" value="Moderately"> Moderately</label>
-          <label><input type="radio" name="q7" value="Very"> Very</label>
-          <label><input type="radio" name="q7" value="Extremely"> Extremely</label>
+        <label for="erq_7">
+          7. When I want to feel more positive emotion, I change the way I’m thinking about the situation.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_7" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_7" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_7" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_7" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_7" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_7" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_7" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 8 -->
       <div class="question">
-        <label for="q8">8. How much have you been able to concentrate?</label>
-        <div class="options">
-          <label><input type="radio" name="q8" value="Not at all" required> Not at all</label>
-          <label><input type="radio" name="q8" value="A little"> A little</label>
-          <label><input type="radio" name="q8" value="Moderately"> Moderately</label>
-          <label><input type="radio" name="q8" value="Very"> Very</label>
-          <label><input type="radio" name="q8" value="Completely"> Completely</label>
+        <label for="erq_8">
+          8. I control my emotions by changing the way I think about the situation I’m in.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_8" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_8" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_8" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_8" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_8" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_8" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_8" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 9 -->
       <div class="question">
-        <label for="q9">9. How would you rate your overall alertness?</label>
-        <div class="options">
-          <label><input type="radio" name="q9" value="Very low" required> Very low</label>
-          <label><input type="radio" name="q9" value="Low"> Low</label>
-          <label><input type="radio" name="q9" value="Moderate"> Moderate</label>
-          <label><input type="radio" name="q9" value="High"> High</label>
-          <label><input type="radio" name="q9" value="Very high"> Very high</label>
+        <label for="erq_9">
+          9. When I am feeling negative emotions, I make sure not to express them.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_9" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_9" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_9" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_9" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_9" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_9" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_9" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
       <!-- Question 10 -->
       <div class="question">
-        <label for="q10">10. How do you feel about your day so far?</label>
-        <div class="options">
-          <label><input type="radio" name="q10" value="Very dissatisfied" required> Very dissatisfied</label>
-          <label><input type="radio" name="q10" value="Dissatisfied"> Dissatisfied</label>
-          <label><input type="radio" name="q10" value="Neutral"> Neutral</label>
-          <label><input type="radio" name="q10" value="Satisfied"> Satisfied</label>
-          <label><input type="radio" name="q10" value="Very satisfied"> Very satisfied</label>
+        <label for="erq_10">
+          10. When I want to feel less negative emotion, I change the way I’m thinking about the situation.
+        </label>
+        <div class="scale">
+          <label>
+            <input type="radio" name="erq_10" value="1" required>
+            <span>1</span>
+            <small>Strongly Disagree</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_10" value="2">
+            <span>2</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_10" value="3">
+            <span>3</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_10" value="4">
+            <span>4</span>
+            <small>Neutral</small>
+          </label>
+          <label>
+            <input type="radio" name="erq_10" value="5">
+            <span>5</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_10" value="6">
+            <span>6</span>
+          </label>
+          <label>
+            <input type="radio" name="erq_10" value="7">
+            <span>7</span>
+            <small>Strongly Agree</small>
+          </label>
         </div>
       </div>
-      
+
+      <!-- Submit Button -->
       <button type="submit">Submit</button>
     </form>
   </div>
   
   <script>
-    document.getElementById("pretestForm").addEventListener("submit", function(event) {
+    // Global flag to prevent multiple submissions.
+    let submitted = false;
+    
+    // Form Handling: Save responses to localStorage and redirect to Bfis1.html.
+    document.getElementById("surveyForm").addEventListener("submit", function(event) {
       event.preventDefault();
       
-      // Validate using HTML5 built-in validation.
+      if (submitted) return;
+      submitted = true;
+      document.querySelector("button[type='submit']").disabled = true;
+      
       if (!this.checkValidity()) {
         this.reportValidity();
+        submitted = false;
+        document.querySelector("button[type='submit']").disabled = false;
         return;
       }
       
-      // Collect responses into an object.
+      // Collect form data.
       const formData = new FormData(this);
-      const responses = {};
-      for (let [key, value] of formData.entries()) {
-        responses[key] = value;
-      }
+      const dataObj = {};
+      formData.forEach((value, key) => {
+        dataObj[key] = value;
+      });
       
-      // Retrieve participant SID (assumed to be stored in localStorage) or default to "unknown".
+      // Add participant SID from localStorage.
       const participantSID = localStorage.getItem("participantSID") || "unknown";
+      dataObj.participantSID = participantSID;
       
-      // Build the pretest survey data object.
-      const pretestData = {
-        participantSID: participantSID,
-        surveyName: "PretestSurvey",
-        timestamp: new Date().toISOString(),
-        responses: responses
-      };
+      // Save the survey responses for later CSV compilation.
+      localStorage.setItem("pretestSurveyData", JSON.stringify(dataObj));
       
-      // Save the data in localStorage.
-      localStorage.setItem("pretestSurveyData", JSON.stringify(pretestData));
-      
-      // Redirect to the next page (e.g., BFS1 survey page).
+      // Immediately redirect to Bfis1.html.
       window.location.href = "bfis1.html";
     });
   </script>
