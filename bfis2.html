@@ -1,112 +1,60 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Personality Survey - BFS2</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
-      line-height: 1.6;
+      padding: 20px;
       background-color: #f9f9f9;
     }
     .container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 0 auto;
       background: #fff;
-      padding: 20px;
+      padding: 20px 30px;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      text-align: center;
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-    .scale-visual {
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .scale-visual ul {
-      list-style: none;
-      padding: 0;
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin: 0;
-      border-bottom: 1px solid #ccc;
-    }
-    .scale-visual ul li {
-      text-align: center;
-      flex: 1;
-      position: relative;
-    }
-    .scale-visual ul li:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background-color: #ccc;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .question {
       margin-bottom: 20px;
     }
-    label {
-      font-weight: bold;
+    .question label {
       display: block;
       margin-bottom: 10px;
+      font-weight: bold;
     }
     .scale {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-evenly;
     }
     .scale label {
       flex: 1;
       text-align: center;
-      font-weight: normal;
-    }
-    .scale input {
-      margin-right: 5px;
     }
     button {
-      display: block;
-      width: 100%;
       background-color: #007BFF;
       color: white;
       border: none;
-      padding: 10px;
+      padding: 10px 20px;
       font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
       margin-top: 20px;
+      display: block;
+      width: 100%;
     }
     button:hover {
       background-color: #0056b3;
     }
   </style>
-  <script src="dataSender.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Please rate how much each statement applies to you on a scale of 1 to 5</h1>
-    <p>Each statement begins with "I am a person who..."</p>
-    <div class="scale-visual">
-      <ul>
-        <li>1<br><small>(Disagree Strongly)</small></li>
-        <li>2<br><small>(Disagree a Little)</small></li>
-        <li>3<br><small>(Neutral; No Opinion)</small></li>
-        <li>4<br><small>(Agree a Little)</small></li>
-        <li>5<br><small>(Agree Strongly)</small></li>
-      </ul>
-    </div>
-    <form id="personalitySurveyForm2" action="bfis3.html" method="get">
+    <form id="personalitySurveyForm2">
       <div class="question">
         <label for="q1">1. Is full of energy.</label>
         <div class="scale">
@@ -118,7 +66,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q2">2. Assumes the best about people.</label>
+        <label for="q2">2. Is optimistic about the future.</label>
         <div class="scale">
           <label><input type="radio" name="q2" value="1" required> 1</label>
           <label><input type="radio" name="q2" value="2"> 2</label>
@@ -128,7 +76,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q3">3. Is reliable, can always be counted on.</label>
+        <label for="q3">3. Handles stress well.</label>
         <div class="scale">
           <label><input type="radio" name="q3" value="1" required> 1</label>
           <label><input type="radio" name="q3" value="2"> 2</label>
@@ -138,7 +86,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q4">4. Is emotionally stable, not easily upset.</label>
+        <label for="q4">4. Is outgoing and sociable.</label>
         <div class="scale">
           <label><input type="radio" name="q4" value="1" required> 1</label>
           <label><input type="radio" name="q4" value="2"> 2</label>
@@ -148,7 +96,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q5">5. Is original, comes up with new ideas.</label>
+        <label for="q5">5. Is creative in problem-solving.</label>
         <div class="scale">
           <label><input type="radio" name="q5" value="1" required> 1</label>
           <label><input type="radio" name="q5" value="2"> 2</label>
@@ -158,7 +106,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q6">6. Is outgoing, sociable.</label>
+        <label for="q6">6. Is organized in daily tasks.</label>
         <div class="scale">
           <label><input type="radio" name="q6" value="1" required> 1</label>
           <label><input type="radio" name="q6" value="2"> 2</label>
@@ -168,7 +116,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q7">7. Can be cold and uncaring.</label>
+        <label for="q7">7. Is self-disciplined.</label>
         <div class="scale">
           <label><input type="radio" name="q7" value="1" required> 1</label>
           <label><input type="radio" name="q7" value="2"> 2</label>
@@ -178,7 +126,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q8">8. Keeps things neat and tidy.</label>
+        <label for="q8">8. Is talkative.</label>
         <div class="scale">
           <label><input type="radio" name="q8" value="1" required> 1</label>
           <label><input type="radio" name="q8" value="2"> 2</label>
@@ -188,7 +136,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q9">9. Is relaxed, handles stress well.</label>
+        <label for="q9">9. Is adventurous.</label>
         <div class="scale">
           <label><input type="radio" name="q9" value="1" required> 1</label>
           <label><input type="radio" name="q9" value="2"> 2</label>
@@ -198,7 +146,7 @@
         </div>
       </div>
       <div class="question">
-        <label for="q10">10. Has few artistic interests.</label>
+        <label for="q10">10. Is motivated to achieve goals.</label>
         <div class="scale">
           <label><input type="radio" name="q10" value="1" required> 1</label>
           <label><input type="radio" name="q10" value="2"> 2</label>
@@ -210,59 +158,26 @@
       <button type="submit">Submit</button>
     </form>
   </div>
+  
   <script>
-    var pageData = {};
-    function generateCSV(dataObj) {
-      const headers = ["participantSID", "surveyName", "timestamp", "bfis2_1", "bfis2_2", "bfis2_3", "bfis2_4", "bfis2_5", "bfis2_6", "bfis2_7", "bfis2_8", "bfis2_9", "bfis2_10"];
-      const csvHeader = headers.join(",") + "\n";
-      const row = [
-        dataObj.participantSID,
-        dataObj.surveyName,
-        dataObj.timestamp,
-        ...dataObj.responses.sort((a, b) => a.trial - b.trial).map(resp => resp.answer)
-      ];
-      const csvRow = row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
-      return csvHeader + csvRow;
-    }
     document.getElementById("personalitySurveyForm2").addEventListener("submit", function(e) {
       e.preventDefault();
+      
       const formData = new FormData(this);
       const responses = [];
       for (let i = 1; i <= 10; i++) {
         responses.push({ trial: i, answer: formData.get("q" + i) });
       }
-      const participantSID = localStorage.getItem("participantSID");
+      const participantSID = localStorage.getItem("participantSID") || "unknown";
       const experimentData = {
         participantSID: participantSID,
         surveyName: "BFS2",
         timestamp: new Date().toISOString(),
         responses: responses
       };
-      pageData = experimentData;
-      const csvContent = generateCSV(pageData);
-      const filename = `bfis2_${participantSID}.csv`;
-      fetch('/.netlify/functions/upload-csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/csv',
-          'X-Filename': filename
-        },
-        body: csvContent
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then(data => {
-        setTimeout(() => {
-          window.location.href = "bfis3.html";
-        }, 1000);
-      })
-      .catch(error => {
-        alert("Error submitting data. Please try again.");
-      });
+      localStorage.setItem("bfis2Data", JSON.stringify(experimentData));
+      
+      window.location.href = "bfis3.html";
     });
   </script>
 </body>
