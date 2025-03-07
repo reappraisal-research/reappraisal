@@ -197,6 +197,7 @@
         }
       });
     });
+    
     // Enable/disable "Other" text for language.
     const otherLangCheckbox = document.getElementById("otherLangCheckbox");
     const otherLangText = document.getElementById("other-language");
@@ -210,6 +211,7 @@
         otherLangText.value = "";
       }
     });
+    
     // Enable/disable "Other" text for religion.
     const religionOtherCheckbox = document.getElementById("religionOtherCheckbox");
     const religionOtherText = document.getElementById("religion-other-text");
@@ -234,8 +236,8 @@
         return;
       }
       
-      // Custom check: ensure every required radio group is answered.
-      const requiredGroups = ["age", "gender", "ethnicity", "education", "employment", "income", "living", "politics"];
+      // Custom check: ensure every required group is answered.
+      const requiredGroups = ["age", "gender", "ethnicity", "education", "employment", "income", "living", "language", "religion", "politics"];
       for (let group of requiredGroups) {
         if (!document.querySelector('input[name="' + group + '"]:checked')) {
           alert("Please answer all required questions.");
