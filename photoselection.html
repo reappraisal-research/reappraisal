@@ -30,7 +30,7 @@
     }
   </style>
   <script>
-    // Utility: Shuffle array.
+    // Utility: Shuffle an array in place.
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -89,7 +89,7 @@
       "Stimulireal/ur.profile.profile.jpg": "Front view"
     };
 
-    // Save photo pools if not already in localStorage.
+    // Save photo pools in localStorage if not already set.
     if (!localStorage.getItem("ambiguousPhotos")) {
       localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
     }
@@ -116,6 +116,9 @@
       conditionList = shuffleArray(conditions);
       localStorage.setItem("conditionList", JSON.stringify(conditionList));
     }
+
+    // Retrieve or initialize an array for photoselection responses.
+    let photoResponses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
 
     // Display the current photoselection trial.
     function displayPhotoTrial() {
@@ -148,10 +151,9 @@
       document.getElementById("photo").alt = `Selected Photo: ${selectedPhoto}`;
     }
 
-    // Function to send CSV for photoselection trial and auto-advance.
+    // Function to save the current trial's data into photoResponses and either compile/send CSV or proceed.
     function nextPhotoTrial() {
       const participantSID = localStorage.getItem("participantSID") || "unknown";
-      let photoTrialIndex = parseInt(localStorage.getItem("photoTrialIndex"), 10);
       let currentTrial = photoTrialIndex + 1;
       let currentCondition = JSON.parse(localStorage.getItem("conditionList"))[photoTrialIndex];
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
@@ -161,53 +163,69 @@
         participantSID: participantSID,
         visitNumber: currentTrial,
         photoType: currentCondition.photoType,
-        photoShown: selectedPhoto
+        photoShown: selectedPhoto,
+        timestamp: new Date().toISOString()
       };
 
-      function generateCSVFromTrial(dataObj) {
-        const headers = ["participantSID", "visitNumber", "photoType", "photoShown"];
-        const csvHeader = headers.join(",") + "\n";
-        const row = headers.map(key => {
-          let value = dataObj[key] || "";
-          return `"${String(value).replace(/"/g, '""')}"`;
-        }).join(",");
-        return csvHeader + row;
-      }
-      const csvContent = generateCSVFromTrial(trialData);
-      const filename = `photoSelection_${participantSID}_${currentTrial}.csv`;
-
-      fetch('/.netlify/functions/upload-csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/csv',
-          'X-Filename': filename
-        },
-        body: csvContent
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Network response was not ok");
-        return response.json();
-      })
-      .then(data => {
-        console.log("Photoselection CSV uploaded:", data);
-      })
-      .catch(error => {
-        console.error("Error uploading CSV:", error);
-      });
+      // Append this trial's data to photoResponses.
+      photoResponses.push(trialData);
+      localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
 
       // Increment photoselection counter.
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
-      // Auto-redirect after a delay.
-      setTimeout(() => {
-        window.location.href = "video_display.html";
-      }, 1000);
+      // Set final trial number (adjust as needed).
+      const finalPhotoTrial = 20;
+      if (currentTrial >= finalPhotoTrial) {
+        // Compile all photo responses into one CSV.
+        let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
+        const headers = ["participantSID", "visitNumber", "photoType", "photoShown", "timestamp"];
+        let csvContent = headers.join(",") + "\n";
+        responses.forEach(response => {
+          let row = headers.map(key => {
+            let value = response[key] || "";
+            return `"${String(value).replace(/"/g, '""')}"`;
+          }).join(",");
+          csvContent += row + "\n";
+        });
+        const filename = `photoSelection_${participantSID}.csv`;
+        fetch('/.netlify/functions/upload-csv', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/csv',
+            'X-Filename': filename
+          },
+          body: csvContent
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Network response was not ok");
+          return response.json();
+        })
+        .then(data => {
+          console.log("Photo Selection CSV successfully uploaded:", data);
+          // Optionally clear responses.
+          localStorage.removeItem("photoResponses");
+          // After final photoselection trial, redirect to video display.
+          window.location.href = "video_display.html";
+        })
+        .catch(error => {
+          console.error("Error uploading CSV:", error);
+          alert("Error submitting data. Please try again.");
+        });
+      } else {
+        // For non-final trials, redirect to video display.
+        setTimeout(() => {
+          window.location.href = "video_display.html";
+        }, 1000);
+      }
     }
 
+    // On page load, clear any duplicate processing flag and display trial.
     window.addEventListener("load", function() {
+      // Auto display trial.
       displayPhotoTrial();
-      // Auto-move to next trial after a fixed delay (e.g., 10 seconds).
+      // Auto-advance after a fixed delay (e.g., 10 seconds).
       setTimeout(nextPhotoTrial, 10000);
     });
   </script>
