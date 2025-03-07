@@ -20,7 +20,7 @@
       margin: 20px auto;
     }
     .question-container {
-      display: none; /* Hidden until the video ends */
+      display: none;
       margin-top: 20px;
       font-size: 18px;
     }
@@ -96,12 +96,11 @@
     }
   </style>
   <script>
-    // Play the video until a total of 3 seconds have elapsed.
+    // Play the video until 3 seconds have elapsed.
     function playVideoUntil3Seconds(onComplete) {
       let startTime = Date.now();
       let cumulativeTime = 0;
       const videoPlayer = document.getElementById("video");
-
       videoPlayer.style.display = "block";
       videoPlayer.play();
 
@@ -117,7 +116,7 @@
       };
     }
 
-    // Shuffle an array in place.
+    // Utility: Shuffle an array.
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -126,90 +125,85 @@
       return array;
     }
 
-    // Select and display a video.
+    // Define a video list.
+    const videos = [
+      { url: "Videos/0015.mp4", label: "v1" },
+      { url: "Videos/0299.mp4", label: "v2" },
+      { url: "Videos/0489.mp4", label: "v3" },
+      { url: "Videos/0611.mp4", label: "v4" },
+      { url: "Videos/0681.mp4", label: "v5" },
+      { url: "Videos/0719.mp4", label: "v6" },
+      { url: "Videos/0955.mp4", label: "v7" },
+      { url: "Videos/0975.mp4", label: "v8" },
+      { url: "Videos/1576.mp4", label: "v9" },
+      { url: "Videos/1623.mp4", label: "v10" },
+      { url: "Videos/1844.mp4", label: "v11" },
+      { url: "Videos/1959.mp4", label: "v12" },
+      { url: "Videos/0009.mp4", label: "v13" },
+      { url: "Videos/0333.mp4", label: "v14" },
+      { url: "Videos/0706.mp4", label: "v15" },
+      { url: "Videos/0803.mp4", label: "v16" },
+      { url: "Videos/0860.mp4", label: "v17" },
+      { url: "Videos/0948.mp4", label: "v18" },
+      { url: "Videos/1001.mp4", label: "v19" },
+      { url: "Videos/1164.mp4", label: "v20" }
+    ];
+
+    // Use a dedicated video trial counter.
+    if (!localStorage.getItem("videoTrialIndex")) {
+      localStorage.setItem("videoTrialIndex", "0");
+    }
+    let videoTrialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
+
+    // Load or initialize a video order.
+    let videoOrder = JSON.parse(localStorage.getItem("videoOrder") || "[]");
+    if (videoOrder.length === 0) {
+      videoOrder = shuffleArray(videos.slice());
+      localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
+    }
+
     function selectVideo() {
-      const videos = [
-        { url: "Videos/0015.mp4", label: "v1" },
-        { url: "Videos/0299.mp4", label: "v2" },
-        { url: "Videos/0489.mp4", label: "v3" },
-        { url: "Videos/0611.mp4", label: "v4" },
-        { url: "Videos/0681.mp4", label: "v5" },
-        { url: "Videos/0719.mp4", label: "v6" },
-        { url: "Videos/0955.mp4", label: "v7" },
-        { url: "Videos/0975.mp4", label: "v8" },
-        { url: "Videos/1576.mp4", label: "v9" },
-        { url: "Videos/1623.mp4", label: "v10" },
-        { url: "Videos/1844.mp4", label: "v11" },
-        { url: "Videos/1959.mp4", label: "v12" },
-        { url: "Videos/0009.mp4", label: "v13" },
-        { url: "Videos/0333.mp4", label: "v14" },
-        { url: "Videos/0706.mp4", label: "v15" },
-        { url: "Videos/0803.mp4", label: "v16" },
-        { url: "Videos/0860.mp4", label: "v17" },
-        { url: "Videos/0948.mp4", label: "v18" },
-        { url: "Videos/1001.mp4", label: "v19" },
-        { url: "Videos/1164.mp4", label: "v20" }
-      ];
-
-      // Retrieve saved video order or shuffle a new one.
-      let videoOrder = JSON.parse(localStorage.getItem("videoOrder") || "[]");
-      if (videoOrder.length === 0) {
-        videoOrder = shuffleArray(videos.slice());
-        localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
-      }
-
-      // Select the next video.
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
         localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
-        const videoElement = document.getElementById("video");
-        videoElement.src = selectedVideo.url;
+        document.getElementById("video").src = selectedVideo.url;
       } else {
         document.getElementById("video").style.display = "none";
         document.getElementById("questionContainer").innerHTML = "<p>All videos have been shown.</p>";
       }
-
-      // Play the video until 3 seconds have elapsed, then show the question.
       playVideoUntil3Seconds(() => {
         document.getElementById("questionContainer").style.display = "block";
       });
     }
 
-    // Function to send trial data as CSV and redirect.
+    // Function to send CSV for video trial and redirect to survey.
     function nextPage() {
-      // Ensure a video trial index exists.
       if (!localStorage.getItem("videoTrialIndex")) {
         localStorage.setItem("videoTrialIndex", "0");
       }
       let trialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
       let currentTrial = trialIndex + 1;
 
-      // Build trial data object.
       const participantSID = localStorage.getItem("participantSID");
-      const videoElement = document.getElementById("video");
+      const videoShown = document.getElementById("video").src;
       const trialData = {
         participantSID: participantSID,
         trialNumber: currentTrial,
-        videoShown: videoElement.src
+        videoShown: videoShown
       };
 
-      // Generate CSV string.
       function generateCSVFromTrial(dataObj) {
         const headers = ["participantSID", "trialNumber", "videoShown"];
         const csvHeader = headers.join(",") + "\n";
         const row = headers.map(key => {
           let value = dataObj[key] || "";
-          value = String(value).replace(/"/g, '""');
-          return `"${value}"`;
+          return `"${String(value).replace(/"/g, '""')}"`;
         }).join(",");
         return csvHeader + row;
       }
       const csvContent = generateCSVFromTrial(trialData);
-
-      // Create filename: "videoDisplay_{participantSID}_{trialNumber}.csv"
       const filename = `videoDisplay_${participantSID}_${currentTrial}.csv`;
 
-      // Send the CSV data via POST request.
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
         headers: {
@@ -219,52 +213,33 @@
         body: csvContent
       })
       .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         return response.json();
       })
       .then(data => {
-        console.log("CSV successfully uploaded for video trial:", data);
-        // Increment and store the video trial index.
+        console.log("Video CSV uploaded:", data);
         trialIndex++;
         localStorage.setItem("videoTrialIndex", trialIndex.toString());
-        // Redirect to the next page.
         window.location.href = "survey.html";
       })
       .catch(error => {
-        console.error("Error uploading CSV for video trial:", error);
+        console.error("Error uploading video CSV:", error);
         alert("Error submitting data. Please try again.");
       });
     }
 
     window.onload = function() {
-      // Start the video selection logic.
       selectVideo();
-
-      // When a radio button is chosen, show the Next button.
-      const radioButtons = document.getElementsByName("videoScale");
-      const nextButtonContainer = document.getElementById("buttonContainer");
-      Array.from(radioButtons).forEach(radio => {
-        radio.addEventListener("change", () => {
-          nextButtonContainer.style.display = "block";
-        });
-      });
-
-      // Attach event listener to the Next button.
       document.getElementById("nextButton").addEventListener("click", nextPage);
     };
   </script>
 </head>
-
 <body>
   <p>Please watch the video below:</p>
   <video id="video">
     <source src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-
-  <!-- Question Section -->
   <div id="questionContainer" class="question-container">
     <label for="videoScale">1. How negative do you feel?</label>
     <div class="scale">
@@ -319,8 +294,6 @@
       </label>
     </div>
   </div>
-
-  <!-- Next Button -->
   <div id="buttonContainer" class="button-container">
     <button id="nextButton">Next</button>
   </div>
