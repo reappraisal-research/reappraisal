@@ -74,43 +74,45 @@
   </div>
   
   <script>
-    // Function to combine all survey data into one CSV row (one header row and one data row)
+    // Combines demographics data along with all other survey data into one CSV row.
     function combineCSV() {
       let headers = [];
       let values = [];
       
-      // Retrieve demographics data and get participantSID.
+      // Append demographics data (from the demographics page)
       const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
-      const participantSID = demographicsData.participantSID || "unknown";
-      
-      // Add participantSID only once.
-      headers.push("participantSID");
-      values.push(participantSID);
-      
-      // Helper function to append non-array properties.
-      function appendData(prefix, dataObj) {
-        for (let key in dataObj) {
-          if (key === "participantSID") continue; // Skip duplicate SID.
-          if (!Array.isArray(dataObj[key])) {
-            headers.push(`${prefix}_${key}`);
-            values.push(String(dataObj[key]).trim());
-          }
+      if (Object.keys(demographicsData).length > 0) {
+        for (let key in demographicsData) {
+          headers.push("demographics_" + key);
+          values.push(String(demographicsData[key]).trim());
         }
       }
       
-      // Helper function to append responses.
+      // Helper function: append non-array properties from a given survey data object
+      function appendData(prefix, dataObj) {
+        for (let key in dataObj) {
+          if (key === "responses") continue; // We'll process responses separately.
+          headers.push(prefix + "_" + key);
+          values.push(String(dataObj[key]).trim());
+        }
+      }
+      
+      // Helper function: append responses array (sorted by trial).
       function appendResponses(prefix, responses) {
         responses.sort((a, b) => a.trial - b.trial);
         for (let i = 0; i < responses.length; i++) {
-          headers.push(`${prefix}_Q${i + 1}`);
+          headers.push(prefix + "_Q" + (i + 1));
           values.push(String(responses[i].answer).trim());
         }
       }
       
-      // Append Pretest data.
+      // Append Pretest Survey Data.
       const pretestData = JSON.parse(localStorage.getItem("pretestSurveyData") || "{}");
       if (Object.keys(pretestData).length > 0) {
         appendData("pretest", pretestData);
+        if (pretestData.responses && Array.isArray(pretestData.responses)) {
+          appendResponses("pretest", pretestData.responses);
+        }
       }
       
       // Append Personality Survey Data.
@@ -149,7 +151,7 @@
         }
       }
       
-      // Create a single header row and one data row.
+      // Create one header row and one data row.
       const csvHeader = headers.join(",") + "\n";
       const csvRow = values.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
       return csvHeader + csvRow;
@@ -158,21 +160,20 @@
     const csvData = combineCSV();
     console.log("Combined CSV:", csvData);
     
-    // Create a filename using participantSID.
-    const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
-    const participantSID = demographicsData.participantSID || "unknown";
+    // Create a filename using the participantSID from demographics data.
+    const demographicsDataParsed = JSON.parse(localStorage.getItem("demographicsData") || "{}");
+    const participantSID = demographicsDataParsed.participantSID || "unknown";
     const filename = `combined_${participantSID}.csv`;
     
     // Prepare the URL with the filename as a query parameter.
     const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
     
-    // Use navigator.sendBeacon if available.
+    // Use navigator.sendBeacon (for reliability when users navigate away quickly).
     if (navigator.sendBeacon) {
-      // Create a Blob from the CSV data.
       const blob = new Blob([csvData], { type: 'text/csv' });
       navigator.sendBeacon(url, blob);
     } else {
-      // Fallback: use fetch.
+      // Fallback using fetch.
       fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'text/csv' },
@@ -180,7 +181,7 @@
       }).catch(error => console.error("Fetch error:", error));
     }
     
-    // Clear stored data.
+    // Clear all stored survey data.
     localStorage.removeItem("demographicsData");
     localStorage.removeItem("pretestSurveyData");
     localStorage.removeItem("personalitySurveyData");
