@@ -30,7 +30,7 @@
     }
   </style>
   <script>
-    // Delay between trials in milliseconds.
+    // Delay before saving and redirecting (in milliseconds)
     const trialDelay = 1000;
 
     // Utility: Shuffle an array in place.
@@ -100,7 +100,7 @@
       localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
     }
 
-    // Initialize photoselection counter to 1 so the first visit is trial 1.
+    // Initialize photo trial counter to 1 so the first visit is trial 1.
     if (!localStorage.getItem("photoTrialIndex")) {
       localStorage.setItem("photoTrialIndex", "1");
     }
@@ -120,10 +120,10 @@
       localStorage.setItem("conditionList", JSON.stringify(conditionList));
     }
 
-    // Retrieve or initialize an array for photoselection responses.
+    // Retrieve or initialize an array for photo selection responses.
     let photoResponses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
 
-    // Helper: Prepend "./" to image path if needed.
+    // Helper: Ensure the image path is correct.
     function getPhotoPath(photoUrl) {
       if (photoUrl.startsWith("/") || photoUrl.startsWith("./")) {
         return photoUrl;
@@ -132,10 +132,10 @@
       }
     }
 
-    // Display the current photoselection trial.
+    // Display the current photo trial (one image).
     function displayPhotoTrial() {
       if (photoTrialIndex - 1 >= conditionList.length) {
-        // No more trials—do nothing (final trial will trigger CSV upload).
+        // No more conditions remain.
         return;
       }
       let currentCondition = conditionList[photoTrialIndex - 1];
@@ -148,9 +148,8 @@
       // Select a random photo from the pool.
       let randomIndex = Math.floor(Math.random() * photoPool.length);
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
-      // Save the updated pool back.
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
-      // Get proper path.
+      // Get proper image path.
       let photoPath = getPhotoPath(selectedPhoto);
       // Update labels.
       if (currentCondition.photoType === "ambiguous") {
@@ -160,7 +159,7 @@
         document.getElementById("photoLabel").innerText = "Simple";
         document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
-      // Set the image source.
+      // Set image source.
       document.getElementById("photo").src = photoPath;
       document.getElementById("photo").alt = "Selected Photo: " + photoPath;
     }
@@ -171,8 +170,6 @@
       const participantID = demographicsData.participantSID || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
-      
-      // Sort responses by visitNumber.
       responses.sort((a, b) => a.visitNumber - b.visitNumber);
       for (let i = 0; i < responses.length; i++) {
         headers.push("photo_trial_" + (i + 1));
@@ -182,13 +179,12 @@
         row.push(filename);
         row.push(responses[i].photoType || "");
       }
-      
       const csvHeader = headers.join(",") + "\n";
       const csvRow = row.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
       return csvHeader + csvRow;
     }
 
-    // Helper function to upload CSV.
+    // Helper: Upload CSV and, if a callback is provided, then execute it.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -218,7 +214,7 @@
       });
     }
 
-    // Helper function to upload CSV and then redirect.
+    // Helper: Upload CSV then redirect.
     function uploadCSVAndRedirect() {
       uploadCSV(() => {
         localStorage.removeItem("photoResponses");
@@ -226,7 +222,7 @@
       });
     }
 
-    // Save trial data and update flow.
+    // Save the current trial and then redirect to the video page.
     function nextPhotoTrial() {
       let currentTrial = photoTrialIndex;
       if (photoTrialIndex - 1 >= conditionList.length) {
@@ -237,7 +233,6 @@
       let currentPhotoSrc = document.getElementById("photo").src;
       let selectedPhoto = currentPhotoSrc.split("/").pop();
       const participantID = localStorage.getItem("participantSID") || "unknown";
-      
       let trialData = {
         participantID: participantID,
         visitNumber: currentTrial,
@@ -245,36 +240,27 @@
         photoShown: selectedPhoto,
         timestamp: new Date().toISOString()
       };
-      
       photoResponses.push(trialData);
       localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
-      
       // Increment trial counter.
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
       
-      // Determine final trial: if conditionList has at least 20, final is 20; otherwise, use conditionList.length.
+      // Determine final trial: if conditionList has at least 20 trials, final is 20; otherwise, use conditionList.length.
       const finalPhotoTrial = conditionList.length >= 20 ? 20 : conditionList.length;
-      
-      // Check if the current photo pool for the just-used condition is empty.
-      let poolKey = currentCondition.photoType === "ambiguous" ? "ambiguousPhotos" : "nonAmbiguousPhotos";
-      let remainingPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
-      
+      // If trial 10 is reached, upload CSV (but continue flow), else if trial 20 (or final trial) is reached, upload CSV and redirect.
       if (currentTrial === 10) {
-        // Upload CSV at trial 10 but continue flow.
         uploadCSV(() => {
-          displayPhotoTrial();
-          setTimeout(nextPhotoTrial, trialDelay);
+          window.location.href = "video_display.html";
         });
-      } else if (currentTrial === finalPhotoTrial || currentTrial === 20 || remainingPool.length === 0) {
-        // At trial 20 (or final trial or if no photos remain), upload CSV (this overwrites trial 10) and redirect.
+      } else if (currentTrial === finalPhotoTrial || currentTrial === 20) {
         uploadCSVAndRedirect();
       } else {
-        displayPhotoTrial();
-        setTimeout(nextPhotoTrial, trialDelay);
+        window.location.href = "video_display.html";
       }
     }
 
+    // On window load, display one photo and set a timer to save the trial and redirect.
     window.addEventListener("load", function() {
       displayPhotoTrial();
       setTimeout(nextPhotoTrial, trialDelay);
