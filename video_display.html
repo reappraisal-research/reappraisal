@@ -148,9 +148,9 @@
       { url: "Videos/1164.mp4", label: "v20" }
     ];
 
-    // Use a dedicated video trial counter.
+    // Initialize video trial counter to 1 so that the first visit is counted as trial 1.
     if (!localStorage.getItem("videoTrialIndex")) {
-      localStorage.setItem("videoTrialIndex", "0");
+      localStorage.setItem("videoTrialIndex", "1");
     }
     let videoTrialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
 
@@ -164,7 +164,7 @@
     // Retrieve stored video responses or initialize.
     let videoResponses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
 
-    // Selects the next video to be displayed.
+    // Select the next video to be displayed.
     function selectVideo() {
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
@@ -208,7 +208,9 @@
     // Store trial data and send CSV at trial 10 and again at trial 20 (or if no videos remain).
     function nextPage() {
       let trialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
-      let currentTrial = trialIndex + 1;
+      // Use the current trial number directly.
+      let currentTrial = trialIndex;
+      
       // Retrieve participantID directly from localStorage.
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const videoShown = document.getElementById("video").src;
