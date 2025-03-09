@@ -149,6 +149,7 @@
     // Retrieve stored survey responses or initialize.
     let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
 
+    // Save responses for this trial.
     function saveResponses() {
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       if (!rethinkingResponse) {
@@ -169,7 +170,7 @@
       }
       const participantSID = localStorage.getItem("participantSID") || "unknown";
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if(isNaN(trialIndex) || trialIndex <= 0) trialIndex = 1;
+      if (isNaN(trialIndex) || trialIndex <= 0) trialIndex = 1;
       let currentTrial = trialIndex;
       const conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
       let currentCondition = conditionList[currentTrial - 1] || {};
@@ -179,7 +180,6 @@
         participantSID: participantSID,
         trialNumber: currentTrial,
         label: label,
-        // Updated first question text.
         rethinkingResponse: rethinkingResponse,
         howDoYouFeel: howDoYouFeelValue,
         timestamp: new Date().toISOString()
@@ -192,13 +192,18 @@
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
-      if (currentTrial >= 20) {
+      // Send CSV every 5 trials.
+      if (currentTrial % 5 === 0) {
         sendResponsesCSV();
       } else {
         window.location.href = "photoselection.html";
       }
     }
 
+    // Compile CSV from survey responses.
+    // The CSV will have one header row and one data row.
+    // The first column is the participantID (from demographics) and appears only once.
+    // Then the remaining survey trial data is appended.
     function sendResponsesCSV() {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
@@ -210,7 +215,9 @@
         }).join(",");
         csvContent += row + "\n";
       });
-      const filename = `survey_${localStorage.getItem("participantSID") || "unknown"}.csv`;
+      // File name: [participantID]_presurvey.csv
+      const participantSID = localStorage.getItem("participantSID") || "unknown";
+      const filename = `${participantSID}_presurvey.csv`;
 
       fetch('/.netlify/functions/upload-csv', {
         method: 'POST',
@@ -221,9 +228,7 @@
         body: csvContent
       })
       .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         return response.json();
       })
       .then(data => {
@@ -241,40 +246,30 @@
 <body>
   <div class="container">
     <form>
-      <!-- Updated question text -->
       <label for="rethinkingResponse">How could you rethink the video?</label>
       <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
       <label for="howDoYouFeel">How negative do you feel?</label>
       <div class="scale">
         <label>
-          <input type="radio" name="howDoYouFeel" value="1">
-          <span>1</span>
-          <small>Not negative at all</small>
+          <input type="radio" name="howDoYouFeel" value="1" required> 1
         </label>
         <label>
-          <input type="radio" name="howDoYouFeel" value="2">
-          <span>2</span>
+          <input type="radio" name="howDoYouFeel" value="2"> 2
         </label>
         <label>
-          <input type="radio" name="howDoYouFeel" value="3">
-          <span>3</span>
+          <input type="radio" name="howDoYouFeel" value="3"> 3
         </label>
         <label>
-          <input type="radio" name="howDoYouFeel" value="4">
-          <span>4</span>
+          <input type="radio" name="howDoYouFeel" value="4"> 4
         </label>
         <label>
-          <input type="radio" name="howDoYouFeel" value="5">
-          <span>5</span>
+          <input type="radio" name="howDoYouFeel" value="5"> 5
         </label>
         <label>
-          <input type="radio" name="howDoYouFeel" value="6">
-          <span>6</span>
+          <input type="radio" name="howDoYouFeel" value="6"> 6
         </label>
         <label>
-          <input type="radio" name="howDoYouFeel" value="7">
-          <span>7</span>
-          <small>Very negative</small>
+          <input type="radio" name="howDoYouFeel" value="7"> 7
         </label>
       </div>
       <button type="button" onclick="saveResponses()">Next</button>
