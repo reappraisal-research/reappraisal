@@ -97,9 +97,9 @@
       localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
     }
 
-    // Use a dedicated photoselection counter (zero-indexed).
+    // Initialize photoselection counter to 1 so the first visit is trial 1.
     if (!localStorage.getItem("photoTrialIndex")) {
-      localStorage.setItem("photoTrialIndex", "0");
+      localStorage.setItem("photoTrialIndex", "1");
     }
     let photoTrialIndex = parseInt(localStorage.getItem("photoTrialIndex"), 10);
 
@@ -122,11 +122,12 @@
 
     // Display the current photoselection trial.
     function displayPhotoTrial() {
-      if (photoTrialIndex >= conditionList.length) {
+      // Use photoTrialIndex - 1 to index into conditionList.
+      if (photoTrialIndex - 1 >= conditionList.length) {
         alert("All photoselection trials complete.");
         return;
       }
-      let currentCondition = conditionList[photoTrialIndex];
+      let currentCondition = conditionList[photoTrialIndex - 1];
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
       let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
       if (photoPool.length === 0) {
@@ -151,8 +152,8 @@
 
     // Compile CSV from photo responses.
     // The CSV has one header row and one data row.
-    // The first column is the participant ID (from localStorage) appearing only once,
-    // then for each trial two columns are added: one for the photo filename and one for the photo type.
+    // The first column is the participant ID (from localStorage/demographicsData),
+    // then for each trial two columns: one for the photo filename and one for the photo type.
     function compileCSV(responses) {
       const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
       const participantID = demographicsData.participantSID || "unknown";
@@ -179,10 +180,11 @@
     // Function to save trial data and upload CSV at trial 10 and the final trial.
     // The final trial is defined as either trial 20 (if available) or when no more conditions remain.
     function nextPhotoTrial() {
-      const participantID = localStorage.getItem("participantSID") || "unknown";
-      let currentTrial = photoTrialIndex + 1;
-      let currentCondition = JSON.parse(localStorage.getItem("conditionList"))[photoTrialIndex];
+      // Use the current photoTrialIndex as the current trial (already 1-indexed)
+      let currentTrial = photoTrialIndex;
+      let currentCondition = conditionList[photoTrialIndex - 1];
       let selectedPhoto = document.getElementById("photo").src.split("/").pop();
+      const participantID = localStorage.getItem("participantSID") || "unknown";
 
       let trialData = {
         participantID: participantID,
@@ -195,6 +197,7 @@
       photoResponses.push(trialData);
       localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
 
+      // Increment the trial counter.
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
