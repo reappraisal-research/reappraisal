@@ -55,179 +55,138 @@
 </head>
 <body>
   <div class="container" id="finalContainer">
-    <h1>Submitting Your Survey Data...</h1>
-    <p>Please wait while we compile your responses.</p>
+    <h1>Ready to Begin Training</h1>
+    <div class="instructions">
+      <strong>Now you will complete the main task.</strong><br><br>
+      <strong>In every trial you will:</strong>
+      <ol>
+        <li>View an image</li>
+        <li>Watch a video</li>
+        <li>Rate how you feel</li>
+        <li>Try to change how you think about the video</li>
+        <li>Answer questions about it</li>
+      </ol>
+      The images, videos, and questions will be different in every trial.<br>
+      Make sure not to refresh the page.<br>
+      Please follow the instructions carefully.
+    </div>
+    <button onclick="window.location.href='introimage.html'">See Example</button>
   </div>
   
   <script>
-    // Function to combine CSV sections from all survey pages.
-    function generateCombinedCSV() {
-      let csvContent = "";
+    // Function to combine all survey data into one CSV row (one header row and one data row)
+    function combineCSV() {
+      let headers = [];
+      let values = [];
       
-      // Demographics Data
+      // Retrieve demographics data and get participantSID.
       const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
-      if (Object.keys(demographicsData).length > 0) {
-        csvContent += "Demographics Data\n";
-        const demoHeaders = Object.keys(demographicsData);
-        csvContent += demoHeaders.join(",") + "\n";
-        csvContent += demoHeaders.map(key => `"${String(demographicsData[key] || "").replace(/"/g, '""')}"`).join(",") + "\n\n";
+      const participantSID = demographicsData.participantSID || "unknown";
+      
+      // Add participantSID only once.
+      headers.push("participantSID");
+      values.push(participantSID);
+      
+      // Helper function to append non-array properties.
+      function appendData(prefix, dataObj) {
+        for (let key in dataObj) {
+          if (key === "participantSID") continue; // Skip duplicate SID.
+          if (!Array.isArray(dataObj[key])) {
+            headers.push(`${prefix}_${key}`);
+            values.push(String(dataObj[key]).trim());
+          }
+        }
       }
       
-      // Pretest Survey Data
+      // Helper function to append responses.
+      function appendResponses(prefix, responses) {
+        responses.sort((a, b) => a.trial - b.trial);
+        for (let i = 0; i < responses.length; i++) {
+          headers.push(`${prefix}_Q${i + 1}`);
+          values.push(String(responses[i].answer).trim());
+        }
+      }
+      
+      // Append Pretest data.
       const pretestData = JSON.parse(localStorage.getItem("pretestSurveyData") || "{}");
       if (Object.keys(pretestData).length > 0) {
-        csvContent += "Pretest Survey Data\n";
-        const pretestHeaders = Object.keys(pretestData);
-        csvContent += pretestHeaders.join(",") + "\n";
-        csvContent += pretestHeaders.map(key => `"${String(pretestData[key] || "").replace(/"/g, '""')}"`).join(",") + "\n\n";
+        appendData("pretest", pretestData);
       }
       
-      // Personality Survey Data (Intermediate Page)
+      // Append Personality Survey Data.
       const personalityData = JSON.parse(localStorage.getItem("personalitySurveyData") || "{}");
       if (Object.keys(personalityData).length > 0) {
-        csvContent += "Personality Survey Data\n";
-        const persHeaders = ["participantSID", "surveyName", "timestamp"];
-        const numPers = personalityData.responses ? personalityData.responses.length : 0;
-        for (let i = 1; i <= numPers; i++) {
-          persHeaders.push(`Pers_Q${i}`);
+        appendData("personality", personalityData);
+        if (personalityData.responses && Array.isArray(personalityData.responses)) {
+          appendResponses("personality", personalityData.responses);
         }
-        csvContent += persHeaders.join(",") + "\n";
-        let rowPers = [
-          personalityData.participantSID || "",
-          personalityData.surveyName || "",
-          personalityData.timestamp || ""
-        ];
-        if (personalityData.responses) {
-          personalityData.responses.sort((a, b) => a.trial - b.trial);
-          personalityData.responses.forEach(resp => rowPers.push(resp.answer || ""));
-        }
-        csvContent += rowPers.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",") + "\n\n";
       }
       
-      // BFS1 Data
+      // Append BFS1 Data.
       const bfis1Data = JSON.parse(localStorage.getItem("bfis1Data") || "{}");
       if (Object.keys(bfis1Data).length > 0) {
-        csvContent += "BFS1 Data\n";
-        const bfs1Headers = ["participantSID", "surveyName", "timestamp"];
-        const numBFS1 = bfis1Data.responses ? bfis1Data.responses.length : 0;
-        for (let i = 1; i <= numBFS1; i++) {
-          bfs1Headers.push(`BFS1_Q${i}`);
+        appendData("bfis1", bfis1Data);
+        if (bfis1Data.responses && Array.isArray(bfis1Data.responses)) {
+          appendResponses("bfis1", bfis1Data.responses);
         }
-        csvContent += bfs1Headers.join(",") + "\n";
-        let rowBFS1 = [
-          bfis1Data.participantSID || "",
-          bfis1Data.surveyName || "",
-          bfis1Data.timestamp || ""
-        ];
-        if (bfis1Data.responses) {
-          bfis1Data.responses.sort((a, b) => a.trial - b.trial);
-          bfis1Data.responses.forEach(resp => rowBFS1.push(resp.answer || ""));
-        }
-        csvContent += rowBFS1.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",") + "\n\n";
       }
       
-      // BFS2 Data
+      // Append BFS2 Data.
       const bfis2Data = JSON.parse(localStorage.getItem("bfis2Data") || "{}");
       if (Object.keys(bfis2Data).length > 0) {
-        csvContent += "BFS2 Data\n";
-        const bfs2Headers = ["participantSID", "surveyName", "timestamp"];
-        const numBFS2 = bfis2Data.responses ? bfis2Data.responses.length : 0;
-        for (let i = 1; i <= numBFS2; i++) {
-          bfs2Headers.push(`BFS2_Q${i}`);
+        appendData("bfis2", bfis2Data);
+        if (bfis2Data.responses && Array.isArray(bfis2Data.responses)) {
+          appendResponses("bfis2", bfis2Data.responses);
         }
-        csvContent += bfs2Headers.join(",") + "\n";
-        let rowBFS2 = [
-          bfis2Data.participantSID || "",
-          bfis2Data.surveyName || "",
-          bfis2Data.timestamp || ""
-        ];
-        if (bfis2Data.responses) {
-          bfis2Data.responses.sort((a, b) => a.trial - b.trial);
-          bfis2Data.responses.forEach(resp => rowBFS2.push(resp.answer || ""));
-        }
-        csvContent += rowBFS2.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",") + "\n\n";
       }
       
-      // BFS3 Data
+      // Append BFS3 Data.
       const bfis3Data = JSON.parse(localStorage.getItem("bfis3Data") || "{}");
       if (Object.keys(bfis3Data).length > 0) {
-        csvContent += "BFS3 Data\n";
-        const bfs3Headers = ["participantSID", "surveyName", "timestamp"];
-        const numBFS3 = bfis3Data.responses ? bfis3Data.responses.length : 0;
-        for (let i = 1; i <= numBFS3; i++) {
-          bfs3Headers.push(`BFS3_Q${i}`);
+        appendData("bfis3", bfis3Data);
+        if (bfis3Data.responses && Array.isArray(bfis3Data.responses)) {
+          appendResponses("bfis3", bfis3Data.responses);
         }
-        csvContent += bfs3Headers.join(",") + "\n";
-        let rowBFS3 = [
-          bfis3Data.participantSID || "",
-          bfis3Data.surveyName || "",
-          bfis3Data.timestamp || ""
-        ];
-        if (bfis3Data.responses) {
-          bfis3Data.responses.sort((a, b) => a.trial - b.trial);
-          bfis3Data.responses.forEach(resp => rowBFS3.push(resp.answer || ""));
-        }
-        csvContent += rowBFS3.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",") + "\n\n";
       }
       
-      return csvContent;
+      // Create a single header row and one data row.
+      const csvHeader = headers.join(",") + "\n";
+      const csvRow = values.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
+      return csvHeader + csvRow;
     }
     
-    const combinedCSV = generateCombinedCSV();
-    console.log("Combined CSV:", combinedCSV);
+    const csvData = combineCSV();
+    console.log("Combined CSV:", csvData);
     
-    // Use participantSID from demographicsData for filename.
+    // Create a filename using participantSID.
     const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
     const participantSID = demographicsData.participantSID || "unknown";
     const filename = `combined_${participantSID}.csv`;
     
-    fetch('/.netlify/functions/upload-csv', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/csv',
-        'X-Filename': filename
-      },
-      body: combinedCSV
-    })
-    .then(response => {
-      if (!response.ok) throw new Error("Network response was not ok");
-      return response.json();
-    })
-    .then(data => {
-      console.log("Combined CSV successfully uploaded:", data);
-      // Clear stored data.
-      localStorage.removeItem("demographicsData");
-      localStorage.removeItem("pretestSurveyData");
-      localStorage.removeItem("personalitySurveyData");
-      localStorage.removeItem("bfis1Data");
-      localStorage.removeItem("bfis2Data");
-      localStorage.removeItem("bfis3Data");
-      
-      // Now update the page to display training instructions.
-      const container = document.getElementById("finalContainer");
-      container.innerHTML = `
-        <h1>Ready to Begin Training</h1>
-        <div class="instructions">
-          <strong>Now you will complete the main task.</strong><br><br>
-          <strong>In every trial you will:</strong>
-          <ol>
-            <li>View an image</li>
-            <li>Watch a video</li>
-            <li>Rate how you feel</li>
-            <li>Try to change how you think about the video</li>
-            <li>Answer questions about it</li>
-          </ol>
-          The images, videos, and questions will be different in every trial.<br>
-          Make sure not to refresh the page.<br>
-          Please follow the instructions carefully.
-        </div>
-        <button onclick="window.location.href='introimage.html'">See Example</button>
-      `;
-    })
-    .catch(error => {
-      console.error("Error uploading combined CSV:", error);
-      alert("Error submitting data. Please try again.");
-    });
+    // Prepare the URL with the filename as a query parameter.
+    const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
+    
+    // Use navigator.sendBeacon if available.
+    if (navigator.sendBeacon) {
+      // Create a Blob from the CSV data.
+      const blob = new Blob([csvData], { type: 'text/csv' });
+      navigator.sendBeacon(url, blob);
+    } else {
+      // Fallback: use fetch.
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/csv' },
+        body: csvData
+      }).catch(error => console.error("Fetch error:", error));
+    }
+    
+    // Clear stored data.
+    localStorage.removeItem("demographicsData");
+    localStorage.removeItem("pretestSurveyData");
+    localStorage.removeItem("personalitySurveyData");
+    localStorage.removeItem("bfis1Data");
+    localStorage.removeItem("bfis2Data");
+    localStorage.removeItem("bfis3Data");
   </script>
 </body>
 </html>
