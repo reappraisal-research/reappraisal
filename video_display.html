@@ -178,24 +178,46 @@
       });
     }
 
-    // Function to store trial data and, if final trial, compile and send one CSV.
-    function nextPage() {
-      if (!localStorage.getItem("videoTrialIndex")) {
-        localStorage.setItem("videoTrialIndex", "0");
+    // Build CSV from video responses.
+    // The CSV has one header row and one data row.
+    // The first column is the participant ID (from demographics) appearing only once,
+    // then each video trial is appended as "video_trial_1", "video_trial_2", etc.
+    function compileCSV(responses) {
+      // Get the participant ID from demographics.
+      const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
+      const participantID = demographicsData.participantSID || "unknown";
+      
+      // Start with participantID.
+      let headers = ["participantSID"];
+      let row = [participantID];
+      
+      // Append each video response.
+      responses.sort((a, b) => a.trialNumber - b.trialNumber);
+      for (let i = 0; i < responses.length; i++) {
+        headers.push("video_trial_" + (i + 1));
+        row.push(String(responses[i].videoShown).trim());
       }
+      
+      const csvHeader = headers.join(",") + "\n";
+      const csvRow = row.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
+      return csvHeader + csvRow;
+    }
+
+    // Function to store trial data and, at trial 10 and 20, compile & send CSV.
+    function nextPage() {
       let trialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
       let currentTrial = trialIndex + 1;
-      const participantSID = localStorage.getItem("participantSID") || "unknown";
+      const participantID = localStorage.getItem("participantSID") || "unknown";
       const videoShown = document.getElementById("video").src;
       
       // Build trial data.
       const trialData = {
-        participantSID: participantSID,
+        participantSID: participantID,
         trialNumber: currentTrial,
         videoShown: videoShown
       };
       
-      // Append to videoResponses array.
+      // Append trial data.
       videoResponses.push(trialData);
       localStorage.setItem("videoResponses", JSON.stringify(videoResponses));
       
@@ -203,47 +225,55 @@
       trialIndex++;
       localStorage.setItem("videoTrialIndex", trialIndex.toString());
       
-      // Define the final video trial number (e.g., 20).
+      // Define final trial number (e.g., 20).
       const finalVideoTrial = 20;
       
-      if (currentTrial >= finalVideoTrial) {
-        // Compile all video responses into one CSV.
+      if (currentTrial === 10 || currentTrial === finalVideoTrial) {
         let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
-        const headers = ["participantSID", "trialNumber", "videoShown"];
-        let csvContent = headers.join(",") + "\n";
-        responses.forEach(response => {
-          let row = headers.map(key => {
-            let value = response[key] || "";
-            return `"${String(value).replace(/"/g, '""')}"`;
-          }).join(",");
-          csvContent += row + "\n";
-        });
-        const filename = `videoDisplay_${participantSID}.csv`;
-        fetch('/.netlify/functions/upload-csv', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/csv',
-            'X-Filename': filename
-          },
-          body: csvContent
-        })
-        .then(response => {
-          if (!response.ok) throw new Error("Network response was not ok");
-          return response.json();
-        })
-        .then(data => {
-          console.log("Video CSV successfully uploaded:", data);
-          // Optionally clear videoResponses if desired:
-          localStorage.removeItem("videoResponses");
-          // Redirect to survey page after final video trial.
-          window.location.href = "survey.html";
-        })
-        .catch(error => {
-          console.error("Error uploading video CSV:", error);
-          alert("Error submitting data. Please try again.");
-        });
+        const csvContent = compileCSV(responses);
+        // File name: [participantID]_video.csv
+        const filename = `${participantID}_video.csv`;
+        const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
+        if (navigator.sendBeacon) {
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          navigator.sendBeacon(url, blob);
+          console.log(`CSV beacon sent at trial ${currentTrial}`);
+          if (currentTrial === finalVideoTrial) {
+            localStorage.removeItem("videoResponses");
+            window.location.href = "survey.html";
+          } else {
+            setTimeout(() => {
+              window.location.href = "survey.html";
+            }, 1000);
+          }
+        } else {
+          fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/csv' },
+            body: csvContent
+          })
+          .then(response => {
+            if (!response.ok) throw new Error("Network response was not ok");
+            return response.json();
+          })
+          .then(data => {
+            console.log(`CSV uploaded at trial ${currentTrial}:`, data);
+            if (currentTrial === finalVideoTrial) {
+              localStorage.removeItem("videoResponses");
+              window.location.href = "survey.html";
+            } else {
+              setTimeout(() => {
+                window.location.href = "survey.html";
+              }, 1000);
+            }
+          })
+          .catch(error => {
+            console.error("Error uploading CSV:", error);
+            alert("Error submitting data. Please try again.");
+          });
+        }
       } else {
-        // For non-final trials, simply redirect to the survey page.
+        // For non-upload trials, simply redirect.
         window.location.href = "survey.html";
       }
     }
