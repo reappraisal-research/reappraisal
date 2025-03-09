@@ -150,9 +150,9 @@
     }
 
     // Compile CSV from photo responses.
-    // The CSV will have one header row and one data row.
-    // The first column is the participant ID (from localStorage) appearing only once.
-    // Then for each trial two columns are added: one for the photo filename and one for the photo type.
+    // The CSV has one header row and one data row.
+    // The first column is the participant ID (from localStorage) appearing only once,
+    // then for each trial two columns are added: one for the photo filename and one for the photo type.
     function compileCSV(responses) {
       const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
       const participantID = demographicsData.participantSID || "unknown";
@@ -160,11 +160,11 @@
       let headers = ["participantID"];
       let row = [participantID];
       
+      // Sort responses by visitNumber.
       responses.sort((a, b) => a.visitNumber - b.visitNumber);
       for (let i = 0; i < responses.length; i++) {
         headers.push("photo_trial_" + (i + 1));
         headers.push("photo_type_trial_" + (i + 1));
-        // Extract only the filename from the full path.
         let fullPath = String(responses[i].photoShown).trim();
         let filename = fullPath.split("/").pop();
         row.push(filename);
@@ -176,13 +176,12 @@
       return csvHeader + csvRow;
     }
 
-    // Function to save trial data and upload CSV at trial 10 and at the final trial.
-    // The final trial is defined as either trial 20 or when no more photos remain.
+    // Function to save trial data and upload CSV at trial 10 and the final trial.
+    // The final trial is defined as either trial 20 (if available) or when no more conditions remain.
     function nextPhotoTrial() {
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let currentTrial = photoTrialIndex + 1;
       let currentCondition = JSON.parse(localStorage.getItem("conditionList"))[photoTrialIndex];
-      // Extract only the filename from the image src.
       let selectedPhoto = document.getElementById("photo").src.split("/").pop();
 
       let trialData = {
@@ -199,20 +198,21 @@
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
-      // Define final trial: either 20 or when there are no more conditions.
-      const finalPhotoTrial = (conditionList.length < 20) ? conditionList.length : 20;
+      // Determine final trial: if conditionList has at least 20, final is 20; otherwise use conditionList.length.
+      const storedConditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+      const finalPhotoTrial = storedConditionList.length >= 20 ? 20 : storedConditionList.length;
 
-      // Also, if the photo pool for the current condition is empty, consider it the final trial.
+      // Also, if the photo pool for the current condition is empty, treat it as final.
       let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
       let remainingPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
 
+      // If current trial is 10, final trial, or no photos remain in the current pool, upload CSV.
       if (currentTrial === 10 || currentTrial === finalPhotoTrial || remainingPool.length === 0) {
         let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
         const csvContent = compileCSV(responses);
         // File name: [participantID]_photoselection.csv
         const filename = `${participantID}_photoselection.csv`;
         const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
-        // Upload CSV using fetch (or use sendBeacon if desired)
         fetch(url, {
           method: 'POST',
           headers: {
@@ -227,6 +227,7 @@
         })
         .then(data => {
           console.log(`CSV uploaded at trial ${currentTrial}:`, data);
+          // If it's the final trial or no more photos remain, clear responses and redirect.
           if (currentTrial === finalPhotoTrial || remainingPool.length === 0) {
             localStorage.removeItem("photoResponses");
             window.location.href = "video_display.html";
