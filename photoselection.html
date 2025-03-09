@@ -151,9 +151,6 @@
     }
 
     // Compile CSV from photo responses.
-    // The CSV has one header row and one data row.
-    // The first column is the participant ID (from localStorage/demographicsData),
-    // then for each trial two columns: one for the photo filename and one for the photo type.
     function compileCSV(responses) {
       const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
       const participantID = demographicsData.participantSID || "unknown";
@@ -177,10 +174,9 @@
       return csvHeader + csvRow;
     }
 
-    // Function to save trial data and upload CSV at trial 10 and the final trial.
-    // The final trial is defined as either trial 20 (if available) or when no more conditions remain.
+    // Function to save trial data and update the display.
     function nextPhotoTrial() {
-      // Use the current photoTrialIndex as the current trial (already 1-indexed)
+      // Save the current trial using the one-indexed trial number.
       let currentTrial = photoTrialIndex;
       let currentCondition = conditionList[photoTrialIndex - 1];
       let selectedPhoto = document.getElementById("photo").src.split("/").pop();
@@ -201,7 +197,7 @@
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
-      // Determine final trial: if conditionList has at least 20, final is 20; otherwise use conditionList.length.
+      // Determine final trial: if conditionList has at least 20 trials, final is 20; otherwise, use conditionList.length.
       const storedConditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
       const finalPhotoTrial = storedConditionList.length >= 20 ? 20 : storedConditionList.length;
 
@@ -213,7 +209,6 @@
       if (currentTrial === 10 || currentTrial === finalPhotoTrial || remainingPool.length === 0) {
         let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
         const csvContent = compileCSV(responses);
-        // File name: [participantID]_photoselection.csv
         const filename = `${participantID}_photoselection.csv`;
         const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
         fetch(url, {
@@ -230,30 +225,24 @@
         })
         .then(data => {
           console.log(`CSV uploaded at trial ${currentTrial}:`, data);
-          // If it's the final trial or no more photos remain, clear responses and redirect.
-          if (currentTrial === finalPhotoTrial || remainingPool.length === 0) {
-            localStorage.removeItem("photoResponses");
-            window.location.href = "video_display.html";
-          } else {
-            setTimeout(() => {
-              window.location.href = "video_display.html";
-            }, 1000);
-          }
+          localStorage.removeItem("photoResponses");
+          window.location.href = "video_display.html";
         })
         .catch(error => {
           console.error("Error uploading CSV:", error);
           alert("Error submitting data. Please try again.");
         });
       } else {
-        setTimeout(() => {
-          window.location.href = "video_display.html";
-        }, 1000);
+        // Update the display for the next trial without reloading the page.
+        displayPhotoTrial();
+        // Schedule the next trial after a fixed delay.
+        setTimeout(nextPhotoTrial, 1000);
       }
     }
 
     window.addEventListener("load", function() {
       displayPhotoTrial();
-      // Auto-advance after a fixed delay (e.g., 1 second; adjust as needed).
+      // Start the auto-advance cycle without reloading the page.
       setTimeout(nextPhotoTrial, 1000);
     });
   </script>
