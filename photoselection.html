@@ -100,11 +100,12 @@
       localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
     }
 
-    // Initialize photo trial counter to 1 so the first visit is trial 1.
+    // Initialize photo trial counter to 1 so the first visit is counted as trial 1.
     if (!localStorage.getItem("photoTrialIndex")) {
       localStorage.setItem("photoTrialIndex", "1");
     }
     let photoTrialIndex = parseInt(localStorage.getItem("photoTrialIndex"), 10);
+    console.log("Initial photoTrialIndex:", photoTrialIndex);
 
     // Retrieve or generate a balanced condition list.
     let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
@@ -179,7 +180,7 @@
       return csvHeader + csvRow;
     }
 
-    // Helper: Upload CSV and execute callback if provided.
+    // Helper: Upload CSV and execute a callback if provided.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -218,6 +219,8 @@
     }
 
     // Save the current trial and then redirect to the video page.
+    // This function saves the trial data and, if the trial number is a multiple of 5,
+    // it compiles and uploads the CSV (overwriting any previous CSV) before redirecting.
     function nextPhotoTrial() {
       let currentTrial = photoTrialIndex;
       if (photoTrialIndex - 1 >= conditionList.length) {
@@ -237,28 +240,29 @@
       };
       photoResponses.push(trialData);
       localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
-      
+
       // Increment trial counter.
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
-      
-      // Determine final trial: if conditionList has at least 20 trials, final is 20; otherwise, use conditionList.length.
+
+      // Determine final trial number: if conditionList has at least 20, final is 20; otherwise, use conditionList.length.
       const finalPhotoTrial = conditionList.length >= 20 ? 20 : conditionList.length;
       
-      // If trial 10 is reached, upload CSV (but continue by redirecting to video page),
-      // else if trial 20 (or final trial) is reached, upload CSV (overwriting previous CSV) and redirect.
-      if (currentTrial === 10) {
-        uploadCSV(() => {
-          window.location.href = "video_display.html";
-        });
-      } else if (currentTrial === finalPhotoTrial || currentTrial === 20) {
-        uploadCSVAndRedirect();
+      // Save (upload CSV) every 5 trials.
+      if (currentTrial % 5 === 0) {
+        // If final trial or trial 20, redirect after upload; otherwise, also redirect.
+        if (currentTrial === finalPhotoTrial || currentTrial === 20) {
+          uploadCSVAndRedirect();
+        } else {
+          uploadCSV(() => {
+            window.location.href = "video_display.html";
+          });
+        }
       } else {
         window.location.href = "video_display.html";
       }
     }
 
-    // On window load, display one photo and set a timer to save the trial and redirect.
     window.addEventListener("load", function() {
       displayPhotoTrial();
       setTimeout(nextPhotoTrial, trialDelay);
