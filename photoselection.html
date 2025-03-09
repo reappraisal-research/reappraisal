@@ -162,8 +162,8 @@
 
     // Compile CSV from all saved photo responses.
     function compileCSV(responses) {
-      const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
-      const participantID = demographicsData.participantSID || "unknown";
+      // Use localStorage.getItem("participantSID") directly.
+      const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
       responses.sort((a, b) => a.visitNumber - b.visitNumber);
@@ -180,12 +180,11 @@
       return csvHeader + csvRow;
     }
 
-    // Helper: Upload CSV and execute a callback if provided.
+    // Helper: Upload CSV and execute callback if provided.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
       const csvContent = compileCSV(responses);
-      const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
-      const participantID = demographicsData.participantSID || "unknown";
+      const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = `${participantID}_photoselection.csv`;
       const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
       fetch(url, {
@@ -218,8 +217,8 @@
       });
     }
 
-    // Save the current trial and then redirect to the video page.
-    // This function saves the trial data and, if the trial number is a multiple of 5,
+    // Save the current trial and then redirect.
+    // This function saves trial data and, if the current trial is a multiple of 5,
     // it compiles and uploads the CSV (overwriting any previous CSV) before redirecting.
     function nextPhotoTrial() {
       let currentTrial = photoTrialIndex;
@@ -250,8 +249,7 @@
       
       // Save (upload CSV) every 5 trials.
       if (currentTrial % 5 === 0) {
-        // If final trial or trial 20, redirect after upload; otherwise, also redirect.
-        if (currentTrial === finalPhotoTrial || currentTrial === 20) {
+        if (currentTrial === finalPhotoTrial || currentTrial === 20 || videoOrder.length === 0) {
           uploadCSVAndRedirect();
         } else {
           uploadCSV(() => {
