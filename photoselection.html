@@ -132,10 +132,9 @@
       }
     }
 
-    // Display the current photo trial (one image).
+    // Display one photo for the current trial.
     function displayPhotoTrial() {
       if (photoTrialIndex - 1 >= conditionList.length) {
-        // No more conditions remain.
         return;
       }
       let currentCondition = conditionList[photoTrialIndex - 1];
@@ -145,13 +144,10 @@
         alert("No photos remain in the pool.");
         return;
       }
-      // Select a random photo from the pool.
       let randomIndex = Math.floor(Math.random() * photoPool.length);
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
-      // Get proper image path.
       let photoPath = getPhotoPath(selectedPhoto);
-      // Update labels.
       if (currentCondition.photoType === "ambiguous") {
         document.getElementById("photoLabel").innerText = "Complex";
         document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
@@ -159,7 +155,6 @@
         document.getElementById("photoLabel").innerText = "Simple";
         document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
-      // Set image source.
       document.getElementById("photo").src = photoPath;
       document.getElementById("photo").alt = "Selected Photo: " + photoPath;
     }
@@ -184,7 +179,7 @@
       return csvHeader + csvRow;
     }
 
-    // Helper: Upload CSV and, if a callback is provided, then execute it.
+    // Helper: Upload CSV and execute callback if provided.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -242,13 +237,16 @@
       };
       photoResponses.push(trialData);
       localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
+      
       // Increment trial counter.
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
       
       // Determine final trial: if conditionList has at least 20 trials, final is 20; otherwise, use conditionList.length.
       const finalPhotoTrial = conditionList.length >= 20 ? 20 : conditionList.length;
-      // If trial 10 is reached, upload CSV (but continue flow), else if trial 20 (or final trial) is reached, upload CSV and redirect.
+      
+      // If trial 10 is reached, upload CSV (but continue by redirecting to video page),
+      // else if trial 20 (or final trial) is reached, upload CSV (overwriting previous CSV) and redirect.
       if (currentTrial === 10) {
         uploadCSV(() => {
           window.location.href = "video_display.html";
