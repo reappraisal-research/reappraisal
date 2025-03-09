@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Photo Selection - TrainingCheck</title>
   <style>
     body {
@@ -149,14 +149,28 @@
       document.getElementById("photo").alt = `Selected Photo: ${selectedPhoto}`;
     }
 
-    // Function to save the current trial's data and redirect.
+    // Function to compile responses into CSV.
+    // This version creates a single header row and one data row.
+    function compileCSV(responses) {
+      const headers = ["participantSID", "visitNumber", "photoType", "photoShown", "timestamp"];
+      let csvContent = headers.join(",") + "\n";
+      responses.forEach(response => {
+        let row = headers.map(key => {
+          let value = response[key] || "";
+          return `"${String(value).replace(/"/g, '""')}"`;
+        }).join(",");
+        csvContent += row + "\n";
+      });
+      return csvContent;
+    }
+
+    // Function to save the current trial's data, and upload CSV at trial 10 and 20.
     function nextPhotoTrial() {
       const participantSID = localStorage.getItem("participantSID") || "unknown";
-      // Because the counter is zero-indexed, current trial number is photoTrialIndex + 1.
+      // Current trial is photoTrialIndex + 1.
       let currentTrial = photoTrialIndex + 1;
       let currentCondition = JSON.parse(localStorage.getItem("conditionList"))[photoTrialIndex];
-      let poolKey = (currentCondition.photoType === "ambiguous") ? "ambiguousPhotos" : "nonAmbiguousPhotos";
-      // Extract only the file name from the image src.
+      // Extract only the filename (using last part) from the image src.
       let selectedPhoto = document.getElementById("photo").src.split("/").pop();
 
       let trialData = {
@@ -167,28 +181,18 @@
         timestamp: new Date().toISOString()
       };
 
-      // Append trial data.
+      // Append this trial's data.
       photoResponses.push(trialData);
       localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
 
-      // Increment the photoselection counter.
+      // Increment trial counter.
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
-      // Define the final trial number (final trial is when currentTrial equals 20).
-      const finalPhotoTrial = 20;
-      if (currentTrial >= finalPhotoTrial) {
-        // Compile all responses into one CSV.
-        let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
-        const headers = ["participantSID", "visitNumber", "photoType", "photoShown", "timestamp"];
-        let csvContent = headers.join(",") + "\n";
-        responses.forEach(response => {
-          let row = headers.map(key => {
-            let value = response[key] || "";
-            return `"${String(value).replace(/"/g, '""')}"`;
-          }).join(",");
-          csvContent += row + "\n";
-        });
+      // Check if we need to upload CSV.
+      // We'll upload partial CSV at trial 10, and final CSV (overwriting previous) at trial 20.
+      if (currentTrial === 10 || currentTrial === 20) {
+        let csvContent = compileCSV(photoResponses);
         const filename = `photoSelection_${participantSID}.csv`;
         fetch('/.netlify/functions/upload-csv', {
           method: 'POST',
@@ -203,17 +207,24 @@
           return response.json();
         })
         .then(data => {
-          console.log("Photo Selection CSV successfully uploaded:", data);
-          localStorage.removeItem("photoResponses");
-          // After final trial, redirect to video display.
-          window.location.href = "video_display.html";
+          console.log(`CSV uploaded at trial ${currentTrial}:`, data);
+          // At trial 20, clear responses and redirect to video display.
+          if (currentTrial === 20) {
+            localStorage.removeItem("photoResponses");
+            window.location.href = "video_display.html";
+          } else {
+            // At trial 10, continue to video display without clearing responses.
+            setTimeout(() => {
+              window.location.href = "video_display.html";
+            }, 1000);
+          }
         })
         .catch(error => {
           console.error("Error uploading CSV:", error);
           alert("Error submitting data. Please try again.");
         });
       } else {
-        // For non-final trials, auto-redirect to video display after a delay.
+        // For trials other than 10 and 20, simply redirect after a short delay.
         setTimeout(() => {
           window.location.href = "video_display.html";
         }, 1000);
@@ -222,7 +233,7 @@
 
     window.addEventListener("load", function() {
       displayPhotoTrial();
-      // Auto-advance after a fixed delay (e.g., 10 seconds).
+      // Auto-advance after a fixed delay (e.g., 1 second for testing; adjust as needed).
       setTimeout(nextPhotoTrial, 1000);
     });
   </script>
