@@ -149,52 +149,62 @@
       document.getElementById("photo").alt = `Selected Photo: ${selectedPhoto}`;
     }
 
-    // Function to compile responses into CSV.
-    // This version creates a single header row and one data row.
+    // Compile CSV from photo responses.
+    // The CSV has one header row and one data row.
+    // The first column is the participant ID (from localStorage) appearing only once,
+    // then each trial is appended as "photo_trial_1", "photo_trial_2", etc.
+    // Only the filename (e.g. "0015.jpg") is included for the photoShown field.
     function compileCSV(responses) {
-      const headers = ["participantSID", "visitNumber", "photoType", "photoShown", "timestamp"];
-      let csvContent = headers.join(",") + "\n";
-      responses.forEach(response => {
-        let row = headers.map(key => {
-          let value = response[key] || "";
-          return `"${String(value).replace(/"/g, '""')}"`;
-        }).join(",");
-        csvContent += row + "\n";
-      });
-      return csvContent;
+      const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
+      const participantID = demographicsData.participantSID || "unknown";
+      
+      let headers = ["participantID"];
+      let row = [participantID];
+      
+      responses.sort((a, b) => a.visitNumber - b.visitNumber);
+      for (let i = 0; i < responses.length; i++) {
+        headers.push("photo_trial_" + (i + 1));
+        // Extract just the filename from the full path.
+        let fullPath = String(responses[i].photoShown).trim();
+        let filename = fullPath.split("/").pop();
+        row.push(filename);
+      }
+      
+      const csvHeader = headers.join(",") + "\n";
+      const csvRow = row.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
+      return csvHeader + csvRow;
     }
 
-    // Function to save the current trial's data, and upload CSV at trial 10 and 20.
+    // Function to save the current trial's data, and upload CSV at trial 10 and trial 20.
     function nextPhotoTrial() {
-      const participantSID = localStorage.getItem("participantSID") || "unknown";
-      // Current trial is photoTrialIndex + 1.
+      const participantID = localStorage.getItem("participantSID") || "unknown";
       let currentTrial = photoTrialIndex + 1;
       let currentCondition = JSON.parse(localStorage.getItem("conditionList"))[photoTrialIndex];
-      // Extract only the filename (using last part) from the image src.
+      // Extract only the filename from the image src.
       let selectedPhoto = document.getElementById("photo").src.split("/").pop();
 
       let trialData = {
-        participantSID: participantSID,
+        participantID: participantID,
         visitNumber: currentTrial,
         photoType: currentCondition.photoType,
         photoShown: selectedPhoto,
         timestamp: new Date().toISOString()
       };
 
-      // Append this trial's data.
       photoResponses.push(trialData);
       localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
 
-      // Increment trial counter.
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
-      // Check if we need to upload CSV.
-      // We'll upload partial CSV at trial 10, and final CSV (overwriting previous) at trial 20.
+      // Upload CSV at trial 10 and trial 20.
       if (currentTrial === 10 || currentTrial === 20) {
-        let csvContent = compileCSV(photoResponses);
-        const filename = `photoSelection_${participantSID}.csv`;
-        fetch('/.netlify/functions/upload-csv', {
+        let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
+        const csvContent = compileCSV(responses);
+        // File name: [participantID]_photoselection.csv
+        const filename = `${participantID}_photoselection.csv`;
+        const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
+        fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'text/csv',
@@ -208,12 +218,10 @@
         })
         .then(data => {
           console.log(`CSV uploaded at trial ${currentTrial}:`, data);
-          // At trial 20, clear responses and redirect to video display.
           if (currentTrial === 20) {
             localStorage.removeItem("photoResponses");
             window.location.href = "video_display.html";
           } else {
-            // At trial 10, continue to video display without clearing responses.
             setTimeout(() => {
               window.location.href = "video_display.html";
             }, 1000);
@@ -224,7 +232,6 @@
           alert("Error submitting data. Please try again.");
         });
       } else {
-        // For trials other than 10 and 20, simply redirect after a short delay.
         setTimeout(() => {
           window.location.href = "video_display.html";
         }, 1000);
