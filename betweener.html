@@ -73,6 +73,15 @@
         csvContent += demoHeaders.map(key => `"${String(demographicsData[key] || "").replace(/"/g, '""')}"`).join(",") + "\n\n";
       }
       
+      // Pretest Survey Data
+      const pretestData = JSON.parse(localStorage.getItem("pretestSurveyData") || "{}");
+      if (Object.keys(pretestData).length > 0) {
+        csvContent += "Pretest Survey Data\n";
+        const pretestHeaders = Object.keys(pretestData);
+        csvContent += pretestHeaders.join(",") + "\n";
+        csvContent += pretestHeaders.map(key => `"${String(pretestData[key] || "").replace(/"/g, '""')}"`).join(",") + "\n\n";
+      }
+      
       // Personality Survey Data (Intermediate Page)
       const personalityData = JSON.parse(localStorage.getItem("personalitySurveyData") || "{}");
       if (Object.keys(personalityData).length > 0) {
@@ -188,6 +197,7 @@
       console.log("Combined CSV successfully uploaded:", data);
       // Clear stored data.
       localStorage.removeItem("demographicsData");
+      localStorage.removeItem("pretestSurveyData");
       localStorage.removeItem("personalitySurveyData");
       localStorage.removeItem("bfis1Data");
       localStorage.removeItem("bfis2Data");
