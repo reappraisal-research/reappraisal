@@ -2,59 +2,140 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Personality Survey - BFS2</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
-      padding: 20px;
+      line-height: 1.6;
       background-color: #f9f9f9;
     }
     .container {
-      max-width: 800px;
+      max-width: 600px;
       margin: 0 auto;
       background: #fff;
       padding: 20px 30px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    p {
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .scale-visual {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .scale-visual ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin: 0;
+      border-bottom: 1px solid #ccc;
+    }
+    .scale-visual ul li {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+    .scale-visual ul li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #ccc;
     }
     .question {
       margin-bottom: 20px;
     }
     .question label {
+      font-weight: bold;
       display: block;
       margin-bottom: 10px;
-      font-weight: bold;
     }
     .scale {
       display: flex;
-      justify-content: space-evenly;
+      justify-content: space-between;
     }
     .scale label {
       flex: 1;
       text-align: center;
+      font-weight: normal;
+    }
+    .scale input {
+      margin-right: 5px;
     }
     button {
+      display: block;
+      width: 100%;
       background-color: #007BFF;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 10px;
       font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
       margin-top: 20px;
-      display: block;
-      width: 100%;
     }
     button:hover {
       background-color: #0056b3;
     }
   </style>
+  <script>
+    window.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("personalitySurveyForm2").addEventListener("submit", function(e) {
+        e.preventDefault();
+        if (!this.checkValidity()) {
+          this.reportValidity();
+          return;
+        }
+        // Collect responses for questions q1 to q10.
+        const formData = new FormData(this);
+        const responses = [];
+        for (let i = 1; i <= 10; i++) {
+          responses.push({ trial: i, answer: formData.get("q" + i) });
+        }
+        const participantSID = localStorage.getItem("participantSID") || "unknown";
+        const experimentData = {
+          participantSID: participantSID,
+          surveyName: "BFS2",
+          timestamp: new Date().toISOString(),
+          responses: responses
+        };
+        // Save BFS2 data for later CSV combination.
+        localStorage.setItem("bfis2Data", JSON.stringify(experimentData));
+        // Redirect to BFS3.
+        window.location.href = "bfis3.html";
+      });
+    });
+  </script>
 </head>
 <body>
   <div class="container">
+    <h1>Please rate how much each statement applies to you on a scale of 1 to 5</h1>
+    <p>Each statement begins with "I am a person who..."</p>
+    <div class="scale-visual">
+      <ul>
+        <li>1<br><small>(Disagree Strongly)</small></li>
+        <li>2<br><small>(Disagree a Little)</small></li>
+        <li>3<br><small>(Neutral; No Opinion)</small></li>
+        <li>4<br><small>(Agree a Little)</small></li>
+        <li>5<br><small>(Agree Strongly)</small></li>
+      </ul>
+    </div>
     <form id="personalitySurveyForm2">
+      <!-- BFS2 Questions -->
       <div class="question">
         <label for="q1">1. Is full of energy.</label>
         <div class="scale">
@@ -158,27 +239,5 @@
       <button type="submit">Submit</button>
     </form>
   </div>
-  
-  <script>
-    document.getElementById("personalitySurveyForm2").addEventListener("submit", function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData(this);
-      const responses = [];
-      for (let i = 1; i <= 10; i++) {
-        responses.push({ trial: i, answer: formData.get("q" + i) });
-      }
-      const participantSID = localStorage.getItem("participantSID") || "unknown";
-      const experimentData = {
-        participantSID: participantSID,
-        surveyName: "BFS2",
-        timestamp: new Date().toISOString(),
-        responses: responses
-      };
-      localStorage.setItem("bfis2Data", JSON.stringify(experimentData));
-      
-      window.location.href = "bfis3.html";
-    });
-  </script>
 </body>
 </html>
