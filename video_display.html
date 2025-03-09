@@ -164,6 +164,7 @@
     // Retrieve stored video responses or initialize.
     let videoResponses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
 
+    // Selects the next video to be displayed.
     function selectVideo() {
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
@@ -179,9 +180,9 @@
     }
 
     // Compile CSV from video responses.
-    // The CSV has one header row and one data row.
-    // The first column is the participant ID (from localStorage) appearing only once.
-    // Then for each video trial, two columns are added: one for the video filename and one for the rating.
+    // CSV structure:
+    // - First column: participantID (from demographicsData, stored once)
+    // - Then, for each trial, two columns: one for the video filename and one for the video rating.
     function compileCSV(responses) {
       const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
       const participantID = demographicsData.participantSID || "unknown";
@@ -197,7 +198,7 @@
         let fullPath = String(responses[i].videoShown).trim();
         let filename = fullPath.split("/").pop();
         row.push(filename);
-        row.push(responses[i].videoRating || ""); // Include the rating.
+        row.push(responses[i].videoRating || "");
       }
       
       const csvHeader = headers.join(",") + "\n";
@@ -205,14 +206,15 @@
       return csvHeader + csvRow;
     }
 
-    // Function to store trial data and, at trial 10 and trial 20 (or when no videos remain), compile & send CSV.
+    // Store trial data and send CSV at trial 10 and again at trial 20 (or if no videos remain).
     function nextPage() {
       let trialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
       let currentTrial = trialIndex + 1;
+      // Retrieve participantID (ensure that participantSID is set in localStorage/demographicsData)
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const videoShown = document.getElementById("video").src;
       
-      // Retrieve the video rating.
+      // Retrieve the video rating from the selected radio button.
       const radioOptions = document.getElementsByName("videoScale");
       let videoRating = "";
       for (let i = 0; i < radioOptions.length; i++) {
@@ -238,20 +240,21 @@
       trialIndex++;
       localStorage.setItem("videoTrialIndex", trialIndex.toString());
       
-      // Define final trial number (here, trial 20).
+      // Set the final video trial (20) for overwriting.
       const finalVideoTrial = 20;
       
-      // If we've reached trial 10, trial 20, or there are no more videos to show, compile and upload CSV.
+      // At trial 10, trial 20, or if there are no more videos, compile and send the CSV.
       if (currentTrial === 10 || currentTrial === finalVideoTrial || videoOrder.length === 0) {
         let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
         const csvContent = compileCSV(responses);
-        // File name: [participantID]_video.csv
+        // File name will be: [participantID]_video.csv
         const filename = `${participantID}_video.csv`;
         const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
         if (navigator.sendBeacon) {
           const blob = new Blob([csvContent], { type: 'text/csv' });
           navigator.sendBeacon(url, blob);
           console.log(`CSV beacon sent at trial ${currentTrial}`);
+          // If final trial or no more videos, clear the responses and go to survey page.
           if (currentTrial === finalVideoTrial || videoOrder.length === 0) {
             localStorage.removeItem("videoResponses");
             window.location.href = "survey.html";
@@ -287,6 +290,7 @@
           });
         }
       } else {
+        // For trials that are not a saving point, simply continue the flow.
         window.location.href = "survey.html";
       }
     }
