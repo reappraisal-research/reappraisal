@@ -181,11 +181,10 @@
 
     // Compile CSV from video responses.
     // CSV structure:
-    // - First column: participantID (from demographicsData, stored once)
+    // - First column: participantID (directly from localStorage using "participantSID")
     // - Then, for each trial, two columns: one for the video filename and one for the video rating.
     function compileCSV(responses) {
-      const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
-      const participantID = demographicsData.participantSID || "unknown";
+      const participantID = localStorage.getItem("participantSID") || "unknown";
       
       let headers = ["participantID"];
       let row = [participantID];
@@ -210,7 +209,7 @@
     function nextPage() {
       let trialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
       let currentTrial = trialIndex + 1;
-      // Retrieve participantID (ensure that participantSID is set in localStorage/demographicsData)
+      // Retrieve participantID directly from localStorage.
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const videoShown = document.getElementById("video").src;
       
