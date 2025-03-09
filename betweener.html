@@ -74,30 +74,36 @@
   </div>
   
   <script>
-    // Combines demographics data along with all other survey data into one CSV row.
+    // Combines demographics data and all survey data into one CSV row.
     function combineCSV() {
       let headers = [];
       let values = [];
       
-      // Append demographics data (from the demographics page)
+      // Get demographics data.
       const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
-      if (Object.keys(demographicsData).length > 0) {
-        for (let key in demographicsData) {
-          headers.push("demographics_" + key);
-          values.push(String(demographicsData[key]).trim());
-        }
+      const studentID = demographicsData.participantSID || "unknown";
+      
+      // Start with the student ID (only once).
+      headers.push("participantSID");
+      values.push(studentID);
+      
+      // Append remaining demographics data without any prefix.
+      for (let key in demographicsData) {
+        if (key === "participantSID") continue;
+        headers.push(key);
+        values.push(String(demographicsData[key]).trim());
       }
       
-      // Helper function: append non-array properties from a given survey data object
+      // Helper function to append non-array properties from a given survey data object.
       function appendData(prefix, dataObj) {
         for (let key in dataObj) {
-          if (key === "responses") continue; // We'll process responses separately.
+          if (key === "participantSID" || key === "responses") continue;
           headers.push(prefix + "_" + key);
           values.push(String(dataObj[key]).trim());
         }
       }
       
-      // Helper function: append responses array (sorted by trial).
+      // Helper function to append responses array (sorted by trial).
       function appendResponses(prefix, responses) {
         responses.sort((a, b) => a.trial - b.trial);
         for (let i = 0; i < responses.length; i++) {
@@ -160,20 +166,19 @@
     const csvData = combineCSV();
     console.log("Combined CSV:", csvData);
     
-    // Create a filename using the participantSID from demographics data.
-    const demographicsDataParsed = JSON.parse(localStorage.getItem("demographicsData") || "{}");
-    const participantSID = demographicsDataParsed.participantSID || "unknown";
-    const filename = `combined_${participantSID}.csv`;
+    // Create a filename using the student ID.
+    const demographicsParsed = JSON.parse(localStorage.getItem("demographicsData") || "{}");
+    const participantID = demographicsParsed.participantSID || "unknown";
+    const filename = `${participantID}_presurvey.csv`;
     
     // Prepare the URL with the filename as a query parameter.
     const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
     
-    // Use navigator.sendBeacon (for reliability when users navigate away quickly).
+    // Use navigator.sendBeacon (with fetch fallback) to send CSV data.
     if (navigator.sendBeacon) {
       const blob = new Blob([csvData], { type: 'text/csv' });
       navigator.sendBeacon(url, blob);
     } else {
-      // Fallback using fetch.
       fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'text/csv' },
