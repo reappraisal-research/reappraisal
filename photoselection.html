@@ -92,4 +92,185 @@
       "Stimulireal/ur.profile.profile.jpg": "Front view"
     };
 
-    // Save photo pools i
+    // Save photo pools in localStorage if not already set.
+    if (!localStorage.getItem("ambiguousPhotos")) {
+      localStorage.setItem("ambiguousPhotos", JSON.stringify(ambiguousPhotos));
+    }
+    if (!localStorage.getItem("nonAmbiguousPhotos")) {
+      localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
+    }
+
+    // Initialize photo trial counter to 1 (first visit is trial 1).
+    if (!localStorage.getItem("photoTrialIndex")) {
+      localStorage.setItem("photoTrialIndex", "1");
+    }
+    let photoTrialIndex = parseInt(localStorage.getItem("photoTrialIndex"), 10);
+    console.log("Initial photoTrialIndex:", photoTrialIndex);
+
+    // Retrieve or generate a balanced condition list.
+    let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+    if (!conditionList || conditionList.length === 0) {
+      let conditions = [];
+      for (let i = 0; i < 5; i++) {
+        conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
+        conditions.push({ photoType: "ambiguous", rethinkingLabel: "Goal rethinking" });
+        conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
+        conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Goal rethinking" });
+      }
+      conditionList = shuffleArray(conditions);
+      localStorage.setItem("conditionList", JSON.stringify(conditionList));
+    }
+
+    // Retrieve or initialize an array for photo selection responses.
+    let photoResponses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
+
+    // Helper: Ensure the image path is correct.
+    function getPhotoPath(photoUrl) {
+      if (photoUrl.startsWith("/") || photoUrl.startsWith("./")) {
+        return photoUrl;
+      } else {
+        return "./" + photoUrl;
+      }
+    }
+
+    // Display one photo for the current trial.
+    function displayPhotoTrial() {
+      if (photoTrialIndex - 1 >= conditionList.length) {
+        return;
+      }
+      let currentCondition = conditionList[photoTrialIndex - 1];
+      let poolKey = currentCondition.photoType === "ambiguous" ? "ambiguousPhotos" : "nonAmbiguousPhotos";
+      let photoPool = JSON.parse(localStorage.getItem(poolKey) || "[]");
+      if (photoPool.length === 0) {
+        alert("No photos remain in the pool.");
+        return;
+      }
+      let randomIndex = Math.floor(Math.random() * photoPool.length);
+      let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
+      localStorage.setItem(poolKey, JSON.stringify(photoPool));
+      let photoPath = getPhotoPath(selectedPhoto);
+      if (currentCondition.photoType === "ambiguous") {
+        document.getElementById("photoLabel").innerText = "Complex";
+        document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
+      } else {
+        document.getElementById("photoLabel").innerText = "Simple";
+        document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
+      }
+      document.getElementById("photo").src = photoPath;
+      document.getElementById("photo").alt = "Selected Photo: " + photoPath;
+    }
+
+    // Compile CSV from all saved photo responses.
+    function compileCSV(responses) {
+      // Pull the student ID directly from localStorage.
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+      let headers = ["participantID"];
+      let row = [participantID];
+      responses.sort((a, b) => a.visitNumber - b.visitNumber);
+      for (let i = 0; i < responses.length; i++) {
+        headers.push("photo_trial_" + (i + 1));
+        headers.push("photo_type_trial_" + (i + 1));
+        let fullPath = String(responses[i].photoShown).trim();
+        let filename = fullPath.split("/").pop();
+        row.push(filename);
+        row.push(responses[i].photoType || "");
+      }
+      const csvHeader = headers.join(",") + "\n";
+      const csvRow = row.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
+      return csvHeader + csvRow;
+    }
+
+    // Helper: Upload CSV and execute a callback if provided.
+    function uploadCSV(callback) {
+      let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
+      const csvContent = compileCSV(responses);
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+      const filename = `${participantID}_photoselection.csv`;
+      const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV uploaded:", data);
+        if (callback) callback();
+      })
+      .catch(error => {
+        console.error("Error uploading CSV:", error);
+        alert("Error submitting data. Please try again.");
+      });
+    }
+
+    // Helper: Upload CSV then redirect.
+    function uploadCSVAndRedirect() {
+      uploadCSV(() => {
+        localStorage.removeItem("photoResponses");
+        window.location.href = "video_display.html";
+      });
+    }
+
+    // Save the current trial and then redirect.
+    // Every 5th trial (or if no more conditions remain), the CSV is compiled and uploaded.
+    function nextPhotoTrial() {
+      let currentTrial = photoTrialIndex;
+      if (photoTrialIndex - 1 >= conditionList.length) {
+        uploadCSVAndRedirect();
+        return;
+      }
+      let currentCondition = conditionList[photoTrialIndex - 1];
+      let currentPhotoSrc = document.getElementById("photo").src;
+      let selectedPhoto = currentPhotoSrc.split("/").pop();
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+      let trialData = {
+        participantID: participantID,
+        visitNumber: currentTrial,
+        photoType: currentCondition.photoType,
+        photoShown: selectedPhoto,
+        timestamp: new Date().toISOString()
+      };
+      photoResponses.push(trialData);
+      localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
+
+      // Increment the trial counter.
+      photoTrialIndex++;
+      localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
+
+      // Determine final trial: if there are at least 20 conditions, final is 20; otherwise, it's the length of conditionList.
+      const finalPhotoTrial = conditionList.length >= 20 ? 20 : conditionList.length;
+      
+      // Every 5th trial (or if no more conditions remain) upload CSV and redirect.
+      if (currentTrial % 5 === 0 || photoTrialIndex - 1 >= conditionList.length) {
+        if (currentTrial === finalPhotoTrial || currentTrial === 20) {
+          uploadCSVAndRedirect();
+        } else {
+          uploadCSV(() => {
+            window.location.href = "video_display.html";
+          });
+        }
+      } else {
+        window.location.href = "video_display.html";
+      }
+    }
+
+    window.addEventListener("load", function() {
+      displayPhotoTrial();
+      setTimeout(nextPhotoTrial, trialDelay);
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div id="photoLabel"></div>
+    <img id="photo" src="" alt="Selected Photo">
+    <div id="ambiguousLabel"></div>
+  </div>
+</body>
+</html>
