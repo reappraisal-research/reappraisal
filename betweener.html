@@ -70,6 +70,7 @@
       Make sure not to refresh the page.<br>
       Please follow the instructions carefully.
     </div>
+    <!-- The button now triggers doubleUploadCSV which uploads the CSV (twice) before navigating -->
     <button id="uploadButton">See Example</button>
   </div>
   
@@ -94,7 +95,7 @@
         values.push(String(demographicsData[key]).trim());
       }
       
-      // Helper function to append non-array properties.
+      // Helper: Append non-array properties.
       function appendData(prefix, dataObj) {
         for (let key in dataObj) {
           if (key === "participantSID" || key === "responses") continue;
@@ -103,7 +104,7 @@
         }
       }
       
-      // Helper function to append responses array (sorted by trial).
+      // Helper: Append responses array (sorted by trial).
       function appendResponses(prefix, responses) {
         responses.sort((a, b) => a.trial - b.trial);
         for (let i = 0; i < responses.length; i++) {
@@ -197,13 +198,13 @@
       });
     }
     
-    // Perform double upload: first immediately, then again after 500ms.
+    // Helper: Double upload the CSV (with a 500ms gap) then navigate.
     function doubleUploadCSV() {
       uploadCSV(() => {
         console.log("First upload complete.");
         setTimeout(() => {
           uploadCSV(() => {
-            console.log("Second upload complete. Clearing data.");
+            console.log("Second upload complete. Clearing data and redirecting.");
             // Clear all stored survey data.
             localStorage.removeItem("demographicsData");
             localStorage.removeItem("pretestSurveyData");
@@ -211,12 +212,14 @@
             localStorage.removeItem("bfis1Data");
             localStorage.removeItem("bfis2Data");
             localStorage.removeItem("bfis3Data");
+            // Navigate to the next page.
+            window.location.href = "introimage.html";
           });
         }, 500);
       });
     }
     
-    // When the button is clicked, perform the double upload.
+    // Attach the double upload function to the button.
     document.getElementById("uploadButton").addEventListener("click", doubleUploadCSV);
   </script>
 </body>
