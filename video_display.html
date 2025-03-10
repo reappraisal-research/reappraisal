@@ -96,6 +96,15 @@
     }
   </style>
   <script>
+    // Debug: Log the stored Student ID.
+    const storedID = localStorage.getItem("participantSID");
+    console.log("Stored participantSID:", storedID);
+    // Validate that the participantSID is exactly 10 digits.
+    if (!/^\d{10}$/.test(storedID)) {
+      console.error("Error: participantSID is not a valid 10-digit Student ID.");
+      // Optionally, you can redirect or alert the user.
+    }
+
     // Play the video until 3 seconds have elapsed.
     function playVideoUntil3Seconds(onComplete) {
       let startTime = Date.now();
@@ -162,7 +171,7 @@
       localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
     }
 
-    // Retrieve stored video responses or initialize.
+    // Retrieve stored video responses.
     let videoResponses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
 
     // Select the next video to be displayed.
@@ -182,6 +191,7 @@
 
     // Compile CSV from video responses.
     function compileCSV(responses) {
+      // Use the student ID directly.
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
@@ -201,7 +211,7 @@
       return csvHeader + csvRow;
     }
 
-    // Helper: Upload CSV and execute callback if provided.
+    // Helper: Upload CSV and execute a callback if provided.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -211,7 +221,7 @@
       if (navigator.sendBeacon) {
         const blob = new Blob([csvContent], { type: 'text/csv' });
         navigator.sendBeacon(url, blob);
-        console.log("CSV beacon sent");
+        console.log("CSV beacon sent:", filename);
         if (callback) callback();
       } else {
         fetch(url, {
@@ -243,17 +253,11 @@
     }
 
     // Save the current trial and then redirect.
-    // This version saves each trial's data and, if the current trial is a multiple of 5 or if there are no more videos,
-    // it compiles and uploads the CSV (overwriting previous CSV), then redirects.
+    // This saves trial data and uploads the CSV every 5 trials (rewriting previous CSV), then redirects.
     function nextPage() {
-      // Get current trial number (first visit is trial 1).
       let currentTrial = videoTrialIndex;
-      
-      // Retrieve participantID and video shown.
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const videoShown = document.getElementById("video").src;
-      
-      // Retrieve the video rating.
       const radioOptions = document.getElementsByName("videoScale");
       let videoRating = "";
       for (let i = 0; i < radioOptions.length; i++) {
@@ -262,29 +266,24 @@
           break;
         }
       }
-      
-      // Build trial data.
       const trialData = {
         participantID: participantID,
         trialNumber: currentTrial,
         videoShown: videoShown,
         videoRating: videoRating
       };
-      
-      // Save trial data.
       videoResponses.push(trialData);
       localStorage.setItem("videoResponses", JSON.stringify(videoResponses));
-      
+
       // Increment trial counter.
       videoTrialIndex++;
       localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
-      
-      // Final video trial is set to 20.
+
+      // Set final video trial to 20.
       const finalVideoTrial = 20;
-      
-      // If the current trial is a multiple of 5 or if no more videos remain, compile/upload CSV.
+
+      // If the current trial is a multiple of 5 or if there are no more videos, upload CSV.
       if (currentTrial % 5 === 0 || videoOrder.length === 0) {
-        // If it's the final trial (trial 20 or no videos remain), remove responses after upload and redirect to survey.
         if (currentTrial === finalVideoTrial || videoOrder.length === 0) {
           uploadCSVAndRedirect();
         } else {
@@ -293,7 +292,6 @@
           });
         }
       } else {
-        // Otherwise, simply redirect to survey.
         window.location.href = "survey.html";
       }
     }
