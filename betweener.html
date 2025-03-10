@@ -70,11 +70,11 @@
       Make sure not to refresh the page.<br>
       Please follow the instructions carefully.
     </div>
-    <button onclick="window.location.href='introimage.html'">See Example</button>
+    <button id="uploadButton">See Example</button>
   </div>
   
   <script>
-    // Combines demographics data and all survey data into one CSV row.
+    // --- Combine CSV Data from Various Stored Data ---
     function combineCSV() {
       let headers = [];
       let values = [];
@@ -83,18 +83,18 @@
       const demographicsData = JSON.parse(localStorage.getItem("demographicsData") || "{}");
       const studentID = demographicsData.participantSID || "unknown";
       
-      // Start with the student ID (only once).
+      // Start with the student ID.
       headers.push("participantSID");
       values.push(studentID);
       
-      // Append remaining demographics data without any prefix.
+      // Append remaining demographics data.
       for (let key in demographicsData) {
         if (key === "participantSID") continue;
         headers.push(key);
         values.push(String(demographicsData[key]).trim());
       }
       
-      // Helper function to append non-array properties from a given survey data object.
+      // Helper function to append non-array properties.
       function appendData(prefix, dataObj) {
         for (let key in dataObj) {
           if (key === "participantSID" || key === "responses") continue;
@@ -157,7 +157,6 @@
         }
       }
       
-      // Create one header row and one data row.
       const csvHeader = headers.join(",") + "\n";
       const csvRow = values.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
       return csvHeader + csvRow;
@@ -174,25 +173,51 @@
     // Prepare the URL with the filename as a query parameter.
     const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
     
-    // Use navigator.sendBeacon (with fetch fallback) to send CSV data.
-    if (navigator.sendBeacon) {
-      const blob = new Blob([csvData], { type: 'text/csv' });
-      navigator.sendBeacon(url, blob);
-    } else {
+    // Helper: Upload CSV using fetch.
+    function uploadCSV(callback) {
       fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/csv' },
+        headers: {
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
         body: csvData
-      }).catch(error => console.error("Fetch error:", error));
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV successfully uploaded:", data);
+        if (callback) callback();
+      })
+      .catch(error => {
+        console.error("Error uploading CSV:", error);
+        alert("Error submitting data. Please try again.");
+      });
     }
     
-    // Clear all stored survey data.
-    localStorage.removeItem("demographicsData");
-    localStorage.removeItem("pretestSurveyData");
-    localStorage.removeItem("personalitySurveyData");
-    localStorage.removeItem("bfis1Data");
-    localStorage.removeItem("bfis2Data");
-    localStorage.removeItem("bfis3Data");
+    // Perform double upload: first immediately, then again after 500ms.
+    function doubleUploadCSV() {
+      uploadCSV(() => {
+        console.log("First upload complete.");
+        setTimeout(() => {
+          uploadCSV(() => {
+            console.log("Second upload complete. Clearing data.");
+            // Clear all stored survey data.
+            localStorage.removeItem("demographicsData");
+            localStorage.removeItem("pretestSurveyData");
+            localStorage.removeItem("personalitySurveyData");
+            localStorage.removeItem("bfis1Data");
+            localStorage.removeItem("bfis2Data");
+            localStorage.removeItem("bfis3Data");
+          });
+        }, 500);
+      });
+    }
+    
+    // When the button is clicked, perform the double upload.
+    document.getElementById("uploadButton").addEventListener("click", doubleUploadCSV);
   </script>
 </body>
 </html>
