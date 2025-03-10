@@ -162,7 +162,6 @@
 
     // Compile CSV from all saved photo responses.
     function compileCSV(responses) {
-      // Pull the student ID directly from localStorage.
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
@@ -180,7 +179,7 @@
       return csvHeader + csvRow;
     }
 
-    // Helper: Upload CSV and execute a callback if provided.
+    // Helper: Upload CSV using fetch.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -209,14 +208,14 @@
       });
     }
 
-    // Helper: Upload CSV twice then redirect.
+    // Helper: Double upload the CSV (with a 500ms gap) then redirect.
     function uploadCSVAndRedirect() {
-      // First upload immediately.
       uploadCSV(() => {
-        // Then wait 500ms and perform the second upload.
+        console.log("First upload complete.");
         setTimeout(() => {
+          console.log("Starting second upload.");
           uploadCSV(() => {
-            // After the second upload, clear photoResponses and redirect.
+            console.log("Second upload complete. Redirecting now.");
             localStorage.removeItem("photoResponses");
             window.location.href = "video_display.html";
           });
@@ -224,11 +223,12 @@
       });
     }
 
-    // Save the current trial and then redirect.
-    // Every 5th trial (or if no more conditions remain), the CSV is compiled and uploaded.
+    // Save the current trial and decide whether to upload.
+    // The CSV is uploaded every 5th trial (trial 5, 10, 15, ...) with trial 1 as the first.
     function nextPhotoTrial() {
       let currentTrial = photoTrialIndex;
       if (photoTrialIndex - 1 >= conditionList.length) {
+        // If no more conditions remain, perform double upload.
         uploadCSVAndRedirect();
         return;
       }
@@ -253,15 +253,9 @@
       // Determine final trial: if there are at least 20 conditions, final is 20; otherwise, it's the length of conditionList.
       const finalPhotoTrial = conditionList.length >= 20 ? 20 : conditionList.length;
       
-      // Every 5th trial (or if no more conditions remain) upload CSV and redirect.
+      // Every 5th trial (or if no more conditions remain) perform a double upload.
       if (currentTrial % 5 === 0 || photoTrialIndex - 1 >= conditionList.length) {
-        if (currentTrial === finalPhotoTrial || currentTrial === 20) {
-          uploadCSVAndRedirect();
-        } else {
-          uploadCSV(() => {
-            window.location.href = "video_display.html";
-          });
-        }
+        uploadCSVAndRedirect();
       } else {
         window.location.href = "video_display.html";
       }
