@@ -211,7 +211,7 @@
       return csvHeader + csvRow;
     }
 
-    // Helper: Upload CSV and execute a callback if provided using fetch.
+    // Helper: Upload CSV using fetch.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -219,7 +219,6 @@
       const filename = `${participantID}_video.csv`;
       const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
       
-      // Always use fetch so we can set custom headers.
       fetch(url, {
         method: 'POST',
         headers: { 
@@ -242,20 +241,23 @@
       });
     }
 
- // Helper: Upload CSV then redirect.
-function uploadCSVAndRedirect() {
-  uploadCSV(() => {
-    setTimeout(() => {
+    // Helper: Upload CSV twice then redirect.
+    function uploadCSVAndRedirect() {
+      // First upload immediately.
       uploadCSV(() => {
-        localStorage.removeItem("photoResponses");
-        window.location.href = "video_display.html";
+        // Then wait 500ms and perform the second upload.
+        setTimeout(() => {
+          uploadCSV(() => {
+            // After second upload, clear videoResponses and redirect.
+            localStorage.removeItem("videoResponses");
+            window.location.href = "video_display.html";
+          });
+        }, 500);
       });
-    }, 500);
-  });
-}
+    }
 
     // Save the current trial and then redirect.
-    // This saves trial data and uploads the CSV every 5 trials (rewriting previous CSV), then redirects.
+    // This saves trial data and uploads the CSV every 5 trials (overwriting previous CSV), then redirects.
     function nextPage() {
       let currentTrial = videoTrialIndex;
       const participantID = localStorage.getItem("participantSID") || "unknown";
