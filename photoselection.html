@@ -209,14 +209,17 @@
       });
     }
 
-    // Helper: Upload CSV then redirect.
-    function uploadCSVAndRedirect() {
+  // Helper: Upload CSV then redirect.
+function uploadCSVAndRedirect() {
+  uploadCSV(() => {
+    setTimeout(() => {
       uploadCSV(() => {
         localStorage.removeItem("photoResponses");
         window.location.href = "video_display.html";
       });
-    }
-
+    }, 500);
+  });
+}
     // Save the current trial and then redirect.
     // Every 5th trial (or if no more conditions remain), the CSV is compiled and uploaded.
     function nextPhotoTrial() {
