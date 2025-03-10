@@ -101,7 +101,7 @@
     console.log("Stored participantSID:", storedID);
     if (!/^\d{10}$/.test(storedID)) {
       console.error("Error: participantSID is not a valid 10-digit Student ID.");
-      // Optionally, add redirect or alert here.
+      // Optionally, you can redirect or alert here.
     }
 
     // Play the video until at least 3 seconds have elapsed.
@@ -123,7 +123,7 @@
       };
     }
 
-    // Utility function to shuffle an array.
+    // Utility: Shuffle an array.
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -132,7 +132,7 @@
       return array;
     }
 
-    // Define your video list.
+    // Define the video list.
     const videos = [
       { url: "Videos/0015.mp4", label: "v1" },
       { url: "Videos/0299.mp4", label: "v2" },
@@ -156,7 +156,7 @@
       { url: "Videos/1164.mp4", label: "v20" }
     ];
 
-    // Initialize the video trial counter.
+    // Initialize video trial counter.
     if (!localStorage.getItem("videoTrialIndex")) {
       localStorage.setItem("videoTrialIndex", "1");
     }
@@ -242,11 +242,10 @@
     }
 
     // Helper: Upload CSV twice then redirect.
+    // For debugging purposes, this version forces two uploads (with a 500ms gap) before redirecting.
     function uploadCSVAndRedirect() {
-      // First upload immediately.
       uploadCSV(() => {
         console.log("First upload complete.");
-        // Wait 500ms, then perform the second upload.
         setTimeout(() => {
           console.log("Starting second upload.");
           uploadCSV(() => {
@@ -258,7 +257,7 @@
       });
     }
 
-    // Save current trial data and decide where to redirect.
+    // Save current trial data and trigger double-upload.
     function nextPage() {
       let currentTrial = videoTrialIndex;
       const participantID = localStorage.getItem("participantSID") || "unknown";
@@ -284,21 +283,8 @@
       videoTrialIndex++;
       localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
 
-      // Final video trial is set to 20.
-      const finalVideoTrial = 20;
-
-      // If the current trial is a multiple of 5 or no videos remain, upload CSV.
-      if (currentTrial % 5 === 0 || videoOrder.length === 0) {
-        if (currentTrial === finalVideoTrial || videoOrder.length === 0) {
-          uploadCSVAndRedirect();
-        } else {
-          uploadCSV(() => {
-            window.location.href = "survey.html";
-          });
-        }
-      } else {
-        window.location.href = "survey.html";
-      }
+      // For this forced test, always use double-upload.
+      uploadCSVAndRedirect();
     }
 
     window.onload = function() {
