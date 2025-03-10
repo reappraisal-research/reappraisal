@@ -166,7 +166,7 @@
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
-      // Sort responses by their visit number.
+      // Sort responses by visit number.
       responses.sort((a, b) => a.visitNumber - b.visitNumber);
       for (let i = 0; i < responses.length; i++) {
         headers.push("photo_trial_" + (i + 1));
@@ -189,6 +189,9 @@
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = `${participantID}_photoselection.csv`;
       const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
+      
+      console.log("Starting upload for", filename);
+      
       fetch(url, {
         method: 'POST',
         headers: {
@@ -212,30 +215,31 @@
     }
 
     // Helper: Double upload the CSV (with a 500ms gap) then redirect.
-    // Every time the CSV is saved (every 5th trial or if no more conditions remain),
-    // both uploads will send the accumulated responses (so by the final save, it will have all entries).
-    function uploadCSVAndRedirect() {
+    // If it's a final upload, the responses are cleared.
+    function uploadCSVAndRedirect(finalUpload) {
       uploadCSV(() => {
         console.log("First upload complete.");
         setTimeout(() => {
           console.log("Starting second upload.");
           uploadCSV(() => {
-            console.log("Second upload complete. Redirecting now.");
-            localStorage.removeItem("photoResponses");
+            console.log("Second upload complete.");
+            if (finalUpload) {
+              localStorage.removeItem("photoResponses");
+            }
             window.location.href = "video_display.html";
           });
         }, 500);
       });
     }
 
-    // Save the current trial and decide whether to upload.
-    // The CSV is uploaded every 5th trial (trial 5, 10, 15, ...) with trial 1 as the first.
-    // The CSV contains all responses from the beginning (so the final CSV will have 20 entries).
+    // Save current trial data and decide whether to upload.
+    // The CSV is uploaded every 5th trial (trial 5, 10, 15, etc.) with trial 1 as the first.
+    // All responses accumulate, so by the final trial (or when no more conditions remain) the CSV contains all entries.
     function nextPhotoTrial() {
       let currentTrial = photoTrialIndex;
       if (photoTrialIndex - 1 >= conditionList.length) {
-        // If no more conditions remain, perform double upload.
-        uploadCSVAndRedirect();
+        // If no more conditions remain, perform double upload (final).
+        uploadCSVAndRedirect(true);
         return;
       }
       let currentCondition = conditionList[photoTrialIndex - 1];
@@ -252,16 +256,17 @@
       photoResponses.push(trialData);
       localStorage.setItem("photoResponses", JSON.stringify(photoResponses));
 
-      // Increment the trial counter.
+      // Increment trial counter.
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
       // Determine final trial: if there are at least 20 conditions, final is 20; otherwise, it's the length of conditionList.
       const finalPhotoTrial = conditionList.length >= 20 ? 20 : conditionList.length;
       
-      // Every 5th trial (or if no more conditions remain) perform a double upload.
+      // If current trial is a multiple of 5 or no more conditions remain, trigger upload.
       if (currentTrial % 5 === 0 || photoTrialIndex - 1 >= conditionList.length) {
-        uploadCSVAndRedirect();
+        let isFinal = (currentTrial === finalPhotoTrial || photoTrialIndex - 1 >= conditionList.length);
+        uploadCSVAndRedirect(isFinal);
       } else {
         window.location.href = "video_display.html";
       }
