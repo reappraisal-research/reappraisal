@@ -96,7 +96,7 @@
     }
   </style>
   <script>
-    // Validate and log participant SID.
+    // Log and validate the stored participant SID.
     const storedID = localStorage.getItem("participantSID");
     console.log("Stored participantSID:", storedID);
     if (!/^\d{10}$/.test(storedID)) {
@@ -241,24 +241,26 @@
     }
 
     // Helper: Double upload the CSV (with a 500ms gap) then redirect.
-    // This function is called when the CSV should be saved (e.g., every 5th trial or if no more videos remain).
-    function uploadCSVAndRedirect() {
+    // The function accepts a parameter 'finalUpload' that determines whether to clear responses.
+    function uploadCSVAndRedirect(finalUpload) {
       uploadCSV(() => {
         console.log("First upload complete.");
         setTimeout(() => {
           console.log("Starting second upload.");
           uploadCSV(() => {
-            console.log("Second upload complete. Redirecting now.");
-            localStorage.removeItem("videoResponses");
+            console.log("Second upload complete.");
+            // Clear stored responses only on the final upload.
+            if (finalUpload) {
+              localStorage.removeItem("videoResponses");
+            }
             window.location.href = "survey.html";
           });
         }, 500);
       });
     }
 
-    // Save current trial data and decide whether to upload.
-    // The CSV is uploaded every 5th trial (trial 5, 10, 15, ...) with trial 1 as the first.
-    // All responses accumulate, so the final CSV will include all trials completed.
+    // Save current trial data and upload every 5th trial (trial 5, 10, 15, 20) with trial 1 as the first.
+    // All responses accumulate so that the final CSV contains all trials completed.
     function nextPage() {
       let currentTrial = videoTrialIndex;
       const participantID = localStorage.getItem("participantSID") || "unknown";
@@ -286,9 +288,12 @@
 
       const finalVideoTrial = 20; // Final trial is 20.
 
-      // Every 5th trial (i.e. trial 5, 10, 15, 20) or if no videos remain, perform double upload.
+      // Determine if we should perform an upload.
+      // Every 5th trial (5, 10, 15, 20) or if no videos remain triggers an upload.
+      // For the final upload (trial 20 or if no videos remain), clear responses after double upload.
       if (currentTrial % 5 === 0 || videoOrder.length === 0) {
-        uploadCSVAndRedirect();
+        let isFinal = (currentTrial === finalVideoTrial || videoOrder.length === 0);
+        uploadCSVAndRedirect(isFinal);
       } else {
         window.location.href = "survey.html";
       }
