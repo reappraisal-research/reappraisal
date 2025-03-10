@@ -96,16 +96,15 @@
     }
   </style>
   <script>
-    // Debug: Log the stored Student ID.
+    // Log and validate the stored Student ID.
     const storedID = localStorage.getItem("participantSID");
     console.log("Stored participantSID:", storedID);
-    // Validate that the participantSID is exactly 10 digits.
     if (!/^\d{10}$/.test(storedID)) {
       console.error("Error: participantSID is not a valid 10-digit Student ID.");
-      // Optionally, you can redirect or alert the user.
+      // Optionally, add redirect or alert here.
     }
 
-    // Play the video until 3 seconds have elapsed.
+    // Play the video until at least 3 seconds have elapsed.
     function playVideoUntil3Seconds(onComplete) {
       let startTime = Date.now();
       let cumulativeTime = 0;
@@ -124,7 +123,7 @@
       };
     }
 
-    // Utility: Shuffle an array.
+    // Utility function to shuffle an array.
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -133,7 +132,7 @@
       return array;
     }
 
-    // Define the video list.
+    // Define your video list.
     const videos = [
       { url: "Videos/0015.mp4", label: "v1" },
       { url: "Videos/0299.mp4", label: "v2" },
@@ -157,14 +156,14 @@
       { url: "Videos/1164.mp4", label: "v20" }
     ];
 
-    // Initialize video trial counter to 1 if not already set.
+    // Initialize the video trial counter.
     if (!localStorage.getItem("videoTrialIndex")) {
       localStorage.setItem("videoTrialIndex", "1");
     }
     let videoTrialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
     console.log("Initial videoTrialIndex:", videoTrialIndex);
 
-    // Retrieve or initialize a video order.
+    // Retrieve or generate a randomized video order.
     let videoOrder = JSON.parse(localStorage.getItem("videoOrder") || "[]");
     if (videoOrder.length === 0) {
       videoOrder = shuffleArray(videos.slice());
@@ -174,7 +173,7 @@
     // Retrieve stored video responses.
     let videoResponses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
 
-    // Select the next video to be displayed.
+    // Select and display the next video.
     function selectVideo() {
       if (videoOrder.length > 0) {
         const selectedVideo = videoOrder.shift();
@@ -191,7 +190,6 @@
 
     // Compile CSV from video responses.
     function compileCSV(responses) {
-      // Use the student ID directly.
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
@@ -219,6 +217,8 @@
       const filename = `${participantID}_video.csv`;
       const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
       
+      console.log("Starting upload for", filename);
+      
       fetch(url, {
         method: 'POST',
         headers: { 
@@ -245,19 +245,20 @@
     function uploadCSVAndRedirect() {
       // First upload immediately.
       uploadCSV(() => {
-        // Then wait 500ms and perform the second upload.
+        console.log("First upload complete.");
+        // Wait 500ms, then perform the second upload.
         setTimeout(() => {
+          console.log("Starting second upload.");
           uploadCSV(() => {
-            // After second upload, clear videoResponses and redirect.
+            console.log("Second upload complete. Redirecting now.");
             localStorage.removeItem("videoResponses");
-            window.location.href = "video_display.html";
+            window.location.href = "survey.html";
           });
         }, 500);
       });
     }
 
-    // Save the current trial and then redirect.
-    // This saves trial data and uploads the CSV every 5 trials (overwriting previous CSV), then redirects.
+    // Save current trial data and decide where to redirect.
     function nextPage() {
       let currentTrial = videoTrialIndex;
       const participantID = localStorage.getItem("participantSID") || "unknown";
@@ -283,10 +284,10 @@
       videoTrialIndex++;
       localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
 
-      // Set final video trial to 20.
+      // Final video trial is set to 20.
       const finalVideoTrial = 20;
 
-      // If the current trial is a multiple of 5 or if there are no more videos, upload CSV.
+      // If the current trial is a multiple of 5 or no videos remain, upload CSV.
       if (currentTrial % 5 === 0 || videoOrder.length === 0) {
         if (currentTrial === finalVideoTrial || videoOrder.length === 0) {
           uploadCSVAndRedirect();
@@ -325,52 +326,31 @@
     <div class="scale">
       <label class="option">
         <input type="radio" name="videoScale" value="1">
-        <span class="label-text">
-          <span class="number">1</span>
-          <small>Not negative at all</small>
-        </span>
+        <span class="label-text"><span class="number">1</span><small>Not negative at all</small></span>
       </label>
       <label class="option">
         <input type="radio" name="videoScale" value="2">
-        <span class="label-text">
-          <span class="number">2</span>
-          <small>&nbsp;</small>
-        </span>
+        <span class="label-text"><span class="number">2</span><small>&nbsp;</small></span>
       </label>
       <label class="option">
         <input type="radio" name="videoScale" value="3">
-        <span class="label-text">
-          <span class="number">3</span>
-          <small>&nbsp;</small>
-        </span>
+        <span class="label-text"><span class="number">3</span><small>&nbsp;</small></span>
       </label>
       <label class="option">
         <input type="radio" name="videoScale" value="4">
-        <span class="label-text">
-          <span class="number">4</span>
-          <small>&nbsp;</small>
-        </span>
+        <span class="label-text"><span class="number">4</span><small>&nbsp;</small></span>
       </label>
       <label class="option">
         <input type="radio" name="videoScale" value="5">
-        <span class="label-text">
-          <span class="number">5</span>
-          <small>&nbsp;</small>
-        </span>
+        <span class="label-text"><span class="number">5</span><small>&nbsp;</small></span>
       </label>
       <label class="option">
         <input type="radio" name="videoScale" value="6">
-        <span class="label-text">
-          <span class="number">6</span>
-          <small>&nbsp;</small>
-        </span>
+        <span class="label-text"><span class="number">6</span><small>&nbsp;</small></span>
       </label>
       <label class="option">
         <input type="radio" name="videoScale" value="7">
-        <span class="label-text">
-          <span class="number">7</span>
-          <small>Extremely negative</small>
-        </span>
+        <span class="label-text"><span class="number">7</span><small>Extremely negative</small></span>
       </label>
     </div>
   </div>
