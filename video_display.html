@@ -211,37 +211,35 @@
       return csvHeader + csvRow;
     }
 
-    // Helper: Upload CSV and execute a callback if provided.
+    // Helper: Upload CSV and execute a callback if provided using fetch.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
       const csvContent = compileCSV(responses);
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = `${participantID}_video.csv`;
       const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
-      if (navigator.sendBeacon) {
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        navigator.sendBeacon(url, blob);
-        console.log("CSV beacon sent:", filename);
+      
+      // Always use fetch so we can set custom headers.
+      fetch(url, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV uploaded:", data);
         if (callback) callback();
-      } else {
-        fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/csv' },
-          body: csvContent
-        })
-        .then(response => {
-          if (!response.ok) throw new Error("Network response was not ok");
-          return response.json();
-        })
-        .then(data => {
-          console.log("CSV uploaded:", data);
-          if (callback) callback();
-        })
-        .catch(error => {
-          console.error("Error uploading CSV:", error);
-          alert("Error submitting data. Please try again.");
-        });
-      }
+      })
+      .catch(error => {
+        console.error("Error uploading CSV:", error);
+        alert("Error submitting data. Please try again.");
+      });
     }
 
     // Helper: Upload CSV then redirect.
