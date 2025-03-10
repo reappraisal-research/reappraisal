@@ -128,7 +128,7 @@
       "Stimulireal/ur.horseback.jpg",
       "Stimulireal/ur.jastrow.rabbit.jpg"
     ];
-    // Initialize or load the shuffled images array from localStorage
+    // Initialize or load the shuffled images array from localStorage.
     let images;
     if (localStorage.getItem("perceptionImages")) {
       images = JSON.parse(localStorage.getItem("perceptionImages"));
@@ -147,13 +147,13 @@
 
     // --- Display the Current Trial ---
     function displayTrial() {
-      // If all images have been used, redirect immediately
+      // If all images have been used, submit CSV.
       if (trialIndex >= images.length) {
         submitResponsesCSV();
         return;
       }
       document.getElementById("trialImage").src = images[trialIndex];
-      // Reset radio selections for both scales.
+      // Reset radio selections.
       document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
     }
 
@@ -175,7 +175,7 @@
         return;
       }
 
-      // Retrieve participant ID
+      // Retrieve participant ID.
       const participantSID = localStorage.getItem("participantSID") || "unknown";
 
       // Record the response for the current trial.
@@ -193,7 +193,7 @@
       trialIndex++;
       localStorage.setItem("perceptionTrialIndex", trialIndex.toString());
 
-      // If all images have been used, proceed to CSV submission and redirection.
+      // If all images have been used, submit CSV.
       if (trialIndex >= images.length) {
         submitResponsesCSV();
       } else {
@@ -201,7 +201,7 @@
       }
     }
 
-    // --- Compile and Upload CSV, then Redirect ---
+    // --- Compile and Double-Upload CSV, then Redirect ---
     function submitResponsesCSV() {
       const responses = JSON.parse(localStorage.getItem("perceptionResponses") || "[]");
       const headers = ["participantSID", "image", "perceptionResponse", "positivityResponse", "trial", "timestamp"];
@@ -216,27 +216,39 @@
       const participantSID = localStorage.getItem("participantSID") || "unknown";
       const filename = `perception_${participantSID}.csv`;
 
-      fetch('/.netlify/functions/upload-csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/csv',
-          'X-Filename': filename
-        },
-        body: csvContent
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Network response was not ok");
-        return response.json();
-      })
-      .then(data => {
-        console.log("CSV successfully uploaded:", data);
-        localStorage.removeItem("perceptionResponses");
-        // Redirect to thank_you.html after the final submission.
-        window.location.href = "thank_you.html";
-      })
-      .catch(error => {
-        console.error("Error uploading CSV:", error);
-        alert("Error submitting data. Please try again.");
+      // Helper function to perform one upload.
+      function upload(callback) {
+        fetch('/.netlify/functions/upload-csv', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/csv',
+            'X-Filename': filename
+          },
+          body: csvContent
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Network response was not ok");
+          return response.json();
+        })
+        .then(data => {
+          console.log("CSV successfully uploaded:", data);
+          if (callback) callback();
+        })
+        .catch(error => {
+          console.error("Error uploading CSV:", error);
+          alert("Error submitting data. Please try again.");
+        });
+      }
+
+      // Double upload: first immediately, then again after 500ms.
+      upload(() => {
+        setTimeout(() => {
+          upload(() => {
+            console.log("Double upload complete.");
+            localStorage.removeItem("perceptionResponses");
+            window.location.href = "thank_you.html";
+          });
+        }, 500);
       });
     }
 
