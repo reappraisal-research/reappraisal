@@ -205,9 +205,7 @@
       }
     }
 
-    // Compile CSV from survey responses.
-    // The CSV has one header row and one data row.
-    // The first column is the participantID (only once) then each trial's data.
+    // Updated sendResponsesCSV function: Upload CSV twice with a 0.5-second gap and then redirect immediately.
     function sendResponsesCSV(uploadType) {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
@@ -223,32 +221,43 @@
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = `${participantID}_survey.csv`;
 
-      fetch('/.netlify/functions/upload-csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/csv',
-          'X-Filename': filename
-        },
-        body: csvContent
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Network response was not ok");
-        return response.json();
-      })
-      .then(data => {
-        console.log("CSV successfully uploaded:", data);
-        if (uploadType === "final") {
-          localStorage.removeItem("surveyResponses");
-          window.location.href = "Shiftingsuccess.html";
-        } else {
-          setTimeout(() => {
-            window.location.href = "photoselection.html";
-          }, 1000);
-        }
-      })
-      .catch(error => {
-        console.error("Error uploading CSV:", error);
-        alert("Error submitting data. Please try again.");
+      // Helper function to perform one upload using fetch.
+      function upload(callback) {
+        fetch('/.netlify/functions/upload-csv', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/csv',
+            'X-Filename': filename
+          },
+          body: csvContent
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Network response was not ok");
+          return response.json();
+        })
+        .then(data => {
+          console.log("CSV successfully uploaded:", data);
+          if (callback) callback();
+        })
+        .catch(error => {
+          console.error("Error uploading CSV:", error);
+          alert("Error submitting data. Please try again.");
+        });
+      }
+
+      // Upload twice: first immediately, then 0.5 seconds later.
+      upload(() => {
+        setTimeout(() => {
+          upload(() => {
+            // Immediately redirect after the second upload finishes.
+            if (uploadType === "final") {
+              localStorage.removeItem("surveyResponses");
+              window.location.href = "Shiftingsuccess.html";
+            } else {
+              window.location.href = "photoselection.html";
+            }
+          });
+        }, 500);
       });
     }
   </script>
