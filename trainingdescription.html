@@ -60,8 +60,11 @@
       background-color: #4CAF50;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -122,7 +125,7 @@
         }
       };
 
-      // Generate CSV content.
+      // Generate CSV content. The participant ID is the first column.
       function generateCSV(dataObj) {
         const headers = ["participantSID", "surveyName", "timestamp", "situationResponse", "goalResponse"];
         const csvHeader = headers.join(",") + "\n";
@@ -133,36 +136,56 @@
           dataObj.responses.situationResponse,
           dataObj.responses.goalResponse
         ];
-        const csvRow = row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",");
-        return csvHeader + csvRow;
+        return csvHeader + row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(",") + "\n";
       }
       
       var csvContent = generateCSV(experimentData);
       console.log("CSV Content:", csvContent);
-      var filename = `trainingcheck_${participantSID}.csv`;
-
-      // Send the CSV data to the server using a POST request.
-      fetch('/.netlify/functions/upload-csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/csv',
-          'X-Filename': filename
-        },
-        body: csvContent
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log("CSV successfully uploaded:", data);
+      
+      // The CSV filename is [participantSID]_trainingcheck.csv.
+      var filename = `${participantSID}_trainingcheck.csv`;
+      var url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
+      
+      // Helper function: Upload CSV using fetch.
+      function uploadCSV(callback) {
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/csv',
+            'X-Filename': filename
+          },
+          body: csvContent
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Network response was not ok");
+          return response.json();
+        })
+        .then(data => {
+          console.log("CSV successfully uploaded:", data);
+          if (callback) callback();
+        })
+        .catch(error => {
+          console.error("Error uploading CSV:", error);
+          alert("Error submitting data. Please try again.");
+        });
+      }
+      
+      // Helper function: Perform double upload (first immediately, then 500ms later).
+      function doubleUploadCSV(callback) {
+        uploadCSV(() => {
+          console.log("First upload complete.");
+          setTimeout(() => {
+            uploadCSV(() => {
+              console.log("Second upload complete.");
+              if (callback) callback();
+            });
+          }, 500);
+        });
+      }
+      
+      // Double upload the CSV then navigate to the next page.
+      doubleUploadCSV(function() {
         window.location.href = "trainingdescriptiontwo.html";
-      })
-      .catch(error => {
-        console.error("Error uploading CSV:", error);
-        alert("Error submitting data. Please try again.");
       });
     });
   </script>
