@@ -96,12 +96,11 @@
     }
   </style>
   <script>
-    // Log and validate the stored Student ID.
+    // Log and validate the stored participant SID.
     const storedID = localStorage.getItem("participantSID");
     console.log("Stored participantSID:", storedID);
     if (!/^\d{10}$/.test(storedID)) {
       console.error("Error: participantSID is not a valid 10-digit Student ID.");
-      // Optionally, you can redirect or alert here.
     }
 
     // Play the video until at least 3 seconds have elapsed.
@@ -156,7 +155,7 @@
       { url: "Videos/1164.mp4", label: "v20" }
     ];
 
-    // Initialize video trial counter.
+    // Initialize video trial counter (first visit counts as trial 1).
     if (!localStorage.getItem("videoTrialIndex")) {
       localStorage.setItem("videoTrialIndex", "1");
     }
@@ -193,7 +192,6 @@
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
-      
       responses.sort((a, b) => a.trialNumber - b.trialNumber);
       for (let i = 0; i < responses.length; i++) {
         headers.push("video_trial_" + (i + 1));
@@ -203,7 +201,6 @@
         row.push(filename);
         row.push(responses[i].videoRating || "");
       }
-      
       const csvHeader = headers.join(",") + "\n";
       const csvRow = row.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
       return csvHeader + csvRow;
@@ -241,8 +238,7 @@
       });
     }
 
-    // Helper: Upload CSV twice then redirect.
-    // For debugging purposes, this version forces two uploads (with a 500ms gap) before redirecting.
+    // Helper: Always perform double upload then redirect.
     function uploadCSVAndRedirect() {
       uploadCSV(() => {
         console.log("First upload complete.");
@@ -257,7 +253,7 @@
       });
     }
 
-    // Save current trial data and trigger double-upload.
+    // Save current trial data and upload every five trials (trial 5, 10, 15, 20) with trial 1 counting as first.
     function nextPage() {
       let currentTrial = videoTrialIndex;
       const participantID = localStorage.getItem("participantSID") || "unknown";
@@ -283,8 +279,14 @@
       videoTrialIndex++;
       localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
 
-      // For this forced test, always use double-upload.
-      uploadCSVAndRedirect();
+      const finalVideoTrial = 20; // Final trial is 20.
+
+      // Every 5th trial (i.e. trial 5, 10, 15, 20) or if no videos remain, perform double upload.
+      if (currentTrial % 5 === 0 || videoOrder.length === 0) {
+        uploadCSVAndRedirect();
+      } else {
+        window.location.href = "survey.html";
+      }
     }
 
     window.onload = function() {
