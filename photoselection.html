@@ -161,10 +161,12 @@
     }
 
     // Compile CSV from all saved photo responses.
+    // The CSV begins with the participant ID as the first column.
     function compileCSV(responses) {
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
+      // Sort responses by their visit number.
       responses.sort((a, b) => a.visitNumber - b.visitNumber);
       for (let i = 0; i < responses.length; i++) {
         headers.push("photo_trial_" + (i + 1));
@@ -180,6 +182,7 @@
     }
 
     // Helper: Upload CSV using fetch.
+    // The CSV filename is [participantID]_photoselection.csv.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -209,6 +212,8 @@
     }
 
     // Helper: Double upload the CSV (with a 500ms gap) then redirect.
+    // Every time the CSV is saved (every 5th trial or if no more conditions remain),
+    // both uploads will send the accumulated responses (so by the final save, it will have all entries).
     function uploadCSVAndRedirect() {
       uploadCSV(() => {
         console.log("First upload complete.");
@@ -225,6 +230,7 @@
 
     // Save the current trial and decide whether to upload.
     // The CSV is uploaded every 5th trial (trial 5, 10, 15, ...) with trial 1 as the first.
+    // The CSV contains all responses from the beginning (so the final CSV will have 20 entries).
     function nextPhotoTrial() {
       let currentTrial = photoTrialIndex;
       if (photoTrialIndex - 1 >= conditionList.length) {
