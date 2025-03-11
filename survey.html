@@ -6,7 +6,7 @@
   <title>Survey</title>
   <style>
     body {
-      font-family: Arial, sans-serif; /* Using Arial for the entire page */
+      font-family: Arial, sans-serif;
       background-color: #f0f0f0;
       margin: 0;
       padding: 20px;
@@ -106,6 +106,12 @@
     }
   </style>
   <script>
+    // Immediately enforce a 20-trial limit.
+    let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
+    if (trialIndex > 20) {
+      window.location.href = "Shiftingsuccess.html";
+    }
+
     // IIFE: Set up condition list and insert header.
     (function() {
       function shuffleArray(array) {
@@ -118,6 +124,7 @@
       let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
       if (conditionList.length === 0) {
         let conditions = [];
+        // Create conditions so that there are at least 20 trials.
         for (let i = 0; i < 5; i++) {
           conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
           conditions.push({ photoType: "ambiguous", rethinkingLabel: "Goal rethinking" });
@@ -127,18 +134,13 @@
         conditionList = shuffleArray(conditions);
         localStorage.setItem("conditionList", JSON.stringify(conditionList));
       }
-      // Retrieve global trialIndex; default to 1 if not set.
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if (isNaN(trialIndex) || trialIndex <= 0) {
-        trialIndex = 1;
-        localStorage.setItem("trialIndex", "1");
-      }
+      // Use the current trial from localStorage.
+      trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
       let currentTrial = trialIndex;
       let currentCondition = conditionList[currentTrial - 1] || {};
       
       document.addEventListener("DOMContentLoaded", function() {
         let header = document.createElement("h2");
-        // Insert the condition label header.
         header.innerText = currentCondition.rethinkingLabel || "Default Header";
         let container = document.querySelector(".container");
         if (container) {
@@ -170,8 +172,7 @@
         return;
       }
       const participantID = localStorage.getItem("participantSID") || "unknown";
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10);
-      if (isNaN(trialIndex) || trialIndex <= 0) trialIndex = 1;
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
       let currentTrial = trialIndex;
       const conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
       let currentCondition = conditionList[currentTrial - 1] || {};
@@ -190,12 +191,13 @@
       surveyResponses.push(trialData);
       localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
 
+      // Increment the trial index.
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
-      // Upload CSV every 5 trials.
+      // If this trial is a multiple of 5, trigger a CSV upload.
       if (currentTrial % 5 === 0) {
-        // If final trial (20), final upload; otherwise, partial.
+        // On the 20th trial always perform final upload.
         if (currentTrial === 20) {
           sendResponsesCSV("final");
         } else {
@@ -212,14 +214,12 @@
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
       let csvContent = headers.join(",") + "\n";
       responses.forEach(response => {
-        // Use template literals for clarity.
         let row = headers.map(key => {
           let value = response[key] || "";
           return `"${String(value).replace(/"/g, '""')}"`;
         }).join(",");
         csvContent += row + "\n";
       });
-      // File name: [participantID]_survey.csv (participantID is the first column).
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = `${participantID}_survey.csv`;
 
@@ -263,8 +263,7 @@
       });
     }
 
-    // The Next button calls saveResponses, which saves the current trial response,
-    // accumulates responses, and then every 5th trial uploads the CSV (which will contain 5, 10, 15, or 20 entries).
+    // Called when the participant clicks the Next button.
     function nextTrial() {
       saveResponses();
     }
@@ -272,9 +271,7 @@
 </head>
 <body>
   <div class="container">
-    <div id="photoLabel"></div>
-    <div id="ambiguousLabel"></div>
-    <!-- The form for the survey scale with labeled bubbles -->
+    <!-- Optional: You can add a photoLabel or ambiguousLabel here if needed -->
     <form>
       <label for="rethinkingResponse">How could you rethink the video?</label>
       <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
