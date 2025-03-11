@@ -204,7 +204,7 @@
         row.push(responses[i].videoRating || "");
       }
       const csvHeader = headers.join(",") + "\n";
-      const csvRow = row.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
+     const csvRow = row.map(val => `${val.replace(/"/g, '""')}`).join(",") + "\n";
       return csvHeader + csvRow;
     }
 
