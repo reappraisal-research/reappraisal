@@ -40,19 +40,21 @@
       border-radius: 4px;
       resize: vertical;
     }
+    /* Scale container */
     .scale {
       display: flex;
       justify-content: space-evenly;
+      align-items: center;
       margin: 20px auto;
       width: 100%;
     }
-    .scale label {
+    .scale .option {
       position: relative;
       flex: 0 0 70px;
       height: 140px;
       text-align: center;
     }
-    .scale label input[type="radio"] {
+    .scale .option input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
       background-color: #fff;
@@ -67,26 +69,25 @@
       left: 50%;
       transform: translateX(-50%);
     }
-    .scale label input[type="radio"]:checked {
+    .scale .option input[type="radio"]:checked {
       background-color: #000;
       color: #fff;
     }
-    .scale label span {
+    .scale .option .label-text {
+      display: block;
       position: absolute;
       top: 45px;
       left: 50%;
       transform: translateX(-50%);
+    }
+    .scale .option .label-text .number {
       font-size: 16px;
       font-weight: bold;
-      display: block;
     }
-    .scale label small {
-      position: absolute;
-      top: 75px;
-      left: 50%;
-      transform: translateX(-50%);
+    .scale .option .label-text small {
       font-size: 14px;
       line-height: 1.2;
+      display: block;
     }
     button {
       padding: 10px 20px;
@@ -192,7 +193,7 @@
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
-      // Send CSV every 5 trials.
+      // Upload CSV every 5 trials.
       if (currentTrial % 5 === 0) {
         // If final trial (20), final upload; otherwise, partial.
         if (currentTrial === 20) {
@@ -205,23 +206,24 @@
       }
     }
 
-    // Updated sendResponsesCSV function: Upload CSV twice with a 0.5-second gap and then redirect immediately.
+    // sendResponsesCSV: Compile CSV from all stored survey responses, then double upload.
     function sendResponsesCSV(uploadType) {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
       let csvContent = headers.join(",") + "\n";
       responses.forEach(response => {
+        // Use template literals for clarity.
         let row = headers.map(key => {
           let value = response[key] || "";
           return `"${String(value).replace(/"/g, '""')}"`;
         }).join(",");
         csvContent += row + "\n";
       });
-      // File name: [participantID]_survey.csv
+      // File name: [participantID]_survey.csv (participantID is the first column).
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = `${participantID}_survey.csv`;
 
-      // Helper function to perform one upload using fetch.
+      // Helper: Upload CSV using fetch.
       function upload(callback) {
         fetch('/.netlify/functions/upload-csv', {
           method: 'POST',
@@ -245,11 +247,11 @@
         });
       }
 
-      // Upload twice: first immediately, then 0.5 seconds later.
+      // Double upload: first immediately, then 0.5 seconds later.
       upload(() => {
         setTimeout(() => {
           upload(() => {
-            // Immediately redirect after the second upload finishes.
+            console.log("Second upload complete.");
             if (uploadType === "final") {
               localStorage.removeItem("surveyResponses");
               window.location.href = "Shiftingsuccess.html";
@@ -260,38 +262,85 @@
         }, 500);
       });
     }
+
+    // The Next button calls saveResponses, which saves the current trial response,
+    // accumulates responses, and then every 5th trial uploads the CSV (which will contain 5, 10, 15, or 20 entries).
+    function nextTrial() {
+      saveResponses();
+    }
+
+    window.onload = function() {
+      // Display the current trial.
+      // (Assume displayPhotopage functionality is defined elsewhere for showing images.)
+      // For our purposes here, we call displayPhotoTrial() to show the image.
+      displayPhotoTrial();
+      // After a delay, move to the next trial.
+      setTimeout(nextTrial, trialDelay);
+    };
   </script>
 </head>
 <body>
   <div class="container">
+    <div id="photoLabel"></div>
+    <img id="photo" src="" alt="Selected Photo">
+    <div id="ambiguousLabel"></div>
+    <!-- The form for the survey scale with labeled bubbles -->
     <form>
       <label for="rethinkingResponse">How could you rethink the video?</label>
       <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
       <label for="howDoYouFeel">How negative do you feel?</label>
       <div class="scale">
-        <label>
-          <input type="radio" name="howDoYouFeel" value="1" required> 1
+        <label class="option">
+          <input type="radio" name="howDoYouFeel" value="1" required>
+          <span class="label-text">
+            <span class="number">1</span>
+            <small>Not negative at all</small>
+          </span>
         </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="2"> 2
+        <label class="option">
+          <input type="radio" name="howDoYouFeel" value="2">
+          <span class="label-text">
+            <span class="number">2</span>
+            <small></small>
+          </span>
         </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="3"> 3
+        <label class="option">
+          <input type="radio" name="howDoYouFeel" value="3">
+          <span class="label-text">
+            <span class="number">3</span>
+            <small></small>
+          </span>
         </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="4"> 4
+        <label class="option">
+          <input type="radio" name="howDoYouFeel" value="4">
+          <span class="label-text">
+            <span class="number">4</span>
+            <small></small>
+          </span>
         </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="5"> 5
+        <label class="option">
+          <input type="radio" name="howDoYouFeel" value="5">
+          <span class="label-text">
+            <span class="number">5</span>
+            <small></small>
+          </span>
         </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="6"> 6
+        <label class="option">
+          <input type="radio" name="howDoYouFeel" value="6">
+          <span class="label-text">
+            <span class="number">6</span>
+            <small></small>
+          </span>
         </label>
-        <label>
-          <input type="radio" name="howDoYouFeel" value="7"> 7
+        <label class="option">
+          <input type="radio" name="howDoYouFeel" value="7">
+          <span class="label-text">
+            <span class="number">7</span>
+            <small>Very negative</small>
+          </span>
         </label>
       </div>
-      <button type="button" onclick="saveResponses()">Next</button>
+      <button type="button" onclick="nextTrial()">Next</button>
     </form>
   </div>
 </body>
