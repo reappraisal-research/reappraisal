@@ -64,19 +64,24 @@
   
   <script>
     // Push a new history state to make the back button less effective.
-history.pushState(null, null, location.href);
+    history.pushState(null, null, location.href);
 
-// When the user clicks back, push the state again.
-window.addEventListener('popstate', function (event) {
-  history.pushState(null, null, location.href);
-});
+    // When the user clicks back, push the state again.
+    window.addEventListener('popstate', function (event) {
+      history.pushState(null, null, location.href);
+    });
 
-// Warn the user if they try to refresh or close the page.
-window.addEventListener('beforeunload', function (e) {
-  e.preventDefault();
-  // For some browsers, setting e.returnValue is required.
-  e.returnValue = '';
-});
+    // Flag to indicate intentional navigation.
+    let allowNavigation = false;
+
+    // Warn the user if they try to refresh or close the page.
+    window.addEventListener('beforeunload', function (e) {
+      if (!allowNavigation) {
+        e.preventDefault();
+        // For some browsers, setting e.returnValue is required.
+        e.returnValue = '';
+      }
+    });
 
     // When the Next button is clicked:
     document.getElementById("nextButton").addEventListener("click", function() {
@@ -93,6 +98,8 @@ window.addEventListener('beforeunload', function (e) {
         if (err) {
           alert("Error recording your action. Please try again.");
         } else {
+          // Set the flag to allow navigation before redirecting.
+          allowNavigation = true;
           // On success, redirect to readytwo.html.
           window.location.href = "readytwo.html";
         }
@@ -112,6 +119,7 @@ window.addEventListener('beforeunload', function (e) {
         if (err) {
           alert("Error recording your action. Please try again.");
         } else {
+          allowNavigation = true;
           // On success, redirect to betweener.html.
           window.location.href = "betweener.html";
         }
