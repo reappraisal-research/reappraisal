@@ -121,6 +121,22 @@
     }
   </style>
   <script>
+    // Prevent back navigation and warn on refresh/close.
+  history.pushState(null, null, location.href);
+  window.addEventListener('popstate', function (event) {
+    history.pushState(null, null, location.href);
+  });
+  window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  // Enforce a 20-trial limit immediately.
+  let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
+  if (trialIndex > 20) {
+    window.location.href = "Shiftingsuccess.html";
+  }
+
     function saveResponses() {
       // Retrieve values from the form
       const reappraisalText = document.getElementById("reappraisalText").value || ""; // Default to empty string if blank
