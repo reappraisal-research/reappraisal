@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
+    /* [Your styles remain unchanged] */
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
@@ -172,15 +173,23 @@
     // Retrieve stored video responses (accumulated across trials).
     let videoResponses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
 
-    // Select and display the next video.
+    // Check if a video has already been selected for the current trial.
     function selectVideo() {
-      if (videoOrder.length > 0) {
-        const selectedVideo = videoOrder.shift();
-        localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
-        document.getElementById("video").src = selectedVideo.url;
+      // Try to retrieve a saved current video.
+      let currentVideo = localStorage.getItem("currentVideo");
+      if (currentVideo) {
+        document.getElementById("video").src = currentVideo;
       } else {
-        document.getElementById("video").style.display = "none";
-        document.getElementById("questionContainer").innerHTML = "<p>All videos have been shown.</p>";
+        if (videoOrder.length > 0) {
+          const selectedVideo = videoOrder.shift();
+          localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
+          // Save the selected video URL so that if the page is refreshed, we use the same video.
+          localStorage.setItem("currentVideo", selectedVideo.url);
+          document.getElementById("video").src = selectedVideo.url;
+        } else {
+          document.getElementById("video").style.display = "none";
+          document.getElementById("questionContainer").innerHTML = "<p>All videos have been shown.</p>";
+        }
       }
       playVideoUntil3Seconds(() => {
         document.getElementById("questionContainer").style.display = "block";
@@ -188,12 +197,10 @@
     }
 
     // Compile CSV from all saved video responses.
-    // The CSV begins with the participant ID as the first column.
     function compileCSV(responses) {
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
-      // Sort responses by trial number.
       responses.sort((a, b) => a.trialNumber - b.trialNumber);
       for (let i = 0; i < responses.length; i++) {
         headers.push("video_trial_" + (i + 1));
@@ -204,7 +211,7 @@
         row.push(responses[i].videoRating || "");
       }
       const csvHeader = headers.join(",") + "\n";
-     const csvRow = row.map(val => `${val.replace(/"/g, '""')}`).join(",") + "\n";
+      const csvRow = row.map(val => `${val.replace(/"/g, '""')}`).join(",") + "\n";
       return csvHeader + csvRow;
     }
 
@@ -241,7 +248,6 @@
     }
 
     // Helper: Double upload the CSV (with a 500ms gap) then redirect.
-    // The function accepts a parameter 'finalUpload' that determines whether to clear responses.
     function uploadCSVAndRedirect(finalUpload) {
       uploadCSV(() => {
         console.log("First upload complete.");
@@ -249,7 +255,6 @@
           console.log("Starting second upload.");
           uploadCSV(() => {
             console.log("Second upload complete.");
-            // Clear stored responses only on the final upload.
             if (finalUpload) {
               localStorage.removeItem("videoResponses");
             }
@@ -259,8 +264,7 @@
       });
     }
 
-    // Save current trial data and upload every 5th trial (trial 5, 10, 15, 20) with trial 1 as the first.
-    // All responses accumulate so that the final CSV contains all trials completed.
+    // Save current trial data and handle navigation.
     function nextPage() {
       let currentTrial = videoTrialIndex;
       const participantID = localStorage.getItem("participantSID") || "unknown";
@@ -285,12 +289,12 @@
       // Increment trial counter.
       videoTrialIndex++;
       localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
+      
+      // Remove the current video flag so that the next trial will select a new video.
+      localStorage.removeItem("currentVideo");
 
       const finalVideoTrial = 20; // Final trial is 20.
 
-      // Determine if we should perform an upload.
-      // Every 5th trial (5, 10, 15, 20) or if no videos remain triggers an upload.
-      // For the final upload (trial 20 or if no videos remain), clear responses after double upload.
       if (currentTrial % 5 === 0 || videoOrder.length === 0) {
         let isFinal = (currentTrial === finalVideoTrial || videoOrder.length === 0);
         uploadCSVAndRedirect(isFinal);
@@ -322,6 +326,7 @@
   <div id="questionContainer" class="question-container">
     <label for="videoScale">1. How negative do you feel?</label>
     <div class="scale">
+      <!-- Radio options here -->
       <label class="option">
         <input type="radio" name="videoScale" value="1">
         <span class="label-text"><span class="number">1</span><small>Not negative at all</small></span>
