@@ -19,6 +19,20 @@
       display: block;
       margin: 20px auto;
     }
+    /* Overlay that shows if autoplay is blocked */
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+      font-size: 18px;
+    }
     .question-container {
       display: none;
       margin-top: 20px;
@@ -102,6 +116,9 @@
     <source src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
+  <!-- Overlay displayed if autoplay is blocked -->
+  <div id="playOverlay" class="overlay">Click to play video</div>
+  
   <div id="questionContainer" class="question-container">
     <label for="videoScale">1. How negative do you feel?</label>
     <div class="scale">
@@ -152,19 +169,38 @@
       let startTime = Date.now();
       let cumulativeTime = 0;
       const videoPlayer = document.getElementById("video");
-      videoPlayer.style.display = "block";
-      videoPlayer.play();
-      videoPlayer.onended = videoPlayer.onpause = () => {
-        cumulativeTime += Date.now() - startTime;
-        if (cumulativeTime < 3000) {
-          startTime = Date.now();
-          videoPlayer.play();
-        } else {
-          videoPlayer.onended = videoPlayer.onpause = null;
-          onComplete();
-        }
-      };
+      
+      // Attempt to play the video.
+      videoPlayer.play().then(() => {
+        videoPlayer.onended = videoPlayer.onpause = () => {
+          cumulativeTime += Date.now() - startTime;
+          if (cumulativeTime < 3000) {
+            startTime = Date.now();
+            videoPlayer.play();
+          } else {
+            videoPlayer.onended = videoPlayer.onpause = null;
+            onComplete();
+          }
+        };
+      }).catch(err => {
+        // If play() is not allowed, display the overlay.
+        console.error("Playback error:", err);
+        document.getElementById("playOverlay").style.display = "block";
+      });
     }
+    
+    // When overlay is clicked, try to play the video.
+    document.getElementById("playOverlay").addEventListener("click", function() {
+      const videoPlayer = document.getElementById("video");
+      videoPlayer.play().then(() => {
+        document.getElementById("playOverlay").style.display = "none";
+        playVideoUntil3Seconds(() => {
+          document.getElementById("questionContainer").style.display = "block";
+        });
+      }).catch(err => {
+        console.error("Playback error on click:", err);
+      });
+    });
     
     // Utility: Shuffle an array.
     function shuffleArray(array) {
@@ -216,7 +252,7 @@
     // Retrieve stored video responses.
     let videoResponses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
     
-    // Function to select and display the current video.
+    // Select and display the current video.
     function selectVideo() {
       const videoElement = document.getElementById("video");
       let currentVideo = localStorage.getItem("currentVideo");
@@ -238,7 +274,7 @@
       // Force the video element to reload its source.
       videoElement.load();
       
-      // Wait for metadata to load before playing the video.
+      // Wait for metadata before playing.
       videoElement.onloadedmetadata = () => {
         playVideoUntil3Seconds(() => {
           document.getElementById("questionContainer").style.display = "block";
@@ -246,7 +282,7 @@
       };
     }
     
-    // Compile CSV from video responses.
+    // Compile CSV from stored video responses.
     function compileCSV(responses) {
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
@@ -265,7 +301,7 @@
       return csvHeader + csvRow;
     }
     
-    // Helper function: Upload CSV using fetch.
+    // Helper: Upload CSV using fetch.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -296,7 +332,7 @@
       });
     }
     
-    // Double upload the CSV with a 500ms gap, then redirect.
+    // Double upload CSV with a 500ms gap, then redirect.
     function uploadCSVAndRedirect(finalUpload) {
       uploadCSV(() => {
         console.log("First upload complete.");
@@ -335,11 +371,11 @@
       videoResponses.push(trialData);
       localStorage.setItem("videoResponses", JSON.stringify(videoResponses));
       
-      // Increment the trial counter.
+      // Increment trial counter.
       videoTrialIndex++;
       localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
       
-      // Clear the saved current video so that a new one will be chosen next trial.
+      // Clear the saved current video so next trial gets a new video.
       localStorage.removeItem("currentVideo");
       
       const finalVideoTrial = 20; // Final trial is 20.
