@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    /* [Your styles remain unchanged] */
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
@@ -96,226 +95,6 @@
       background-color: #45a049;
     }
   </style>
-  <script>
-    // Log and validate the stored participant SID.
-    const storedID = localStorage.getItem("participantSID");
-    console.log("Stored participantSID:", storedID);
-    if (!/^\d{10}$/.test(storedID)) {
-      console.error("Error: participantSID is not a valid 10-digit Student ID.");
-    }
-
-    // Play the video until at least 3 seconds have elapsed.
-    function playVideoUntil3Seconds(onComplete) {
-      let startTime = Date.now();
-      let cumulativeTime = 0;
-      const videoPlayer = document.getElementById("video");
-      videoPlayer.style.display = "block";
-      videoPlayer.play();
-      videoPlayer.onended = videoPlayer.onpause = () => {
-        cumulativeTime += Date.now() - startTime;
-        if (cumulativeTime < 3000) {
-          startTime = Date.now();
-          videoPlayer.play();
-        } else {
-          videoPlayer.onended = videoPlayer.onpause = null;
-          onComplete();
-        }
-      };
-    }
-
-    // Utility: Shuffle an array.
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-
-    // Define the video list.
-    const videos = [
-      { url: "Videos/0015.mp4", label: "v1" },
-      { url: "Videos/0299.mp4", label: "v2" },
-      { url: "Videos/0489.mp4", label: "v3" },
-      { url: "Videos/0611.mp4", label: "v4" },
-      { url: "Videos/0681.mp4", label: "v5" },
-      { url: "Videos/0719.mp4", label: "v6" },
-      { url: "Videos/0955.mp4", label: "v7" },
-      { url: "Videos/0975.mp4", label: "v8" },
-      { url: "Videos/1576.mp4", label: "v9" },
-      { url: "Videos/1623.mp4", label: "v10" },
-      { url: "Videos/1844.mp4", label: "v11" },
-      { url: "Videos/1959.mp4", label: "v12" },
-      { url: "Videos/0009.mp4", label: "v13" },
-      { url: "Videos/0333.mp4", label: "v14" },
-      { url: "Videos/0706.mp4", label: "v15" },
-      { url: "Videos/0803.mp4", label: "v16" },
-      { url: "Videos/0860.mp4", label: "v17" },
-      { url: "Videos/0948.mp4", label: "v18" },
-      { url: "Videos/1001.mp4", label: "v19" },
-      { url: "Videos/1164.mp4", label: "v20" }
-    ];
-
-    // Initialize video trial counter (first visit counts as trial 1).
-    if (!localStorage.getItem("videoTrialIndex")) {
-      localStorage.setItem("videoTrialIndex", "1");
-    }
-    let videoTrialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
-    console.log("Initial videoTrialIndex:", videoTrialIndex);
-
-    // Retrieve or generate a randomized video order.
-    let videoOrder = JSON.parse(localStorage.getItem("videoOrder") || "[]");
-    if (videoOrder.length === 0) {
-      videoOrder = shuffleArray(videos.slice());
-      localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
-    }
-
-    // Retrieve stored video responses (accumulated across trials).
-    let videoResponses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
-
-    // Check if a video has already been selected for the current trial.
-    function selectVideo() {
-      // Try to retrieve a saved current video.
-      let currentVideo = localStorage.getItem("currentVideo");
-      if (currentVideo) {
-        document.getElementById("video").src = currentVideo;
-      } else {
-        if (videoOrder.length > 0) {
-          const selectedVideo = videoOrder.shift();
-          localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
-          // Save the selected video URL so that if the page is refreshed, we use the same video.
-          localStorage.setItem("currentVideo", selectedVideo.url);
-          document.getElementById("video").src = selectedVideo.url;
-        } else {
-          document.getElementById("video").style.display = "none";
-          document.getElementById("questionContainer").innerHTML = "<p>All videos have been shown.</p>";
-        }
-      }
-      playVideoUntil3Seconds(() => {
-        document.getElementById("questionContainer").style.display = "block";
-      });
-    }
-
-    // Compile CSV from all saved video responses.
-    function compileCSV(responses) {
-      const participantID = localStorage.getItem("participantSID") || "unknown";
-      let headers = ["participantID"];
-      let row = [participantID];
-      responses.sort((a, b) => a.trialNumber - b.trialNumber);
-      for (let i = 0; i < responses.length; i++) {
-        headers.push("video_trial_" + (i + 1));
-        headers.push("video_rating_" + (i + 1));
-        let fullPath = String(responses[i].videoShown).trim();
-        let filename = fullPath.split("/").pop();
-        row.push(filename);
-        row.push(responses[i].videoRating || "");
-      }
-      const csvHeader = headers.join(",") + "\n";
-      const csvRow = row.map(val => `${val.replace(/"/g, '""')}`).join(",") + "\n";
-      return csvHeader + csvRow;
-    }
-
-    // Helper: Upload CSV using fetch.
-    function uploadCSV(callback) {
-      let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
-      const csvContent = compileCSV(responses);
-      const participantID = localStorage.getItem("participantSID") || "unknown";
-      const filename = `${participantID}_video.csv`;
-      const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
-      
-      console.log("Starting upload for", filename);
-      
-      fetch(url, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'text/csv',
-          'X-Filename': filename
-        },
-        body: csvContent
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Network response was not ok");
-        return response.json();
-      })
-      .then(data => {
-        console.log("CSV uploaded:", data);
-        if (callback) callback();
-      })
-      .catch(error => {
-        console.error("Error uploading CSV:", error);
-        alert("Error submitting data. Please try again.");
-      });
-    }
-
-    // Helper: Double upload the CSV (with a 500ms gap) then redirect.
-    function uploadCSVAndRedirect(finalUpload) {
-      uploadCSV(() => {
-        console.log("First upload complete.");
-        setTimeout(() => {
-          console.log("Starting second upload.");
-          uploadCSV(() => {
-            console.log("Second upload complete.");
-            if (finalUpload) {
-              localStorage.removeItem("videoResponses");
-            }
-            window.location.href = "survey.html";
-          });
-        }, 500);
-      });
-    }
-
-    // Save current trial data and handle navigation.
-    function nextPage() {
-      let currentTrial = videoTrialIndex;
-      const participantID = localStorage.getItem("participantSID") || "unknown";
-      const videoShown = document.getElementById("video").src;
-      const radioOptions = document.getElementsByName("videoScale");
-      let videoRating = "";
-      for (let i = 0; i < radioOptions.length; i++) {
-        if (radioOptions[i].checked) {
-          videoRating = radioOptions[i].value;
-          break;
-        }
-      }
-      const trialData = {
-        participantID: participantID,
-        trialNumber: currentTrial,
-        videoShown: videoShown,
-        videoRating: videoRating
-      };
-      videoResponses.push(trialData);
-      localStorage.setItem("videoResponses", JSON.stringify(videoResponses));
-
-      // Increment trial counter.
-      videoTrialIndex++;
-      localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
-      
-      // Remove the current video flag so that the next trial will select a new video.
-      localStorage.removeItem("currentVideo");
-
-      const finalVideoTrial = 20; // Final trial is 20.
-
-      if (currentTrial % 5 === 0 || videoOrder.length === 0) {
-        let isFinal = (currentTrial === finalVideoTrial || videoOrder.length === 0);
-        uploadCSVAndRedirect(isFinal);
-      } else {
-        window.location.href = "survey.html";
-      }
-    }
-
-    window.onload = function() {
-      selectVideo();
-      // Show the Next button only after a radio selection is made.
-      const radioButtons = document.getElementsByName("videoScale");
-      const nextButtonContainer = document.getElementById("buttonContainer");
-      Array.from(radioButtons).forEach(radio => {
-        radio.addEventListener("change", () => {
-          nextButtonContainer.style.display = "block";
-        });
-      });
-      document.getElementById("nextButton").addEventListener("click", nextPage);
-    };
-  </script>
 </head>
 <body>
   <p>Please watch the video below:</p>
@@ -326,7 +105,6 @@
   <div id="questionContainer" class="question-container">
     <label for="videoScale">1. How negative do you feel?</label>
     <div class="scale">
-      <!-- Radio options here -->
       <label class="option">
         <input type="radio" name="videoScale" value="1">
         <span class="label-text"><span class="number">1</span><small>Not negative at all</small></span>
@@ -360,5 +138,231 @@
   <div id="buttonContainer" class="button-container">
     <button id="nextButton">Next</button>
   </div>
+  
+  <script>
+    // Validate stored participant SID.
+    const storedID = localStorage.getItem("participantSID");
+    console.log("Stored participantSID:", storedID);
+    if (!/^\d{10}$/.test(storedID)) {
+      console.error("Error: participantSID is not a valid 10-digit Student ID.");
+    }
+    
+    // Function to play the video until at least 3 seconds have elapsed.
+    function playVideoUntil3Seconds(onComplete) {
+      let startTime = Date.now();
+      let cumulativeTime = 0;
+      const videoPlayer = document.getElementById("video");
+      videoPlayer.style.display = "block";
+      videoPlayer.play();
+      videoPlayer.onended = videoPlayer.onpause = () => {
+        cumulativeTime += Date.now() - startTime;
+        if (cumulativeTime < 3000) {
+          startTime = Date.now();
+          videoPlayer.play();
+        } else {
+          videoPlayer.onended = videoPlayer.onpause = null;
+          onComplete();
+        }
+      };
+    }
+    
+    // Utility: Shuffle an array.
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    
+    // Define the video list.
+    const videos = [
+      { url: "Videos/0015.mp4", label: "v1" },
+      { url: "Videos/0299.mp4", label: "v2" },
+      { url: "Videos/0489.mp4", label: "v3" },
+      { url: "Videos/0611.mp4", label: "v4" },
+      { url: "Videos/0681.mp4", label: "v5" },
+      { url: "Videos/0719.mp4", label: "v6" },
+      { url: "Videos/0955.mp4", label: "v7" },
+      { url: "Videos/0975.mp4", label: "v8" },
+      { url: "Videos/1576.mp4", label: "v9" },
+      { url: "Videos/1623.mp4", label: "v10" },
+      { url: "Videos/1844.mp4", label: "v11" },
+      { url: "Videos/1959.mp4", label: "v12" },
+      { url: "Videos/0009.mp4", label: "v13" },
+      { url: "Videos/0333.mp4", label: "v14" },
+      { url: "Videos/0706.mp4", label: "v15" },
+      { url: "Videos/0803.mp4", label: "v16" },
+      { url: "Videos/0860.mp4", label: "v17" },
+      { url: "Videos/0948.mp4", label: "v18" },
+      { url: "Videos/1001.mp4", label: "v19" },
+      { url: "Videos/1164.mp4", label: "v20" }
+    ];
+    
+    // Initialize video trial counter (trial 1 if not already set).
+    if (!localStorage.getItem("videoTrialIndex")) {
+      localStorage.setItem("videoTrialIndex", "1");
+    }
+    let videoTrialIndex = parseInt(localStorage.getItem("videoTrialIndex"), 10);
+    console.log("Initial videoTrialIndex:", videoTrialIndex);
+    
+    // Retrieve or generate a randomized video order.
+    let videoOrder = JSON.parse(localStorage.getItem("videoOrder") || "[]");
+    if (videoOrder.length === 0) {
+      videoOrder = shuffleArray(videos.slice());
+      localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
+    }
+    
+    // Retrieve stored video responses.
+    let videoResponses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
+    
+    // Function to select and display the current video.
+    function selectVideo() {
+      const videoElement = document.getElementById("video");
+      let currentVideo = localStorage.getItem("currentVideo");
+      if (currentVideo) {
+        videoElement.src = currentVideo;
+      } else {
+        if (videoOrder.length > 0) {
+          const selectedVideo = videoOrder.shift();
+          localStorage.setItem("videoOrder", JSON.stringify(videoOrder));
+          localStorage.setItem("currentVideo", selectedVideo.url);
+          videoElement.src = selectedVideo.url;
+        } else {
+          videoElement.style.display = "none";
+          document.getElementById("questionContainer").innerHTML = "<p>All videos have been shown.</p>";
+          return;
+        }
+      }
+      
+      // Force the video element to reload its source.
+      videoElement.load();
+      
+      // Wait for metadata to load before playing the video.
+      videoElement.onloadedmetadata = () => {
+        playVideoUntil3Seconds(() => {
+          document.getElementById("questionContainer").style.display = "block";
+        });
+      };
+    }
+    
+    // Compile CSV from video responses.
+    function compileCSV(responses) {
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+      let headers = ["participantID"];
+      let row = [participantID];
+      responses.sort((a, b) => a.trialNumber - b.trialNumber);
+      for (let i = 0; i < responses.length; i++) {
+        headers.push("video_trial_" + (i + 1));
+        headers.push("video_rating_" + (i + 1));
+        let fullPath = String(responses[i].videoShown).trim();
+        let filename = fullPath.split("/").pop();
+        row.push(filename);
+        row.push(responses[i].videoRating || "");
+      }
+      const csvHeader = headers.join(",") + "\n";
+      const csvRow = row.map(val => `${val.replace(/"/g, '""')}`).join(",") + "\n";
+      return csvHeader + csvRow;
+    }
+    
+    // Helper function: Upload CSV using fetch.
+    function uploadCSV(callback) {
+      let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
+      const csvContent = compileCSV(responses);
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+      const filename = `${participantID}_video.csv`;
+      const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
+      console.log("Starting upload for", filename);
+      
+      fetch(url, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'text/csv',
+          'X-Filename': filename
+        },
+        body: csvContent
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(data => {
+        console.log("CSV uploaded:", data);
+        if (callback) callback();
+      })
+      .catch(error => {
+        console.error("Error uploading CSV:", error);
+        alert("Error submitting data. Please try again.");
+      });
+    }
+    
+    // Double upload the CSV with a 500ms gap, then redirect.
+    function uploadCSVAndRedirect(finalUpload) {
+      uploadCSV(() => {
+        console.log("First upload complete.");
+        setTimeout(() => {
+          console.log("Starting second upload.");
+          uploadCSV(() => {
+            console.log("Second upload complete.");
+            if (finalUpload) {
+              localStorage.removeItem("videoResponses");
+            }
+            window.location.href = "survey.html";
+          });
+        }, 500);
+      });
+    }
+    
+    // Save current trial data and handle navigation.
+    function nextPage() {
+      let currentTrial = videoTrialIndex;
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+      const videoShown = document.getElementById("video").src;
+      const radioOptions = document.getElementsByName("videoScale");
+      let videoRating = "";
+      for (let i = 0; i < radioOptions.length; i++) {
+        if (radioOptions[i].checked) {
+          videoRating = radioOptions[i].value;
+          break;
+        }
+      }
+      const trialData = {
+        participantID: participantID,
+        trialNumber: currentTrial,
+        videoShown: videoShown,
+        videoRating: videoRating
+      };
+      videoResponses.push(trialData);
+      localStorage.setItem("videoResponses", JSON.stringify(videoResponses));
+      
+      // Increment the trial counter.
+      videoTrialIndex++;
+      localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
+      
+      // Clear the saved current video so that a new one will be chosen next trial.
+      localStorage.removeItem("currentVideo");
+      
+      const finalVideoTrial = 20; // Final trial is 20.
+      if (currentTrial % 5 === 0 || videoOrder.length === 0) {
+        let isFinal = (currentTrial === finalVideoTrial || videoOrder.length === 0);
+        uploadCSVAndRedirect(isFinal);
+      } else {
+        window.location.href = "survey.html";
+      }
+    }
+    
+    window.onload = function() {
+      selectVideo();
+      // Show the Next button only after a radio selection is made.
+      const radioButtons = document.getElementsByName("videoScale");
+      const nextButtonContainer = document.getElementById("buttonContainer");
+      Array.from(radioButtons).forEach(radio => {
+        radio.addEventListener("change", () => {
+          nextButtonContainer.style.display = "block";
+        });
+      });
+      document.getElementById("nextButton").addEventListener("click", nextPage);
+    };
+  </script>
 </body>
 </html>
