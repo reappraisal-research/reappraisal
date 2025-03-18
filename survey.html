@@ -105,198 +105,6 @@
       background-color: #45a049;
     }
   </style>
-  <!-- Add the defer attribute so that the script runs after the document is parsed -->
-  <script defer>
-    // Immediately enforce a 20-trial limit.
-    let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
-    if (trialIndex > 20) {
-      window.location.href = "Shiftingsuccess.html";
-    }
-
-    // IIFE: Set up condition list, insert header, and update the question label.
-    (function() {
-      function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-      }
-      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      if (conditionList.length === 0) {
-        let conditions = [];
-        // Create conditions so that there are at least 20 trials.
-        for (let i = 0; i < 5; i++) {
-          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
-          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Goal rethinking" });
-          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
-          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Goal rethinking" });
-        }
-        conditionList = shuffleArray(conditions);
-        localStorage.setItem("conditionList", JSON.stringify(conditionList));
-      }
-      // Use the current trial from localStorage.
-      trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
-      let currentTrial = trialIndex;
-      let currentCondition = conditionList[currentTrial - 1] || {};
-
-      document.addEventListener("DOMContentLoaded", function() {
-        // Insert the condition header if not already present.
-        let container = document.querySelector(".container");
-        let conditionHeader = container.querySelector("#conditionHeader");
-        if (!conditionHeader) {
-          conditionHeader = document.createElement("h2");
-          conditionHeader.id = "conditionHeader";
-          container.insertBefore(conditionHeader, container.firstChild);
-        }
-        conditionHeader.innerText = currentCondition.rethinkingLabel || "Default Header";
-
-        // Update the rethinking question label (for Part 1).
-        let questionLabel = document.getElementById("rethinkingQuestion");
-        if (questionLabel) {
-          if (currentCondition.rethinkingLabel === "Goal rethinking") {
-            questionLabel.innerText = "How can watching this video help you pursue a goal you have?";
-          } else if (currentCondition.rethinkingLabel === "Situation rethinking") {
-            questionLabel.innerText = "How can you reinterpret this scene?";
-          } else {
-            questionLabel.innerText = "How could you rethink the video?";
-          }
-        }
-      });
-    })();
-
-    // Retrieve stored survey responses or initialize.
-    let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
-
-    // When the participant clicks the Next button in Part 1, validate and show Part 2 (without hiding Part 1).
-    function nextPart1() {
-      console.log("nextPart1 clicked");
-      const responseText = document.getElementById("rethinkingResponse").value.trim();
-      if (!responseText) {
-        alert("Please fill out your rethinking response.");
-        return;
-      }
-      // Show Part 2 (pop up below Part 1)
-      document.getElementById("part2").style.display = "block";
-    }
-
-    // Save responses for the current trial.
-    function saveResponses() {
-      const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
-      if (!rethinkingResponse) {
-        alert("Please fill out your rethinking response.");
-        return;
-      }
-      const radioOptions = document.getElementsByName("howDoYouFeel");
-      let howDoYouFeelValue = "";
-      for (let i = 0; i < radioOptions.length; i++) {
-        if (radioOptions[i].checked) {
-          howDoYouFeelValue = radioOptions[i].value;
-          break;
-        }
-      }
-      if (!howDoYouFeelValue) {
-        alert("Please select how negative you feel.");
-        return;
-      }
-      const participantID = localStorage.getItem("participantSID") || "unknown";
-      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
-      let currentTrial = trialIndex;
-      const conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
-      let currentCondition = conditionList[currentTrial - 1] || {};
-      const label = currentCondition.rethinkingLabel || "";
-      
-      const trialData = {
-        participantSID: participantID,
-        trialNumber: currentTrial,
-        label: label,
-        rethinkingResponse: rethinkingResponse,
-        howDoYouFeel: howDoYouFeelValue,
-        timestamp: new Date().toISOString()
-      };
-
-      console.log("Saving trial data:", trialData);
-      surveyResponses.push(trialData);
-      localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
-
-      // Increment the trial index.
-      trialIndex++;
-      localStorage.setItem("trialIndex", trialIndex.toString());
-
-      // If this trial is a multiple of 5, trigger a CSV upload.
-      if (currentTrial % 5 === 0) {
-        if (currentTrial === 20) {
-          sendResponsesCSV("final");
-        } else {
-          sendResponsesCSV("partial");
-        }
-      } else {
-        window.location.href = "photoselection.html";
-      }
-    }
-
-    // Called when the participant clicks the final Submit button.
-    function nextTrial() {
-      saveResponses();
-    }
-
-    // sendResponsesCSV: Compile CSV from all stored survey responses, then double upload.
-    function sendResponsesCSV(uploadType) {
-      let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
-      const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
-      let csvContent = headers.join(",") + "\n";
-      responses.forEach(response => {
-        let row = headers.map(key => {
-          let value = response[key] || "";
-          return `"${String(value).replace(/"/g, '""')}"`;
-        }).join(",");
-        csvContent += row + "\n";
-      });
-      const participantID = localStorage.getItem("participantSID") || "unknown";
-      const filename = participantID + "_survey.csv";
-
-      function upload(callback) {
-        fetch('/.netlify/functions/upload-csv', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'text/csv',
-            'X-Filename': filename
-          },
-          body: csvContent
-        })
-        .then(response => {
-          if (!response.ok) throw new Error("Network response was not ok");
-          return response.json();
-        })
-        .then(data => {
-          console.log("CSV successfully uploaded:", data);
-          if (callback) callback();
-        })
-        .catch(error => {
-          console.error("Error uploading CSV:", error);
-          alert("Error submitting data. Please try again.");
-        });
-      }
-
-      upload(() => {
-        setTimeout(() => {
-          upload(() => {
-            console.log("Second upload complete.");
-            if (uploadType === "final") {
-              localStorage.removeItem("surveyResponses");
-              window.location.href = "Shiftingsuccess.html";
-            } else {
-              window.location.href = "photoselection.html";
-            }
-          });
-        }, 500);
-      });
-    }
-
-    // Expose functions globally.
-    window.nextPart1 = nextPart1;
-    window.nextTrial = nextTrial;
-  </script>
 </head>
 <body>
   <div class="container">
@@ -306,7 +114,7 @@
         <!-- The condition header (dynamic) is inserted at the top by our script -->
         <label for="rethinkingResponse" id="rethinkingQuestion">How could you rethink the video?</label>
         <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
-        <button type="button" id="nextPart1" onclick="nextPart1()">Next</button>
+        <button type="button" id="nextPart1Btn" onclick="showPart2()">Next</button>
       </div>
       <!-- Part 2: Scale question (initially hidden) -->
       <div id="part2" style="display:none;">
@@ -366,5 +174,188 @@
       </div>
     </form>
   </div>
+
+  <!-- Place the script at the end of the body so all elements are defined -->
+  <script>
+    // Immediately enforce a 20-trial limit.
+    let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
+    if (trialIndex > 20) {
+      window.location.href = "Shiftingsuccess.html";
+    }
+
+    // IIFE: Set up condition list, insert header, and update the question label.
+    (function() {
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+      let conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+      if (conditionList.length === 0) {
+        let conditions = [];
+        // Create conditions so that there are at least 20 trials.
+        for (let i = 0; i < 5; i++) {
+          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Situation rethinking" });
+          conditions.push({ photoType: "ambiguous", rethinkingLabel: "Goal rethinking" });
+          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Situation rethinking" });
+          conditions.push({ photoType: "nonAmbiguous", rethinkingLabel: "Goal rethinking" });
+        }
+        conditionList = shuffleArray(conditions);
+        localStorage.setItem("conditionList", JSON.stringify(conditionList));
+      }
+      trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
+      let currentTrial = trialIndex;
+      let currentCondition = conditionList[currentTrial - 1] || {};
+
+      document.addEventListener("DOMContentLoaded", function() {
+        let container = document.querySelector(".container");
+        let conditionHeader = container.querySelector("#conditionHeader");
+        if (!conditionHeader) {
+          conditionHeader = document.createElement("h2");
+          conditionHeader.id = "conditionHeader";
+          container.insertBefore(conditionHeader, container.firstChild);
+        }
+        conditionHeader.innerText = currentCondition.rethinkingLabel || "Default Header";
+
+        let questionLabel = document.getElementById("rethinkingQuestion");
+        if (questionLabel) {
+          if (currentCondition.rethinkingLabel === "Goal rethinking") {
+            questionLabel.innerText = "How can watching this video help you pursue a goal you have?";
+          } else if (currentCondition.rethinkingLabel === "Situation rethinking") {
+            questionLabel.innerText = "How can you reinterpret this scene?";
+          } else {
+            questionLabel.innerText = "How could you rethink the video?";
+          }
+        }
+      });
+    })();
+
+    let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
+
+    function showPart2() {
+      console.log("showPart2 clicked");
+      const responseText = document.getElementById("rethinkingResponse").value.trim();
+      if (!responseText) {
+        alert("Please fill out your rethinking response.");
+        return;
+      }
+      // Hide the Part 1 Next button and show Part 2.
+      document.getElementById("nextPart1Btn").style.display = "none";
+      document.getElementById("part2").style.display = "block";
+    }
+
+    function saveResponses() {
+      const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
+      if (!rethinkingResponse) {
+        alert("Please fill out your rethinking response.");
+        return;
+      }
+      const radioOptions = document.getElementsByName("howDoYouFeel");
+      let howDoYouFeelValue = "";
+      for (let i = 0; i < radioOptions.length; i++) {
+        if (radioOptions[i].checked) {
+          howDoYouFeelValue = radioOptions[i].value;
+          break;
+        }
+      }
+      if (!howDoYouFeelValue) {
+        alert("Please select how negative you feel.");
+        return;
+      }
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
+      let currentTrial = trialIndex;
+      const conditionList = JSON.parse(localStorage.getItem("conditionList") || "[]");
+      let currentCondition = conditionList[currentTrial - 1] || {};
+      const label = currentCondition.rethinkingLabel || "";
+      
+      const trialData = {
+        participantSID: participantID,
+        trialNumber: currentTrial,
+        label: label,
+        rethinkingResponse: rethinkingResponse,
+        howDoYouFeel: howDoYouFeelValue,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log("Saving trial data:", trialData);
+      surveyResponses.push(trialData);
+      localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
+
+      trialIndex++;
+      localStorage.setItem("trialIndex", trialIndex.toString());
+
+      if (currentTrial % 5 === 0) {
+        if (currentTrial === 20) {
+          sendResponsesCSV("final");
+        } else {
+          sendResponsesCSV("partial");
+        }
+      } else {
+        window.location.href = "photoselection.html";
+      }
+    }
+
+    function nextTrial() {
+      saveResponses();
+    }
+
+    function sendResponsesCSV(uploadType) {
+      let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
+      const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
+      let csvContent = headers.join(",") + "\n";
+      responses.forEach(response => {
+        let row = headers.map(key => {
+          let value = response[key] || "";
+          return `"${String(value).replace(/"/g, '""')}"`;
+        }).join(",");
+        csvContent += row + "\n";
+      });
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+      const filename = participantID + "_survey.csv";
+
+      function upload(callback) {
+        fetch('/.netlify/functions/upload-csv', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/csv',
+            'X-Filename': filename
+          },
+          body: csvContent
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Network response was not ok");
+          return response.json();
+        })
+        .then(data => {
+          console.log("CSV successfully uploaded:", data);
+          if (callback) callback();
+        })
+        .catch(error => {
+          console.error("Error uploading CSV:", error);
+          alert("Error submitting data. Please try again.");
+        });
+      }
+
+      upload(() => {
+        setTimeout(() => {
+          upload(() => {
+            console.log("Second upload complete.");
+            if (uploadType === "final") {
+              localStorage.removeItem("surveyResponses");
+              window.location.href = "Shiftingsuccess.html";
+            } else {
+              window.location.href = "photoselection.html";
+            }
+          });
+        }, 500);
+      });
+    }
+
+    window.showPart2 = showPart2;
+    window.nextTrial = nextTrial;
+  </script>
 </body>
 </html>
