@@ -112,7 +112,7 @@
       window.location.href = "Shiftingsuccess.html";
     }
 
-    // IIFE: Set up condition list and insert header.
+    // IIFE: Set up condition list and update the rethinking question.
     (function() {
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -134,17 +134,21 @@
         conditionList = shuffleArray(conditions);
         localStorage.setItem("conditionList", JSON.stringify(conditionList));
       }
-      // Use the current trial from localStorage.
       trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
       let currentTrial = trialIndex;
       let currentCondition = conditionList[currentTrial - 1] || {};
-      
+
       document.addEventListener("DOMContentLoaded", function() {
-        let header = document.createElement("h2");
-        header.innerText = currentCondition.rethinkingLabel || "Default Header";
-        let container = document.querySelector(".container");
-        if (container) {
-          container.insertBefore(header, container.firstChild);
+        // Update the question text based on the condition.
+        let questionLabel = document.getElementById("rethinkingQuestion");
+        if (questionLabel) {
+          if (currentCondition.rethinkingLabel === "Goal rethinking") {
+            questionLabel.innerText = "How can watching this video help you pursue a goal you have?";
+          } else if (currentCondition.rethinkingLabel === "Situation rethinking") {
+            questionLabel.innerText = "How can you reinterpret this scene?";
+          } else {
+            questionLabel.innerText = "How could you rethink the video?";
+          }
         }
       });
     })();
@@ -271,9 +275,8 @@
 </head>
 <body>
   <div class="container">
-    <!-- Optional: You can add a photoLabel or ambiguousLabel here if needed -->
     <form>
-      <label for="rethinkingResponse">How could you rethink the video?</label>
+      <label for="rethinkingResponse" id="rethinkingQuestion">How could you rethink the video?</label>
       <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
       <label for="howDoYouFeel">How negative do you feel?</label>
       <div class="scale">
