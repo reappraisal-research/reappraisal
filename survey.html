@@ -105,7 +105,8 @@
       background-color: #45a049;
     }
   </style>
-  <script>
+  <!-- Add the defer attribute so that the script runs after the document is parsed -->
+  <script defer>
     // Immediately enforce a 20-trial limit.
     let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
     if (trialIndex > 20) {
@@ -167,6 +168,18 @@
     // Retrieve stored survey responses or initialize.
     let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
 
+    // When the participant clicks the Next button in Part 1, validate and show Part 2 (without hiding Part 1).
+    function nextPart1() {
+      console.log("nextPart1 clicked");
+      const responseText = document.getElementById("rethinkingResponse").value.trim();
+      if (!responseText) {
+        alert("Please fill out your rethinking response.");
+        return;
+      }
+      // Show Part 2 (pop up below Part 1)
+      document.getElementById("part2").style.display = "block";
+    }
+
     // Save responses for the current trial.
     function saveResponses() {
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
@@ -222,6 +235,11 @@
       }
     }
 
+    // Called when the participant clicks the final Submit button.
+    function nextTrial() {
+      saveResponses();
+    }
+
     // sendResponsesCSV: Compile CSV from all stored survey responses, then double upload.
     function sendResponsesCSV(uploadType) {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
@@ -275,21 +293,9 @@
       });
     }
 
-    // When the participant clicks the Next button in Part 1, validate and show Part 2 (without hiding Part 1).
-    function nextPart1() {
-      const responseText = document.getElementById("rethinkingResponse").value.trim();
-      if (!responseText) {
-        alert("Please fill out your rethinking response.");
-        return;
-      }
-      // Show Part 2 (pop up below Part 1) without hiding Part 1.
-      document.getElementById("part2").style.display = "block";
-    }
-
-    // Called when the participant clicks the final Submit button.
-    function nextTrial() {
-      saveResponses();
-    }
+    // Expose functions globally.
+    window.nextPart1 = nextPart1;
+    window.nextTrial = nextTrial;
   </script>
 </head>
 <body>
@@ -302,7 +308,7 @@
         <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
         <button type="button" id="nextPart1" onclick="nextPart1()">Next</button>
       </div>
-      <!-- Part 2: Scale question -->
+      <!-- Part 2: Scale question (initially hidden) -->
       <div id="part2" style="display:none;">
         <label for="howDoYouFeel">How negative do you feel?</label>
         <div class="scale">
