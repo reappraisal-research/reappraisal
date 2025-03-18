@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Final Attention Check</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px auto;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+    h1 {
+      text-align: center;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    textarea {
+      width: 100%;
+      margin-top: 5px;
+      padding: 5px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    .attentionCheck {
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="section">
+    <p><strong>Did you experience any technical issues with this study? If so, please describe below:</strong></p>
+    <textarea id="technicalIssues" rows="4" placeholder="Describe any technical problems you encountered..."></textarea>
+  </div>
+
+  <div class="section">
+    <p><strong>Were you paying attention and should we use your data?</strong></p>
+    <div class="attentionCheck">
+      <label>
+        <input type="radio" name="attentionCheck" value="yes">
+        Yes, I was paying attention
+      </label>
+      <label>
+        <input type="radio" name="attentionCheck" value="no">
+        No, please do not use my data
+      </label>
+    </div>
+  </div>
+
+  <button onclick="submitFinalAnswers()">Submit</button>
+
+  <script>
+    function submitFinalAnswers() {
+      // 1. Retrieve participant ID from localStorage (or set to "unknown" if not found).
+      const participantID = localStorage.getItem("participantSID") || "unknown";
+
+      // 2. Collect the user's responses
+      const technicalIssuesText = document.getElementById("technicalIssues").value.trim();
+
+      let attentionValue = "";
+      const attentionRadios = document.getElementsByName("attentionCheck");
+      for (let i = 0; i < attentionRadios.length; i++) {
+        if (attentionRadios[i].checked) {
+          attentionValue = attentionRadios[i].value;
+          break;
+        }
+      }
+
+      // 3. Ensure both questions are answered
+      if (!technicalIssuesText) {
+        alert("Please describe any technical issues (or write 'No issues' if none).");
+        return;
+      }
+      if (!attentionValue) {
+        alert("Please indicate whether you were paying attention.");
+        return;
+      }
+
+      // 4. Create a single row of data
+      const finalData = {
+        participantID: participantID,
+        technicalIssues: technicalIssuesText,
+        attentionCheck: attentionValue,
+        timestamp: new Date().toISOString()
+      };
+
+      // Convert the data to a CSV string
+      const headers = ["participantID", "technicalIssues", "attentionCheck", "timestamp"];
+      let csvContent = headers.join(",") + "\n";
+      csvContent += headers.map(key => {
+        const val = finalData[key] || "";
+        return `"${String(val).replace(/"/g, '""')}"`;
+      }).join(",");
+
+      // 5. Double-upload the CSV
+      // Filename: e.g. "123_attentioncheck.csv"
+      const filename = `${participantID}_attentioncheck.csv`;
+
+      // Helper: perform one upload
+      function uploadOnce(callback) {
+        fetch('/.netlify/functions/upload-csv', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/csv',
+            'X-Filename': filename
+          },
+          body: csvContent
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log("CSV uploaded successfully:", data);
+          if (callback) callback();
+        })
+        .catch(error => {
+          console.error("Error uploading CSV:", error);
+          alert("Error submitting data. Please try again.");
+        });
+      }
+
+      // First upload, then after 500ms do a second upload
+      uploadOnce(() => {
+        setTimeout(() => {
+          uploadOnce(() => {
+            console.log("Double upload complete.");
+            // (Optional) Clear form fields
+            document.getElementById("technicalIssues").value = "";
+            attentionRadios.forEach(r => r.checked = false);
+
+            // Redirect to thank_you page or anywhere you wish
+            window.location.href = "thank_you.html";
+          });
+        }, 500);
+      });
+    }
+  </script>
+</body>
+</html>
