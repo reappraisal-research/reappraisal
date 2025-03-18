@@ -150,7 +150,7 @@
         }
         conditionHeader.innerText = currentCondition.rethinkingLabel || "Default Header";
 
-        // Update the question label (for the rethinking response).
+        // Update the rethinking question label (for Part 1).
         let questionLabel = document.getElementById("rethinkingQuestion");
         if (questionLabel) {
           if (currentCondition.rethinkingLabel === "Goal rethinking") {
@@ -212,7 +212,6 @@
 
       // If this trial is a multiple of 5, trigger a CSV upload.
       if (currentTrial % 5 === 0) {
-        // On the 20th trial always perform final upload.
         if (currentTrial === 20) {
           sendResponsesCSV("final");
         } else {
@@ -238,7 +237,6 @@
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = participantID + "_survey.csv";
 
-      // Helper: Upload CSV using fetch.
       function upload(callback) {
         fetch('/.netlify/functions/upload-csv', {
           method: 'POST',
@@ -262,7 +260,6 @@
         });
       }
 
-      // Double upload: first immediately, then 0.5 seconds later.
       upload(() => {
         setTimeout(() => {
           upload(() => {
@@ -278,7 +275,18 @@
       });
     }
 
-    // Called when the participant clicks the Next button.
+    // When the participant clicks the Next button in Part 1, validate and show Part 2 (without hiding Part 1).
+    function nextPart1() {
+      const responseText = document.getElementById("rethinkingResponse").value.trim();
+      if (!responseText) {
+        alert("Please fill out your rethinking response.");
+        return;
+      }
+      // Show Part 2 (pop up below Part 1) without hiding Part 1.
+      document.getElementById("part2").style.display = "block";
+    }
+
+    // Called when the participant clicks the final Submit button.
     function nextTrial() {
       saveResponses();
     }
@@ -286,63 +294,70 @@
 </head>
 <body>
   <div class="container">
-    <form>
-      <!-- The label below will be updated dynamically based on condition -->
-      <label for="rethinkingResponse" id="rethinkingQuestion">How could you rethink the video?</label>
-      <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
-      <label for="howDoYouFeel">How negative do you feel?</label>
-      <div class="scale">
-        <label class="option">
-          <input type="radio" name="howDoYouFeel" value="1" required>
-          <span class="label-text">
-            <span class="number">1</span>
-            <small>Not negative at all</small>
-          </span>
-        </label>
-        <label class="option">
-          <input type="radio" name="howDoYouFeel" value="2">
-          <span class="label-text">
-            <span class="number">2</span>
-            <small></small>
-          </span>
-        </label>
-        <label class="option">
-          <input type="radio" name="howDoYouFeel" value="3">
-          <span class="label-text">
-            <span class="number">3</span>
-            <small></small>
-          </span>
-        </label>
-        <label class="option">
-          <input type="radio" name="howDoYouFeel" value="4">
-          <span class="label-text">
-            <span class="number">4</span>
-            <small></small>
-          </span>
-        </label>
-        <label class="option">
-          <input type="radio" name="howDoYouFeel" value="5">
-          <span class="label-text">
-            <span class="number">5</span>
-            <small></small>
-          </span>
-        </label>
-        <label class="option">
-          <input type="radio" name="howDoYouFeel" value="6">
-          <span class="label-text">
-            <span class="number">6</span>
-            <small></small>
-          </span>
-        </label>
-        <label class="option">
-          <input type="radio" name="howDoYouFeel" value="7">
-          <span class="label-text">
-            <span class="number">7</span>
-            <small>Very negative</small>
-          </span>
-        </label>
+    <form id="surveyForm">
+      <!-- Part 1: Rethinking response -->
+      <div id="part1">
+        <!-- The condition header (dynamic) is inserted at the top by our script -->
+        <label for="rethinkingResponse" id="rethinkingQuestion">How could you rethink the video?</label>
+        <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
+        <button type="button" id="nextPart1" onclick="nextPart1()">Next</button>
       </div>
-      <button type="button" onclick="nextTrial()">Next</button>
+      <!-- Part 2: Scale question -->
+      <div id="part2" style="display:none;">
+        <label for="howDoYouFeel">How negative do you feel?</label>
+        <div class="scale">
+          <label class="option">
+            <input type="radio" name="howDoYouFeel" value="1" required>
+            <span class="label-text">
+              <span class="number">1</span>
+              <small>Not negative at all</small>
+            </span>
+          </label>
+          <label class="option">
+            <input type="radio" name="howDoYouFeel" value="2">
+            <span class="label-text">
+              <span class="number">2</span>
+              <small></small>
+            </span>
+          </label>
+          <label class="option">
+            <input type="radio" name="howDoYouFeel" value="3">
+            <span class="label-text">
+              <span class="number">3</span>
+              <small></small>
+            </span>
+          </label>
+          <label class="option">
+            <input type="radio" name="howDoYouFeel" value="4">
+            <span class="label-text">
+              <span class="number">4</span>
+              <small></small>
+            </span>
+          </label>
+          <label class="option">
+            <input type="radio" name="howDoYouFeel" value="5">
+            <span class="label-text">
+              <span class="number">5</span>
+              <small></small>
+            </span>
+          </label>
+          <label class="option">
+            <input type="radio" name="howDoYouFeel" value="6">
+            <span class="label-text">
+              <span class="number">6</span>
+              <small></small>
+            </span>
+          </label>
+          <label class="option">
+            <input type="radio" name="howDoYouFeel" value="7">
+            <span class="label-text">
+              <span class="number">7</span>
+              <small>Very negative</small>
+            </span>
+          </label>
+        </div>
+        <button type="button" id="submitSurvey" onclick="nextTrial()">Next</button>
+      </div>
     </form>
   </div>
 </body>
