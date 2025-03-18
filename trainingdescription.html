@@ -69,10 +69,8 @@
   </style>
 </head>
 <body>
-  <h1>Training Check</h1>
-  <p>
-    Next you will use one of two different strategies to rethink the video you just watched.
-  </p>
+  <h1>After the video you will be asked to rethink it using one of the two following strategies:</h1>
+
   <p class="definition">Situation Rethinking</p>
   <p class="description">
     <strong>This strategy is about changing how you interpret the events of a situation so you feel less negative.</strong>
@@ -103,8 +101,18 @@
     document.getElementById("nextButton").addEventListener("click", function() {
       var situationText = document.getElementById("situationResponse").value.trim();
       var goalText = document.getElementById("goalResponse").value.trim();
+
+      // Check that both textareas have been filled in.
       if (situationText === "" || goalText === "") {
         alert("Please fill in both explanations before proceeding.");
+        return;
+      }
+      
+      // Check that each explanation has at least 10 words.
+      var situationWordCount = situationText.split(/\s+/).filter(word => word.length > 0).length;
+      var goalWordCount = goalText.split(/\s+/).filter(word => word.length > 0).length;
+      if (situationWordCount < 10 || goalWordCount < 10) {
+        alert("Please explain your answer a bit more deeply.");
         return;
       }
       
