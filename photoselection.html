@@ -84,7 +84,7 @@
       "Stimulireal/ur.woman.man.png": "Face",
       "Stimulireal/ur.old.young.jpg": "Woman",
       "Stimulireal/ur.frog.horse.png": "Bird",
-      "Stimulireal/ur.horseback.jpg": "Person walking dog",
+      "Stimulireal/ur.horseback.jpg": "Person walking",
       "Stimulireal/ur.profile.profile.jpg": "Front view"
     };
 
@@ -210,6 +210,14 @@
 
     // Helper: Double upload the CSV (with a 500ms gap) then redirect.
     function uploadCSVAndRedirect(finalUpload) {
+      // Validate that there is sufficient CSV data to upload.
+      let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
+      if (!responses || responses.length < 1) {
+        console.log("No data to upload or insufficient CSV data; redirecting immediately.");
+        window.location.href = "video_display.html";
+        return;
+      }
+      // Proceed with the double upload if valid data exists.
       uploadCSV(() => {
         console.log("First upload complete.");
         setTimeout(() => {
