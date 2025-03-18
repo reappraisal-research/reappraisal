@@ -33,10 +33,22 @@
       display: none;
       font-size: 18px;
     }
+    /* Center the question container in the middle of the page */
     .question-container {
       display: none;
-      margin-top: 20px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       font-size: 18px;
+      text-align: center;
+      width: 80%;
+    }
+    /* Make the question bold */
+    .question-container label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 20px;
     }
     .scale {
       display: flex;
@@ -111,7 +123,7 @@
   </style>
 </head>
 <body>
-  <p>Please watch the video below:</p>
+  <p id="watchMessage">Please watch the video below:</p>
   <video id="video">
     <source src="" type="video/mp4">
     Your browser does not support the video tag.
@@ -120,7 +132,7 @@
   <div id="playOverlay" class="overlay">Click to play video</div>
   
   <div id="questionContainer" class="question-container">
-    <label for="videoScale">1. How negative do you feel?</label>
+    <label for="videoScale">How negative do you feel?</label>
     <div class="scale">
       <label class="option">
         <input type="radio" name="videoScale" value="1">
@@ -195,6 +207,9 @@
       videoPlayer.play().then(() => {
         document.getElementById("playOverlay").style.display = "none";
         playVideoUntil3Seconds(() => {
+          // Hide the video and the watch message, then display the question container.
+          videoPlayer.style.display = "none";
+          document.getElementById("watchMessage").style.display = "none";
           document.getElementById("questionContainer").style.display = "block";
         });
       }).catch(err => {
@@ -277,6 +292,9 @@
       // Wait for metadata before playing.
       videoElement.onloadedmetadata = () => {
         playVideoUntil3Seconds(() => {
+          // Hide the video and the watch message once the video has played, then show the question container.
+          videoElement.style.display = "none";
+          document.getElementById("watchMessage").style.display = "none";
           document.getElementById("questionContainer").style.display = "block";
         });
       };
