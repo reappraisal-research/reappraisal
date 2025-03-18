@@ -112,7 +112,7 @@
       window.location.href = "Shiftingsuccess.html";
     }
 
-    // IIFE: Set up condition list and update the rethinking question.
+    // IIFE: Set up condition list, insert header, and update the question label.
     (function() {
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -134,12 +134,23 @@
         conditionList = shuffleArray(conditions);
         localStorage.setItem("conditionList", JSON.stringify(conditionList));
       }
+      // Use the current trial from localStorage.
       trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
       let currentTrial = trialIndex;
       let currentCondition = conditionList[currentTrial - 1] || {};
 
       document.addEventListener("DOMContentLoaded", function() {
-        // Update the question text based on the condition.
+        // Insert the condition header if not already present.
+        let container = document.querySelector(".container");
+        let conditionHeader = container.querySelector("#conditionHeader");
+        if (!conditionHeader) {
+          conditionHeader = document.createElement("h2");
+          conditionHeader.id = "conditionHeader";
+          container.insertBefore(conditionHeader, container.firstChild);
+        }
+        conditionHeader.innerText = currentCondition.rethinkingLabel || "Default Header";
+
+        // Update the question label (for the rethinking response).
         let questionLabel = document.getElementById("rethinkingQuestion");
         if (questionLabel) {
           if (currentCondition.rethinkingLabel === "Goal rethinking") {
@@ -225,7 +236,7 @@
         csvContent += row + "\n";
       });
       const participantID = localStorage.getItem("participantSID") || "unknown";
-      const filename = `${participantID}_survey.csv`;
+      const filename = participantID + "_survey.csv";
 
       // Helper: Upload CSV using fetch.
       function upload(callback) {
@@ -276,6 +287,7 @@
 <body>
   <div class="container">
     <form>
+      <!-- The label below will be updated dynamically based on condition -->
       <label for="rethinkingResponse" id="rethinkingQuestion">How could you rethink the video?</label>
       <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
       <label for="howDoYouFeel">How negative do you feel?</label>
