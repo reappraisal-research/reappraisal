@@ -16,12 +16,8 @@
       object-fit: contain;
       margin: 20px auto;
     }
-    #photoLabel {
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 1.2em;
-    }
+    /* Removed the top label styles so they are no longer shown */
+    /* The label underneath (ambiguousLabel) remains */
     #ambiguousLabel {
       text-align: center;
       margin-top: 10px;
@@ -100,7 +96,7 @@
       localStorage.setItem("nonAmbiguousPhotos", JSON.stringify(nonAmbiguousPhotos));
     }
 
-    // Initialize photo trial counter to 1 (first visit is trial 1).
+    // Initialize photo trial counter to 1.
     if (!localStorage.getItem("photoTrialIndex")) {
       localStorage.setItem("photoTrialIndex", "1");
     }
@@ -149,11 +145,12 @@
       let selectedPhoto = photoPool.splice(randomIndex, 1)[0];
       localStorage.setItem(poolKey, JSON.stringify(photoPool));
       let photoPath = getPhotoPath(selectedPhoto);
+      // Only update the description label underneath.
       if (currentCondition.photoType === "ambiguous") {
-        document.getElementById("photoLabel").innerText = "Complex";
+        // Do not update the top label (removed "Complex")
         document.getElementById("ambiguousLabel").innerText = ambiguousLabels[selectedPhoto] || "";
       } else {
-        document.getElementById("photoLabel").innerText = "Simple";
+        // Do not update the top label (removed "Simple")
         document.getElementById("ambiguousLabel").innerText = nonAmbiguousLabels[selectedPhoto] || "Simply look";
       }
       document.getElementById("photo").src = photoPath;
@@ -161,12 +158,10 @@
     }
 
     // Compile CSV from all saved photo responses.
-    // The CSV begins with the participant ID as the first column.
     function compileCSV(responses) {
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let headers = ["participantID"];
       let row = [participantID];
-      // Sort responses by visit number.
       responses.sort((a, b) => a.visitNumber - b.visitNumber);
       for (let i = 0; i < responses.length; i++) {
         headers.push("photo_trial_" + (i + 1));
@@ -182,7 +177,6 @@
     }
 
     // Helper: Upload CSV using fetch.
-    // The CSV filename is [participantID]_photoselection.csv.
     function uploadCSV(callback) {
       let responses = JSON.parse(localStorage.getItem("photoResponses") || "[]");
       const csvContent = compileCSV(responses);
@@ -215,7 +209,6 @@
     }
 
     // Helper: Double upload the CSV (with a 500ms gap) then redirect.
-    // If it's a final upload, the responses are cleared.
     function uploadCSVAndRedirect(finalUpload) {
       uploadCSV(() => {
         console.log("First upload complete.");
@@ -233,8 +226,6 @@
     }
 
     // Save current trial data and decide whether to upload.
-    // The CSV is uploaded every 5th trial (trial 5, 10, 15, etc.) with trial 1 as the first.
-    // All responses accumulate, so by the final trial (or when no more conditions remain) the CSV contains all entries.
     function nextPhotoTrial() {
       let currentTrial = photoTrialIndex;
       if (photoTrialIndex - 1 >= conditionList.length) {
@@ -260,7 +251,7 @@
       photoTrialIndex++;
       localStorage.setItem("photoTrialIndex", photoTrialIndex.toString());
 
-      // Determine final trial: if there are at least 20 conditions, final is 20; otherwise, it's the length of conditionList.
+      // Determine final trial.
       const finalPhotoTrial = conditionList.length >= 20 ? 20 : conditionList.length;
       
       // If current trial is a multiple of 5 or no more conditions remain, trigger upload.
@@ -280,7 +271,7 @@
 </head>
 <body>
   <div class="container">
-    <div id="photoLabel"></div>
+    <!-- The top labels (photoLabel) have been removed -->
     <img id="photo" src="" alt="Selected Photo">
     <div id="ambiguousLabel"></div>
   </div>
