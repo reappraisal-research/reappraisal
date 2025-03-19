@@ -116,6 +116,7 @@
         <textarea id="rethinkingResponse" name="rethinkingResponse" rows="4"></textarea>
         <button type="button" id="nextPart1Btn" onclick="showPart2()">Next</button>
       </div>
+
       <!-- Part 2: Scale question (initially hidden) -->
       <div id="part2" style="display:none;">
         <label for="howDoYouFeel">How negative do you feel?</label>
@@ -234,24 +235,26 @@
 
     let surveyResponses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
 
+    // Show Part 2 only if the user typed at least 10 words in Part 1.
     function showPart2() {
-      console.log("showPart2 clicked");
       const responseText = document.getElementById("rethinkingResponse").value.trim();
       if (!responseText) {
         alert("Please fill out your rethinking response.");
         return;
       }
-      // Hide the Part 1 Next button and show Part 2.
+      // Count words
+      const wordCount = responseText.split(/\s+/).filter(Boolean).length;
+      if (wordCount < 10) {
+        alert("Please write at least 10 words before continuing.");
+        return;
+      }
+      // Hide Part 1 Next button and show Part 2.
       document.getElementById("nextPart1Btn").style.display = "none";
       document.getElementById("part2").style.display = "block";
     }
 
     function saveResponses() {
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
-      if (!rethinkingResponse) {
-        alert("Please fill out your rethinking response.");
-        return;
-      }
       const radioOptions = document.getElementsByName("howDoYouFeel");
       let howDoYouFeelValue = "";
       for (let i = 0; i < radioOptions.length; i++) {
@@ -287,6 +290,7 @@
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
 
+      // Every 5 trials, or on the final 20th trial, we upload.
       if (currentTrial % 5 === 0) {
         if (currentTrial === 20) {
           sendResponsesCSV("final");
@@ -339,6 +343,7 @@
         });
       }
 
+      // Perform double upload
       upload(() => {
         setTimeout(() => {
           upload(() => {
