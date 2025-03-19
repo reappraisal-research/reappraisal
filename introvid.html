@@ -30,36 +30,41 @@
       color: #555;
       margin-bottom: 20px;
     }
+    /* Wrap video and question in the same container */
+    .video-question-wrapper {
+      position: relative; /* So the question can appear in the same spot */
+      max-width: 800px;
+      margin: 0 auto; /* center horizontally */
+    }
     video {
       width: 100%;
-      max-width: 800px;
       height: auto;
-      margin: 20px 0;
       border: 1px solid #ccc;
       border-radius: 8px;
+      display: block;
     }
     .question-container {
-      display: none; /* Hidden until the video ends */
+      /* Hidden until the video ends */
+      display: none;
       margin-top: 20px;
       font-size: 18px;
     }
-    /* Single row, flush left & right, with equal spacing for each label */
     .scale {
       display: flex;
-      width: 700px;             /* Fixed width ensures flush alignment */
-      margin: 10px auto;        /* Center the scale container */
+      width: 700px;
+      margin: 10px auto;
       justify-content: space-between; 
       align-items: center;
       flex-wrap: nowrap;
     }
     .scale label {
-      flex: 1 1 0;             /* Each label has equal width */
+      flex: 1 1 0; 
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       cursor: pointer;
-      margin: 0 2px;           /* Tiny horizontal margin to avoid label collisions */
+      margin: 0 2px;
     }
     .scale label span {
       font-size: 16px;
@@ -69,7 +74,7 @@
     .scale label small {
       font-size: 14px;
       line-height: 1.2;
-      min-height: 32px;  /* Ensure consistent height, even if blank */
+      min-height: 32px;
     }
     .scale input[type="radio"] {
       -webkit-appearance: none;
@@ -109,12 +114,13 @@
       const nextButton = document.getElementById("nextButton");
       const radioButtons = document.getElementsByName("videoScale");
 
-      // Auto-play the video on page load
+      // Automatically play the video on page load
       video.play();
 
-      // Show the question container when the video finishes
+      // When the video finishes, hide the video and show the question container
       video.onended = function() {
-        questionContainer.style.display = "block";
+        video.style.display = 'none';
+        questionContainer.style.display = 'block';
       };
 
       // Reveal the "I understand" button once any radio option is selected
@@ -130,62 +136,65 @@
   <div class="container">
     <h1>Example Video Page</h1>
     <p>
-      Next a video will automatically play followed by a question about how you feel.<br><br>
-      After you respond a button will appear to take you to the next page.
+      Next, a negative video will automatically play, followed by a question about how you feel.<br><br>
+      After you respond, a button will appear to take you to the next page.
     </p>
 
-    <!-- Video Section -->
-    <video id="videoPlayer" autoplay muted>
-      <source src="Videos/2090.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
+    <!-- Video and Question in the same wrapper -->
+    <div class="video-question-wrapper">
+      <!-- Video Section -->
+      <video id="videoPlayer" autoplay muted>
+        <source src="Videos/2090.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
 
-    <!-- Question Section -->
-    <div id="questionContainer" class="question-container">
-      <label for="videoScale">1. How negative do you feel?</label>
-      <div class="scale">
-        <!-- 1: Not negative at all -->
-        <label>
-          <input type="radio" name="videoScale" value="1">
-          <span>1</span>
-          <small>Not negative<br>at all</small>
-        </label>
-        <!-- 2: no text -->
-        <label>
-          <input type="radio" name="videoScale" value="2">
-          <span>2</span>
-          <small>&nbsp;</small>
-        </label>
-        <!-- 3: no text -->
-        <label>
-          <input type="radio" name="videoScale" value="3">
-          <span>3</span>
-          <small>&nbsp;</small>
-        </label>
-        <!-- 4: no text -->
-        <label>
-          <input type="radio" name="videoScale" value="4">
-          <span>4</span>
-          <small>&nbsp;</small>
-        </label>
-        <!-- 5: no text -->
-        <label>
-          <input type="radio" name="videoScale" value="5">
-          <span>5</span>
-          <small>&nbsp;</small>
-        </label>
-        <!-- 6: no text -->
-        <label>
-          <input type="radio" name="videoScale" value="6">
-          <span>6</span>
-          <small>&nbsp;</small>
-        </label>
-        <!-- 7: Extremely negative -->
-        <label>
-          <input type="radio" name="videoScale" value="7">
-          <span>7</span>
-          <small>Extremely<br>negative</small>
-        </label>
+      <!-- Question Section (initially hidden) -->
+      <div id="questionContainer" class="question-container">
+        <label for="videoScale"><strong>How negative do you feel?</strong></label>
+        <div class="scale">
+          <!-- 1: Not negative at all -->
+          <label>
+            <input type="radio" name="videoScale" value="1">
+            <span>1</span>
+            <small>Not negative<br>at all</small>
+          </label>
+          <!-- 2: no text -->
+          <label>
+            <input type="radio" name="videoScale" value="2">
+            <span>2</span>
+            <small>&nbsp;</small>
+          </label>
+          <!-- 3: no text -->
+          <label>
+            <input type="radio" name="videoScale" value="3">
+            <span>3</span>
+            <small>&nbsp;</small>
+          </label>
+          <!-- 4: no text -->
+          <label>
+            <input type="radio" name="videoScale" value="4">
+            <span>4</span>
+            <small>&nbsp;</small>
+          </label>
+          <!-- 5: no text -->
+          <label>
+            <input type="radio" name="videoScale" value="5">
+            <span>5</span>
+            <small>&nbsp;</small>
+          </label>
+          <!-- 6: no text -->
+          <label>
+            <input type="radio" name="videoScale" value="6">
+            <span>6</span>
+            <small>&nbsp;</small>
+          </label>
+          <!-- 7: Extremely negative -->
+          <label>
+            <input type="radio" name="videoScale" value="7">
+            <span>7</span>
+            <small>Extremely<br>negative</small>
+          </label>
+        </div>
       </div>
     </div>
 
