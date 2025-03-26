@@ -21,6 +21,7 @@
       margin-top: 10px;
       font-weight: bold;
     }
+    input[type="text"],
     textarea {
       width: 100%;
       margin-top: 5px;
@@ -40,6 +41,11 @@
   </style>
 </head>
 <body>
+  
+  <div class="section">
+    <label for="participantName"><strong>What is your name (this is only being recorded so we can give you credit)</strong></label>
+    <input type="text" id="participantName" placeholder="Enter your name" />
+  </div>
   
   <div class="section">
     <p><strong>Did you experience any technical issues with this study? If so, please describe below:</strong></p>
@@ -64,11 +70,22 @@
 
   <script>
     function submitFinalAnswers() {
-      // 1. Retrieve participant ID from localStorage (or set to "unknown" if not found).
+      // Retrieve participant ID from localStorage (or set to "unknown" if not found).
       const participantID = localStorage.getItem("participantSID") || "unknown";
+
+      // 1. Retrieve participant name
+      const participantName = document.getElementById("participantName").value.trim();
+      if (!participantName) {
+        alert("Please enter your name (for credit).");
+        return;
+      }
 
       // 2. Collect the user's responses
       const technicalIssuesText = document.getElementById("technicalIssues").value.trim();
+      if (!technicalIssuesText) {
+        alert("Please describe any technical issues (or write 'No issues' if none).");
+        return;
+      }
 
       let attentionValue = "";
       const attentionRadios = document.getElementsByName("attentionCheck");
@@ -78,38 +95,31 @@
           break;
         }
       }
-
-      // 3. Ensure both questions are answered
-      if (!technicalIssuesText) {
-        alert("Please describe any technical issues (or write 'No issues' if none).");
-        return;
-      }
       if (!attentionValue) {
         alert("Please indicate whether you were paying attention.");
         return;
       }
 
-      // 4. Create a single row of data
+      // 3. Create a single row of data including the participant's name.
       const finalData = {
         participantID: participantID,
+        name: participantName,
         technicalIssues: technicalIssuesText,
         attentionCheck: attentionValue,
         timestamp: new Date().toISOString()
       };
 
-      // Convert the data to a CSV string
-      const headers = ["participantID", "technicalIssues", "attentionCheck", "timestamp"];
+      // Convert the data to a CSV string.
+      const headers = ["participantID", "name", "technicalIssues", "attentionCheck", "timestamp"];
       let csvContent = headers.join(",") + "\n";
       csvContent += headers.map(key => {
         const val = finalData[key] || "";
         return `"${String(val).replace(/"/g, '""')}"`;
       }).join(",");
 
-      // 5. Double-upload the CSV
-      // Filename: e.g. "123_attentioncheck.csv"
+      // 4. Double-upload the CSV.
       const filename = `${participantID}_attentioncheck.csv`;
 
-      // Helper: perform one upload
       function uploadOnce(callback) {
         fetch('/.netlify/functions/upload-csv', {
           method: 'POST',
@@ -135,16 +145,17 @@
         });
       }
 
-      // First upload, then after 500ms do a second upload
+      // First upload, then after 500ms do a second upload.
       uploadOnce(() => {
         setTimeout(() => {
           uploadOnce(() => {
             console.log("Double upload complete.");
-            // (Optional) Clear form fields
+            // Clear form fields.
+            document.getElementById("participantName").value = "";
             document.getElementById("technicalIssues").value = "";
-            attentionRadios.forEach(r => r.checked = false);
+            attentionRadios.forEach(radio => radio.checked = false);
 
-            // Redirect to thank_you page or anywhere you wish
+            // Redirect to thank_you page.
             window.location.href = "thank_you.html";
           });
         }, 500);
