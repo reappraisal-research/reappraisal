@@ -44,7 +44,6 @@
       text-align: center;
       width: 80%;
     }
-    /* Make the question bold */
     .question-container label {
       font-weight: bold;
       display: block;
@@ -182,7 +181,6 @@
       let cumulativeTime = 0;
       const videoPlayer = document.getElementById("video");
       
-      // Attempt to play the video.
       videoPlayer.play().then(() => {
         videoPlayer.onended = videoPlayer.onpause = () => {
           cumulativeTime += Date.now() - startTime;
@@ -195,7 +193,6 @@
           }
         };
       }).catch(err => {
-        // If play() is not allowed, display the overlay.
         console.error("Playback error:", err);
         document.getElementById("playOverlay").style.display = "block";
       });
@@ -207,7 +204,6 @@
       videoPlayer.play().then(() => {
         document.getElementById("playOverlay").style.display = "none";
         playVideoUntil3Seconds(() => {
-          // Hide the video and the watch message, then display the question container.
           videoPlayer.style.display = "none";
           document.getElementById("watchMessage").style.display = "none";
           document.getElementById("questionContainer").style.display = "block";
@@ -286,13 +282,9 @@
         }
       }
       
-      // Force the video element to reload its source.
       videoElement.load();
-      
-      // Wait for metadata before playing.
       videoElement.onloadedmetadata = () => {
         playVideoUntil3Seconds(() => {
-          // Hide the video and the watch message once the video has played, then show the question container.
           videoElement.style.display = "none";
           document.getElementById("watchMessage").style.display = "none";
           document.getElementById("questionContainer").style.display = "block";
@@ -367,8 +359,15 @@
       });
     }
     
+    // Flag to prevent multiple submissions.
+    let isSubmitting = false;
+    
     // Save current trial data and handle navigation.
     function nextPage() {
+      if (isSubmitting) return;
+      isSubmitting = true;
+      document.getElementById("nextButton").disabled = true;
+      
       let currentTrial = videoTrialIndex;
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const videoShown = document.getElementById("video").src;
