@@ -176,7 +176,6 @@
     </form>
   </div>
 
-  <!-- Place the script at the end of the body so all elements are defined -->
   <script>
     // Immediately enforce a 20-trial limit.
     let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
@@ -253,6 +252,9 @@
       document.getElementById("part2").style.display = "block";
     }
 
+    // Flag to prevent multiple submissions.
+    let isSubmitting = false;
+
     function saveResponses() {
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       const radioOptions = document.getElementsByName("howDoYouFeel");
@@ -265,7 +267,7 @@
       }
       if (!howDoYouFeelValue) {
         alert("Please select how negative you feel.");
-        return;
+        return false;
       }
       const participantID = localStorage.getItem("participantSID") || "unknown";
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
@@ -289,10 +291,26 @@
 
       trialIndex++;
       localStorage.setItem("trialIndex", trialIndex.toString());
+      return true;
+    }
 
+    function nextTrial() {
+      // Prevent multiple submissions by checking the flag.
+      if (isSubmitting) return;
+      isSubmitting = true;
+      document.getElementById("submitSurvey").disabled = true;
+      
+      if (!saveResponses()) {
+        // If saving fails (e.g., missing selection), re-enable the button.
+        isSubmitting = false;
+        document.getElementById("submitSurvey").disabled = false;
+        return;
+      }
+
+      let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
       // Every 5 trials, or on the final 20th trial, we upload.
-      if (currentTrial % 5 === 0) {
-        if (currentTrial === 20) {
+      if ((trialIndex - 1) % 5 === 0) {
+        if (trialIndex - 1 === 20) {
           sendResponsesCSV("final");
         } else {
           sendResponsesCSV("partial");
@@ -300,10 +318,6 @@
       } else {
         window.location.href = "photoselection.html";
       }
-    }
-
-    function nextTrial() {
-      saveResponses();
     }
 
     function sendResponsesCSV(uploadType) {
