@@ -311,7 +311,7 @@
       return csvHeader + csvRow;
     }
     
-    // Updated uploadCSV with retry logic.
+    // Updated uploadCSV with retry logic and resetting submission flag.
     function uploadCSV(callback, attempt = 1) {
       const maxAttempts = 3;
       let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
@@ -346,6 +346,7 @@
         } else {
           alert("Error submitting data after multiple attempts. Please try again.");
           document.getElementById("nextButton").disabled = false;
+          isSubmitting = false;
         }
       });
     }
