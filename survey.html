@@ -294,7 +294,7 @@
       return true;
     }
 
-    // Updated sendResponsesCSV function with retry logic
+    // Updated sendResponsesCSV function with retry logic and button re-enable.
     function sendResponsesCSV(uploadType) {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
@@ -338,6 +338,7 @@
             alert("Error submitting data after multiple attempts. Please try again.");
             // Re-enable the button if all retries fail.
             document.getElementById("submitSurvey").disabled = false;
+            isSubmitting = false;
           }
         });
       }
