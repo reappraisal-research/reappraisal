@@ -241,13 +241,13 @@
         alert("Please fill out your rethinking response.");
         return;
       }
-      // Count words.
+      // Count words
       const wordCount = responseText.split(/\s+/).filter(Boolean).length;
       if (wordCount < 10) {
         alert("Please write at least 10 words before continuing.");
         return;
       }
-      // Hide Part 1 and show Part 2.
+      // Hide Part 1 Next button and show Part 2.
       document.getElementById("nextPart1Btn").style.display = "none";
       document.getElementById("part2").style.display = "block";
     }
@@ -255,7 +255,7 @@
     // Flag to prevent multiple submissions.
     let isSubmitting = false;
 
-    // Modified saveResponses prevents duplicate saving for the current trial.
+    // Prevent duplicate saving for the same trial.
     function saveResponses() {
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       const radioOptions = document.getElementsByName("howDoYouFeel");
@@ -277,7 +277,7 @@
       let currentCondition = conditionList[currentTrial - 1] || {};
       const label = currentCondition.rethinkingLabel || "";
       
-      // Only add trial data if it hasn't been saved yet.
+      // Only save data if not already saved for this trial.
       if (!surveyResponses.some(response => response.trialNumber === currentTrial)) {
         const trialData = {
           participantSID: participantID,
@@ -343,6 +343,7 @@
         });
       }
 
+      // Perform double upload.
       upload(() => {
         setTimeout(() => {
           upload(() => {
@@ -359,7 +360,7 @@
       });
     }
 
-    // Modified nextTrial: For upload trials (every 5th), wait for CSV upload success before incrementing trialIndex.
+    // Modified nextTrial: For upload trials (every 5th trial), wait for CSV upload success before incrementing trialIndex.
     function nextTrial() {
       if (isSubmitting) return;
       isSubmitting = true;
@@ -373,9 +374,9 @@
 
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
       
-      // Every 5th trial (or final trial), do CSV upload.
-      if ((trialIndex - 1) % 5 === 0) {
-        if (trialIndex - 1 === 20) {
+      // Use trialIndex % 5 === 0 to trigger CSV upload on every 5th trial.
+      if (trialIndex % 5 === 0) {
+        if (trialIndex === 20) {
           sendResponsesCSV("final", () => {
             trialIndex++;
             localStorage.setItem("trialIndex", trialIndex.toString());
