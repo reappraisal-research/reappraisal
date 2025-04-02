@@ -258,8 +258,8 @@
         return;
       }
       
-      // Custom check: ensure every required group is answered.
-      const requiredGroups = ["age", "gender", "ethnicity", "education", "employment", "income", "living", "language", "religion", "politics"];
+      // Custom check: ensure every required group (except age) is answered.
+      const requiredGroups = ["gender", "ethnicity", "education", "employment", "income", "living", "language", "religion", "politics"];
       for (let group of requiredGroups) {
         if (!document.querySelector('input[name="' + group + '"]:checked')) {
           alert("Please answer all required questions.");
