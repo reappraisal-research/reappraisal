@@ -311,7 +311,7 @@
       return csvHeader + csvRow;
     }
     
-    // Updated uploadCSV with retry logic and resetting submission flag.
+    // Updated uploadCSV with retry logic and button re-enable.
     function uploadCSV(callback, attempt = 1) {
       const maxAttempts = 3;
       let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
@@ -353,15 +353,17 @@
     
     // Double upload CSV with a 500ms gap, then redirect.
     function uploadCSVAndRedirect(finalUpload) {
+      // Perform double upload.
       uploadCSV(() => {
-        console.log("First upload complete.");
         setTimeout(() => {
-          console.log("Starting second upload.");
           uploadCSV(() => {
             console.log("Second upload complete.");
             if (finalUpload) {
               localStorage.removeItem("videoResponses");
             }
+            // Only increment trialIndex and redirect after a successful double upload.
+            let newTrialIndex = videoTrialIndex + 1;
+            localStorage.setItem("videoTrialIndex", newTrialIndex.toString());
             window.location.href = "survey.html";
           });
         }, 500);
@@ -397,11 +399,8 @@
       videoResponses.push(trialData);
       localStorage.setItem("videoResponses", JSON.stringify(videoResponses));
       
-      // Increment trial counter.
-      videoTrialIndex++;
-      localStorage.setItem("videoTrialIndex", videoTrialIndex.toString());
-      
-      // Clear the saved current video so next trial gets a new video.
+      // Do not increment videoTrialIndex until after successful CSV upload.
+      // Clear the saved current video so the next trial gets a new video.
       localStorage.removeItem("currentVideo");
       
       const finalVideoTrial = 20; // Final trial is 20.
@@ -409,6 +408,9 @@
         let isFinal = (currentTrial === finalVideoTrial || videoOrder.length === 0);
         uploadCSVAndRedirect(isFinal);
       } else {
+        // For non-upload trials, increment trialIndex immediately and redirect.
+        let newTrialIndex = currentTrial + 1;
+        localStorage.setItem("videoTrialIndex", newTrialIndex.toString());
         window.location.href = "survey.html";
       }
     }
