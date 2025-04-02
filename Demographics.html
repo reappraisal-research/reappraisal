@@ -41,6 +41,15 @@
     button:hover {
       background-color: #0056b3;
     }
+    /* Style for the slider and its output */
+    input[type=range] {
+      width: 100%;
+    }
+    output {
+      display: inline-block;
+      margin-left: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -49,18 +58,8 @@
     <!-- Age -->
     <div class="question">
       <label for="age">What is your age?</label>
-      <label><input type="radio" name="age" value="15 or younger" required> 15 or younger</label>
-      <label><input type="radio" name="age" value="16–19"> 16–19</label>
-      <label><input type="radio" name="age" value="20–24"> 20–24</label>
-      <label><input type="radio" name="age" value="25–29"> 25–29</label>
-      <label><input type="radio" name="age" value="30–34"> 30–34</label>
-      <label><input type="radio" name="age" value="35–39"> 35–39</label>
-      <label><input type="radio" name="age" value="40–44"> 40–44</label>
-      <label><input type="radio" name="age" value="45–49"> 45–49</label>
-      <label><input type="radio" name="age" value="50–54"> 50–54</label>
-      <label><input type="radio" name="age" value="55–59"> 55–59</label>
-      <label><input type="radio" name="age" value="60–64"> 60–64</label>
-      <label><input type="radio" name="age" value="65 or older"> 65 or older</label>
+      <input type="range" id="age" name="age" min="16" max="100" value="16" oninput="ageOutput.value = age.value" required>
+      <output name="ageOutput" id="ageOutput">16</output>
     </div>
     
     <!-- Gender -->
