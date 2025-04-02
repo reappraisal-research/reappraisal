@@ -241,13 +241,13 @@
         alert("Please fill out your rethinking response.");
         return;
       }
-      // Count words
+      // Count words.
       const wordCount = responseText.split(/\s+/).filter(Boolean).length;
       if (wordCount < 10) {
         alert("Please write at least 10 words before continuing.");
         return;
       }
-      // Hide Part 1 Next button and show Part 2.
+      // Hide Part 1 and show Part 2.
       document.getElementById("nextPart1Btn").style.display = "none";
       document.getElementById("part2").style.display = "block";
     }
@@ -255,7 +255,7 @@
     // Flag to prevent multiple submissions.
     let isSubmitting = false;
 
-    // Modified saveResponses now does NOT increment trialIndex.
+    // Modified saveResponses prevents duplicate saving for the current trial.
     function saveResponses() {
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       const radioOptions = document.getElementsByName("howDoYouFeel");
@@ -277,23 +277,26 @@
       let currentCondition = conditionList[currentTrial - 1] || {};
       const label = currentCondition.rethinkingLabel || "";
       
-      const trialData = {
-        participantSID: participantID,
-        trialNumber: currentTrial,
-        label: label,
-        rethinkingResponse: rethinkingResponse,
-        howDoYouFeel: howDoYouFeelValue,
-        timestamp: new Date().toISOString()
-      };
-
-      console.log("Saving trial data:", trialData);
-      surveyResponses.push(trialData);
-      localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
-      // Do NOT increment trialIndex here for upload trials.
+      // Only add trial data if it hasn't been saved yet.
+      if (!surveyResponses.some(response => response.trialNumber === currentTrial)) {
+        const trialData = {
+          participantSID: participantID,
+          trialNumber: currentTrial,
+          label: label,
+          rethinkingResponse: rethinkingResponse,
+          howDoYouFeel: howDoYouFeelValue,
+          timestamp: new Date().toISOString()
+        };
+        console.log("Saving trial data:", trialData);
+        surveyResponses.push(trialData);
+        localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
+      } else {
+        console.log("Trial data for trial", currentTrial, "already saved. Skipping duplicate save.");
+      }
       return true;
     }
 
-    // Updated sendResponsesCSV with retry logic and a callback.
+    // Updated sendResponsesCSV with retry logic and button re-enable.
     function sendResponsesCSV(uploadType, finalCallback) {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
@@ -308,7 +311,6 @@
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = participantID + "_survey.csv";
 
-      // Retry-enabled upload function.
       function upload(callback, attempt = 1) {
         const maxAttempts = 3;
         fetch('/.netlify/functions/upload-csv', {
@@ -341,13 +343,15 @@
         });
       }
 
-      // Perform double upload.
       upload(() => {
         setTimeout(() => {
           upload(() => {
             console.log("Second upload complete.");
             if (uploadType === "final") {
               localStorage.removeItem("surveyResponses");
+              window.location.href = "Shiftingsuccess.html";
+            } else {
+              window.location.href = "photoselection.html";
             }
             finalCallback();
           });
@@ -366,13 +370,12 @@
         document.getElementById("submitSurvey").disabled = false;
         return;
       }
-      
+
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
       
-      // Determine if this is an upload trial.
-      if (trialIndex % 5 === 0) {
-        // Upload trial: call sendResponsesCSV and only increment trialIndex after successful upload.
-        if (trialIndex === 20) {
+      // Every 5th trial (or final trial), do CSV upload.
+      if ((trialIndex - 1) % 5 === 0) {
+        if (trialIndex - 1 === 20) {
           sendResponsesCSV("final", () => {
             trialIndex++;
             localStorage.setItem("trialIndex", trialIndex.toString());
@@ -386,7 +389,7 @@
           });
         }
       } else {
-        // Non-upload trial: increment trialIndex immediately.
+        // For non-upload trials, increment trialIndex immediately and redirect.
         trialIndex++;
         localStorage.setItem("trialIndex", trialIndex.toString());
         window.location.href = "photoselection.html";
