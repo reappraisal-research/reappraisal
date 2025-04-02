@@ -390,17 +390,19 @@
           break;
         }
       }
-      const trialData = {
-        participantID: participantID,
-        trialNumber: currentTrial,
-        videoShown: videoShown,
-        videoRating: videoRating
-      };
-      videoResponses.push(trialData);
-      localStorage.setItem("videoResponses", JSON.stringify(videoResponses));
+      // Only add trial data if not already added (to avoid duplicates on retries).
+      if (!videoResponses.find(trial => trial.trialNumber === currentTrial)) {
+        const trialData = {
+          participantID: participantID,
+          trialNumber: currentTrial,
+          videoShown: videoShown,
+          videoRating: videoRating
+        };
+        videoResponses.push(trialData);
+        localStorage.setItem("videoResponses", JSON.stringify(videoResponses));
+      }
       
       // Do not increment videoTrialIndex until after successful CSV upload.
-      // Clear the saved current video so the next trial gets a new video.
       localStorage.removeItem("currentVideo");
       
       const finalVideoTrial = 20; // Final trial is 20.
