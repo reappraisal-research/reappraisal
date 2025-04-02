@@ -255,6 +255,7 @@
     // Flag to prevent multiple submissions.
     let isSubmitting = false;
 
+    // Modified saveResponses now does NOT increment trialIndex.
     function saveResponses() {
       const rethinkingResponse = document.getElementById("rethinkingResponse").value.trim();
       const radioOptions = document.getElementsByName("howDoYouFeel");
@@ -288,14 +289,12 @@
       console.log("Saving trial data:", trialData);
       surveyResponses.push(trialData);
       localStorage.setItem("surveyResponses", JSON.stringify(surveyResponses));
-
-      trialIndex++;
-      localStorage.setItem("trialIndex", trialIndex.toString());
+      // Do NOT increment trialIndex here for upload trials.
       return true;
     }
 
-    // Updated sendResponsesCSV function with retry logic and button re-enable.
-    function sendResponsesCSV(uploadType) {
+    // Updated sendResponsesCSV with retry logic and a callback.
+    function sendResponsesCSV(uploadType, finalCallback) {
       let responses = JSON.parse(localStorage.getItem("surveyResponses") || "[]");
       const headers = ["participantSID", "trialNumber", "label", "rethinkingResponse", "howDoYouFeel", "timestamp"];
       let csvContent = headers.join(",") + "\n";
@@ -336,7 +335,6 @@
             }, 500);
           } else {
             alert("Error submitting data after multiple attempts. Please try again.");
-            // Re-enable the button if all retries fail.
             document.getElementById("submitSurvey").disabled = false;
             isSubmitting = false;
           }
@@ -350,37 +348,47 @@
             console.log("Second upload complete.");
             if (uploadType === "final") {
               localStorage.removeItem("surveyResponses");
-              window.location.href = "Shiftingsuccess.html";
-            } else {
-              window.location.href = "photoselection.html";
             }
+            finalCallback();
           });
         }, 500);
       });
     }
 
+    // Modified nextTrial: For upload trials (every 5th), wait for CSV upload success before incrementing trialIndex.
     function nextTrial() {
-      // Prevent multiple submissions by checking the flag.
       if (isSubmitting) return;
       isSubmitting = true;
       document.getElementById("submitSurvey").disabled = true;
       
       if (!saveResponses()) {
-        // If saving fails (e.g., missing selection), re-enable the button.
         isSubmitting = false;
         document.getElementById("submitSurvey").disabled = false;
         return;
       }
-
+      
       let trialIndex = parseInt(localStorage.getItem("trialIndex"), 10) || 1;
-      // Every 5 trials, or on the final 20th trial, we upload.
-      if ((trialIndex - 1) % 5 === 0) {
-        if (trialIndex - 1 === 20) {
-          sendResponsesCSV("final");
+      
+      // Determine if this is an upload trial.
+      if (trialIndex % 5 === 0) {
+        // Upload trial: call sendResponsesCSV and only increment trialIndex after successful upload.
+        if (trialIndex === 20) {
+          sendResponsesCSV("final", () => {
+            trialIndex++;
+            localStorage.setItem("trialIndex", trialIndex.toString());
+            window.location.href = "Shiftingsuccess.html";
+          });
         } else {
-          sendResponsesCSV("partial");
+          sendResponsesCSV("partial", () => {
+            trialIndex++;
+            localStorage.setItem("trialIndex", trialIndex.toString());
+            window.location.href = "photoselection.html";
+          });
         }
       } else {
+        // Non-upload trial: increment trialIndex immediately.
+        trialIndex++;
+        localStorage.setItem("trialIndex", trialIndex.toString());
         window.location.href = "photoselection.html";
       }
     }
