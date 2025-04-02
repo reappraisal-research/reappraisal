@@ -311,14 +311,15 @@
       return csvHeader + csvRow;
     }
     
-    // Helper: Upload CSV using fetch.
-    function uploadCSV(callback) {
+    // Updated uploadCSV with retry logic.
+    function uploadCSV(callback, attempt = 1) {
+      const maxAttempts = 3;
       let responses = JSON.parse(localStorage.getItem("videoResponses") || "[]");
       const csvContent = compileCSV(responses);
       const participantID = localStorage.getItem("participantSID") || "unknown";
       const filename = `${participantID}_video.csv`;
       const url = '/.netlify/functions/upload-csv?filename=' + encodeURIComponent(filename);
-      console.log("Starting upload for", filename);
+      console.log(`Attempt ${attempt}: Starting upload for ${filename}`);
       
       fetch(url, {
         method: 'POST',
@@ -333,12 +334,19 @@
         return response.json();
       })
       .then(data => {
-        console.log("CSV uploaded:", data);
+        console.log("CSV uploaded on attempt", attempt, ":", data);
         if (callback) callback();
       })
       .catch(error => {
-        console.error("Error uploading CSV:", error);
-        alert("Error submitting data. Please try again.");
+        console.error(`Error uploading CSV on attempt ${attempt}:`, error);
+        if (attempt < maxAttempts) {
+          setTimeout(() => {
+            uploadCSV(callback, attempt + 1);
+          }, 500);
+        } else {
+          alert("Error submitting data after multiple attempts. Please try again.");
+          document.getElementById("nextButton").disabled = false;
+        }
       });
     }
     
