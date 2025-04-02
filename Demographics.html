@@ -55,7 +55,7 @@
 <body>
   <h1>Please Fill Out the Following Questions</h1>
   <form id="surveyForm">
-    <!-- Age -->
+    <!-- Age as slider -->
     <div class="question">
       <label for="age">What is your age?</label>
       <input type="range" id="age" name="age" min="16" max="100" value="16" oninput="ageOutput.value = age.value">
@@ -186,6 +186,18 @@
   </form>
   
   <script>
+    // Flag to check if the slider was moved
+    let sliderMoved = false;
+    
+    const ageSlider = document.getElementById("age");
+    const ageOutput = document.getElementById("ageOutput");
+    
+    // When user interacts with the slider, set sliderMoved to true
+    ageSlider.addEventListener("input", function() {
+      sliderMoved = true;
+      ageOutput.value = ageSlider.value;
+    });
+    
     // Enable/disable "Other" text for ethnicity.
     const ethnicityRadios = document.querySelectorAll('input[name="ethnicity"]');
     ethnicityRadios.forEach(radio => {
@@ -233,6 +245,12 @@
     // Handle form submission and custom validation.
     document.getElementById("surveyForm").addEventListener("submit", function(event) {
       event.preventDefault();
+      
+      // Check if the slider was moved; if not, alert the user.
+      if (!sliderMoved) {
+        alert("Please adjust the age slider to indicate your age.");
+        return;
+      }
       
       // First, check HTML5 form validity.
       if (!this.checkValidity()) {
